@@ -668,11 +668,11 @@
               <span class="section-number">1.</span> About
             </h2>
             <p class="fade-in stagger-1">My PhD work is a first-author paper in the Journal of Neuroscience (in press). I discovered that a single gene (Adgrl2) uses alternative splicing to play completely different roles in neurons versus blood vessels. I found the pattern computationally in single-cell RNA-seq across 100K+ cells, then validated it myself at the bench through mouse models, BBB permeability assays, and confocal imaging. Both sides of the paper are mine: the computational pipeline and the wet lab validation.</p>
-            <p class="fade-in stagger-2">Outside the lab, I've built two production data systems from scratch: a system that predicts how humans will rank LLMs using only benchmark scores<span class="sidenote-number" aria-hidden="true">1</span>, and a fully automated daily news podcast publishing to YouTube every morning with zero manual intervention.<span class="sidenote-number" aria-hidden="true">2</span></p>
+            <p class="fade-in stagger-2">Outside the lab, I've built two production data systems from scratch: a system that predicts how humans will rank LLMs using only benchmark scores<span class="sidenote-number" aria-hidden="true">1</span>, and a fully automated daily news podcast that has published 475+ episodes to YouTube.<span class="sidenote-number" aria-hidden="true">2</span></p>
             <p class="fade-in stagger-3">I design end-to-end pipelines, from data collection through statistical modeling through deliverable output. I'm finishing my PhD in June 2026 and looking for roles in computational biology, data science, or applied AI where rigorous analysis drives real decisions.</p>
           </div>
           <aside class="sidenote fade-in">
-            <sup aria-hidden="true">1</sup> R&sup2; = 0.88, 123 training examples, 65+ features, 40% missing data.
+            <sup aria-hidden="true">1</sup> R&sup2; = 0.93, 123 training examples, 65+ features, 40% missing data.
             <br><br>
             <sup aria-hidden="true">2</sup> 475+ episodes and counting.
           </aside>
@@ -702,7 +702,7 @@
 
         <article class="project-card fade-in stagger-2">
           <h3 class="project-title">Project Soothsayer: LLM Evaluation &amp; Prediction System</h3>
-          <p class="project-desc">End-to-end system that predicts human preference ELO scores from benchmark data alone. The core challenge: only 123 training examples, 65+ features, and ~40% missing data. Built custom per-cell imputation with SVD coherence projection, designed 4 original LLM benchmarks, and ran 50+ controlled experiments. R&sup2; = 0.88, correctly ranks 90% of models, predictions within 2% of actual scores.</p>
+          <p class="project-desc">End-to-end system that predicts human preference ELO scores from benchmark data alone. The core challenge: only 123 training examples, 65+ features, and ~40% missing data. Built custom per-cell imputation with SVD coherence projection, designed 4 original LLM benchmarks, and ran 50+ controlled experiments. R&sup2; = 0.93, near-perfect rank ordering (Spearman &rho; = 0.966), predictions within 1.3% of actual scores.</p>
           <div class="project-meta">
             <div class="tags">
               <span class="tag">Python</span>
@@ -718,7 +718,7 @@
 
         <article class="project-card fade-in stagger-3">
           <h3 class="project-title">Newscaster: Automated Daily AI News Podcast</h3>
-          <p class="project-desc">Fully automated pipeline that discovers, researches, scripts, produces, and publishes a daily news episode to YouTube with zero manual intervention. 475+ episodes published. Multi-LLM router across 4 model tiers (Gemini Flash/Pro + Claude Opus), 3-tier editorial pipeline with adversarial fact-checking, persistent story arc tracking, and Google Cloud TTS.</p>
+          <p class="project-desc">Fully automated pipeline that discovers, researches, scripts, produces, and publishes a daily news episode to YouTube. 475+ episodes published. Multi-LLM router across 4 model tiers (Gemini Flash/Pro + Claude Opus), 3-tier editorial pipeline with adversarial fact-checking, persistent story arc tracking, and Google Cloud TTS.</p>
           <div class="project-meta">
             <div class="tags">
               <span class="tag">Python</span>

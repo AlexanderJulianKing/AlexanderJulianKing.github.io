@@ -112,7 +112,7 @@
       font-size: 1.3rem; font-weight: 500; margin-bottom: 1.25rem;
       color: var(--text);
     }
-    .explainer-columns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+    .explainer-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
     .explainer-col h3 {
       font-family: var(--font-sans); font-size: 0.75rem; font-weight: 500;
       text-transform: uppercase; letter-spacing: 0.08em;
@@ -317,10 +317,6 @@
         <div class="explainer-col">
           <h3>Why It&rsquo;s Hard</h3>
           <p>Benchmarks evaluate well-defined capabilities: coding, mathematics, logical reasoning. Human preference is nearly a black box. Intelligence is multidimensional and context-dependent&mdash;the gap between &ldquo;this model performs well&rdquo; and &ldquo;people prefer this model&rdquo; is real and nontrivial. Compounding this, the benchmark matrix is roughly 40% sparse&mdash;not every model is evaluated on every test.</p>
-        </div>
-        <div class="explainer-col">
-          <h3>What Soothsayer Does</h3>
-          <p>Predicts Arena.ai ELO from benchmark data alone&mdash;within 1.3% of actual scores (R&sup2;&nbsp;=&nbsp;0.93). A custom per-cell imputation engine fills the sparse benchmark matrix, then robust regression maps diverse concrete measurements onto the black box of human preference. The full system&mdash;35,000 lines of Python, 4 custom benchmarks, 13+ public sources&mdash;was built solo.</p>
         </div>
       </div>
     </div>

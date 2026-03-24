@@ -26,7 +26,7 @@
       --card-border: #e8e5de;
       --card-hover-shadow: 0 2px 8px rgba(0,0,0,0.06);
       --rule: #c4c0b8;
-      --sidenote-text: #888;
+      --sidenote-text: #767676;
       --tag-bg: #eee;
       --tag-text: #555;
       --font-serif: 'EB Garamond', 'Georgia', serif;
@@ -49,7 +49,7 @@
         --card-border: #2a2a2a;
         --card-hover-shadow: 0 2px 12px rgba(0,0,0,0.3);
         --rule: #333;
-        --sidenote-text: #666;
+        --sidenote-text: #8a8a8a;
         --tag-bg: #262626;
         --tag-text: #999;
       }
@@ -283,9 +283,8 @@
     }
 
     .tag {
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       font-family: var(--font-sans);
-      font-style: italic;
       background: var(--tag-bg);
       color: var(--tag-text);
       padding: 0.2rem 0.6rem;
@@ -580,6 +579,7 @@
       .abstract p {
         margin-left: 0.5rem;
         margin-right: 0.5rem;
+        text-align: left;
       }
 
       .section-heading { font-size: 1.35rem; }
@@ -591,7 +591,11 @@
 
       footer { flex-direction: column; gap: 0.5rem; text-align: center; }
 
-      .nav-inner { gap: 1.25rem; }
+      .nav-inner { gap: 1rem; }
+
+      .nav-link { padding: 0.5rem 0; }
+
+      .nav-link .nav-number { display: none; }
     }
 
     /* ===== Print ===== */
@@ -637,11 +641,11 @@
   <nav class="site-nav" aria-label="Primary navigation">
     <div class="nav-inner">
       <a href="#top" class="nav-name">A. King</a>
-      <a href="#about" class="nav-link">1. About</a>
-      <a href="#projects" class="nav-link">2. Projects</a>
-      <a href="#skills" class="nav-link">3. Skills</a>
-      <a href="#publications" class="nav-link">4. Publications</a>
-      <a href="#contact" class="nav-link">5. Contact</a>
+      <a href="#about" class="nav-link"><span class="nav-number">1. </span>About</a>
+      <a href="#projects" class="nav-link"><span class="nav-number">2. </span>Projects</a>
+      <a href="#skills" class="nav-link"><span class="nav-number">3. </span>Skills</a>
+      <a href="#publications" class="nav-link"><span class="nav-number">4. </span>Publications</a>
+      <a href="#contact" class="nav-link"><span class="nav-number">5. </span>Contact</a>
     </div>
   </nav>
 
@@ -654,7 +658,7 @@
       <hr class="hero-rule hero-anim hero-anim-3" aria-hidden="true">
       <div class="abstract hero-anim hero-anim-4">
 
-        <p>I build systems that extract signal from messy, high-dimensional data. Finishing my PhD in June 2026 and looking for roles in computational biology, data science, or applied AI where rigorous analysis drives real decisions.</p>
+        <p>I build systems that extract signal from messy, high-dimensional data&mdash;from single-cell genomics to LLM evaluation to automated news production. Neuroscience PhD finishing June 2026.</p>
       </div>
     </header>
 
@@ -697,6 +701,7 @@
               <span class="tag">Seurat</span>
               <span class="tag">Confocal</span>
             </div>
+            <a href="https://www.biorxiv.org/content/10.1101/2025.10.24.682442v1" class="read-more" aria-label="Read the bioRxiv preprint">Preprint &rarr;</a>
           </div>
         </article>
 
@@ -727,7 +732,7 @@
               <span class="tag">Google Cloud TTS</span>
               <span class="tag">YouTube API</span>
             </div>
-            <a href="#" class="read-more" aria-label="View Newscaster on YouTube">YouTube &rarr;</a>
+            <a href="https://www.youtube.com/@NewsFromAlex" class="read-more" aria-label="View Newscaster on YouTube">YouTube &rarr;</a>
           </div>
         </article>
 

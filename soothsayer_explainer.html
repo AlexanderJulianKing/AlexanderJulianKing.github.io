@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Soothsayer — How It Works</title>
+  <meta name="description" content="How Project Soothsayer predicts Chatbot Arena ELO scores from benchmark data alone.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #fafaf8;
+      --bg-alt: #f3f2ef;
+      --text: #1a1a1a;
+      --text-muted: #555;
+      --text-light: #777;
+      --accent: #7a2e2e;
+      --accent-hover: #5c1e1e;
+      --border: #d4d0c8;
+      --border-light: #e8e5de;
+      --card-bg: #ffffff;
+      --card-border: #e8e5de;
+      --card-hover-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      --rule: #c4c0b8;
+      --tag-bg: #eee;
+      --tag-text: #555;
+      --font-serif: 'EB Garamond', 'Georgia', serif;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Menlo', monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141414;
+        --bg-alt: #1c1c1c;
+        --text: #d8d4cf;
+        --text-muted: #a09a90;
+        --text-light: #918b83;
+        --accent: #c46b6b;
+        --accent-hover: #d98e8e;
+        --border: #2e2e2e;
+        --border-light: #252525;
+        --card-bg: #1a1a1a;
+        --card-border: #2a2a2a;
+        --card-hover-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        --rule: #333;
+        --tag-bg: #262626;
+        --tag-text: #999;
+      }
+    }
+
+    html { font-size: 18px; scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+    body {
+      font-family: var(--font-serif);
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.68;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Layout */
+    .page-wrapper { max-width: 900px; margin: 0 auto; padding: 0 1.5rem; }
+
+    .back-link {
+      display: inline-block;
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 1.2rem 0 0;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    /* Typography */
+    h1, h2, h3 { font-family: var(--font-serif); font-weight: 500; letter-spacing: -0.01em; }
+
+    .section-heading {
+      font-size: 1.55rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .section-number { color: var(--accent); font-variant-numeric: oldstyle-nums; margin-right: 0.4em; font-weight: 400; }
+
+    p { margin-bottom: 1rem; }
+    .subtitle { color: var(--text-muted); font-size: 1rem; font-style: italic; margin-bottom: 2rem; }
+
+    section { padding: 2.5rem 0 1.5rem; }
+
+    /* Hero */
+    .hero { padding: 4rem 0 2rem; }
+    .hero-name { font-size: 2.4rem; font-weight: 500; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 0.5rem; }
+    .hero-subtitle {
+      font-family: var(--font-serif); font-size: 0.85rem; letter-spacing: 0.06em;
+      color: var(--text-muted); font-variant: small-caps; margin-bottom: 1.5rem;
+    }
+    .hero-rule { border: none; height: 1px; background: var(--rule); margin-bottom: 1.5rem; }
+    .abstract p { font-size: 1.15rem; line-height: 1.65; color: var(--text-muted); margin-left: 1rem; margin-right: 1rem; }
+
+    /* Cards */
+    .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin-top: 1.5rem; }
+    .card {
+      border: 1px solid var(--card-border); background: var(--card-bg); padding: 1.5rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: var(--card-hover-shadow); }
+    .card h3 { font-size: 1.05rem; margin-bottom: 0.4rem; color: var(--accent); }
+    .card .method-tag {
+      display: inline-block; font-family: var(--font-mono); font-size: 0.7rem;
+      background: var(--tag-bg); color: var(--tag-text); padding: 0.15rem 0.5rem;
+      border-radius: 2px; margin-bottom: 0.6rem;
+    }
+    .card p { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0; text-align: left; }
+    .card .impact-tag {
+      display: inline-block; font-family: var(--font-mono); font-size: 0.7rem;
+      color: var(--accent); margin-top: 0.5rem;
+    }
+
+    /* Pipeline canvas */
+    .pipeline-wrap { margin: 1.5rem 0; }
+    .pipeline-wrap canvas { display: block; width: 100%; }
+
+    /* Source bubbles */
+    .source-cloud { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.5rem 0; }
+    .source-bubble {
+      border: 1px solid var(--border); background: var(--bg-alt); padding: 0.3rem 0.8rem;
+      font-size: 0.72rem; font-family: var(--font-sans); color: var(--text-muted);
+      transition: border-color 0.2s, color 0.2s; cursor: default;
+    }
+    .source-bubble:hover { border-color: var(--accent); color: var(--text); }
+    .source-bubble.custom { border-color: var(--accent); color: var(--accent); }
+
+    /* Flow boxes */
+    .flow-row { display: flex; gap: 1rem; margin: 1.5rem 0; flex-wrap: wrap; }
+    .flow-box {
+      flex: 1; min-width: 200px; border: 1px solid var(--card-border);
+      background: var(--card-bg); padding: 1rem 1.2rem;
+    }
+    .flow-box .box-header { font-family: var(--font-serif); font-weight: 500; font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .flow-box .box-detail { color: var(--text-muted); font-size: 0.82rem; }
+
+    /* Stats */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin: 2rem 0; }
+    .stat-card { border: 1px solid var(--card-border); background: var(--card-bg); padding: 1.2rem; text-align: center; }
+    .stat-num { font-size: 2rem; font-weight: 400; font-family: var(--font-mono); color: var(--accent); }
+    .stat-label { font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-sans); margin-top: 0.2rem; }
+
+    /* TrueSkill */
+    .trueskill-box { border: 1px solid var(--card-border); background: var(--card-bg); padding: 2rem; margin: 1.5rem 0; }
+    .trueskill-box h3 { text-align: center; margin-bottom: 0.5rem; }
+    .trueskill-box .ts-desc { text-align: center; color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.2rem; }
+    .battle-arena { display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin: 1rem 0; flex-wrap: wrap; }
+    .fighter {
+      background: var(--bg-alt); border: 1px solid var(--border); padding: 1.2rem 1.5rem;
+      text-align: center; min-width: 130px; transition: border-color 0.3s, opacity 0.3s;
+    }
+    .fighter.winner { border-color: var(--accent); }
+    .fighter.loser { opacity: 0.45; }
+    .fighter .model-name { font-weight: 500; font-size: 0.9rem; margin-bottom: 0.2rem; }
+    .fighter .elo { font-family: var(--font-mono); color: var(--accent); font-size: 1.3rem; }
+    .fighter .sigma { font-size: 0.72rem; color: var(--text-light); font-family: var(--font-mono); }
+    .vs { font-size: 1.2rem; font-weight: 600; color: var(--accent); }
+    .battle-log { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 0.8rem; min-height: 1.2em; }
+
+    /* Imputer deep dive */
+    .imputer-wrap { border: 1px solid var(--card-border); background: var(--card-bg); padding: 2rem; margin: 1.5rem 0; }
+    .phase-bar { display: flex; gap: 0.4rem; margin-bottom: 1.5rem; flex-wrap: wrap; justify-content: center; }
+    .phase-pip {
+      padding: 0.35rem 0.8rem; font-size: 0.7rem; font-family: var(--font-sans); font-weight: 500;
+      background: var(--bg-alt); color: var(--text-muted); border: 1px solid var(--border);
+      cursor: pointer; transition: all 0.25s; user-select: none;
+    }
+    .phase-pip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .phase-pip.done { color: var(--accent); border-color: var(--accent); background: var(--bg-alt); }
+    .phase-narration { text-align: center; margin-bottom: 1.5rem; min-height: 3em; }
+    .phase-narration h4 { font-family: var(--font-serif); font-size: 1.05rem; font-weight: 500; margin-bottom: 0.3rem; }
+    .phase-narration p { font-size: 0.85rem; color: var(--text-muted); max-width: 650px; margin: 0 auto; }
+    .matrix-viewport { position: relative; width: 100%; overflow: hidden; border: 1px solid var(--border-light); background: var(--bg); }
+    .matrix-viewport canvas { display: block; width: 100%; }
+    .imputer-controls { display: flex; justify-content: center; gap: 0.8rem; margin-top: 1.2rem; align-items: center; }
+    .imp-btn {
+      padding: 0.55rem 1.4rem; border: 1px solid var(--border); background: var(--bg-alt);
+      color: var(--text); font-family: var(--font-sans); font-size: 0.78rem; font-weight: 500;
+      cursor: pointer; transition: border-color 0.2s, color 0.2s;
+    }
+    .imp-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .imp-btn:disabled { opacity: 0.3; cursor: default; }
+    .imp-btn:focus-visible, .phase-pip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+    .imp-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .imp-btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: #fff; }
+
+    /* ML steps */
+    .ml-steps { display: flex; flex-direction: column; gap: 0.8rem; margin: 1.5rem 0; }
+    .ml-step { display: flex; align-items: flex-start; gap: 1rem; border: 1px solid var(--card-border); background: var(--card-bg); padding: 1.2rem; }
+    .step-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+    .step-content h4 { font-family: var(--font-serif); font-weight: 500; font-size: 1rem; margin-bottom: 0.2rem; }
+    .step-content p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0; }
+    .code-tag {
+      font-family: var(--font-mono); font-size: 0.7rem;
+      background: var(--tag-bg); border: 1px solid var(--border-light);
+      padding: 0.1rem 0.4rem; color: var(--accent);
+    }
+
+    /* Comparison table */
+    .comparison-table {
+      width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 1rem 0;
+    }
+    .comparison-table th, .comparison-table td {
+      text-align: left; padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border-light);
+    }
+    .comparison-table thead th {
+      border-bottom: 2px solid var(--border); font-family: var(--font-serif);
+      font-weight: 500; font-size: 0.88rem; color: var(--text-muted);
+    }
+    .comparison-table td:nth-child(2), .comparison-table td:nth-child(3), .comparison-table td:nth-child(4),
+    .comparison-table th:nth-child(2), .comparison-table th:nth-child(3), .comparison-table th:nth-child(4) {
+      text-align: right; font-family: var(--font-mono); font-size: 0.85rem;
+    }
+    .comparison-table tbody tr:last-child th, .comparison-table tbody tr:last-child td {
+      border-bottom: 2px solid var(--border);
+    }
+    .comparison-table tr.highlight td {
+      font-weight: 500; color: var(--accent);
+    }
+
+    /* Footer */
+    footer {
+      padding: 2.5rem 0 2rem; border-top: 1px solid var(--border-light); margin-top: 2rem;
+      font-size: 0.78rem; color: var(--text-light); display: flex; justify-content: space-between;
+    }
+    .footer-note { font-style: italic; font-family: var(--font-serif); }
+
+    /* Screen reader only */
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+    /* Animations */
+    .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+    .stagger-1 { transition-delay: 0ms; }
+    .stagger-2 { transition-delay: 60ms; }
+    .stagger-3 { transition-delay: 120ms; }
+    .stagger-4 { transition-delay: 180ms; }
+    .hero-anim { opacity: 0; transform: translateY(18px); animation: heroFadeIn 0.7s ease-out forwards; }
+    .hero-anim-1 { animation-delay: 0ms; }
+    .hero-anim-2 { animation-delay: 120ms; }
+    .hero-anim-3 { animation-delay: 240ms; }
+    .hero-anim-4 { animation-delay: 360ms; }
+    @keyframes heroFadeIn { to { opacity: 1; transform: translateY(0); } }
+
+    /* Responsive */
+    @media (max-width: 800px) {
+      html { font-size: 16px; }
+      .hero-name { font-size: 1.8rem; }
+      .battle-arena { flex-direction: column; }
+      .card-grid { grid-template-columns: 1fr; }
+      .flow-row { flex-direction: column; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fade-in { opacity: 1; transform: none; transition: none; }
+      .hero-anim { opacity: 1; transform: none; animation: none; }
+      .card { transition: none; }
+    }
+
+    @media print {
+      .imputer-wrap, .trueskill-box { page-break-inside: avoid; }
+      .fade-in { opacity: 1 !important; transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <a href="index.html" class="back-link">&larr; Back to portfolio</a>
+
+    <header class="hero">
+      <h1 class="hero-name hero-anim hero-anim-1">Project Soothsayer</h1>
+      <p class="hero-subtitle hero-anim hero-anim-2">LLM Evaluation &amp; Arena ELO Prediction</p>
+      <hr class="hero-rule hero-anim hero-anim-3" aria-hidden="true">
+      <div class="abstract hero-anim hero-anim-4">
+        <p>A multi-benchmark evaluation suite that predicts how well LLMs will perform in the Chatbot Arena&mdash;before anyone votes. Four custom benchmarks join 20+ public leaderboards, feed through a per-cell imputation engine, and emerge as ELO predictions within 1.3% of actual scores.</p>
+      </div>
+    </header>
+
+    <main>
+
+      <!-- 1. The Big Picture -->
+      <section>
+        <h2 class="section-heading fade-in"><span class="section-number">1.</span> The Big Picture</h2>
+        <p class="subtitle fade-in stagger-1">Custom and public benchmarks converge into one dataset, then imputation and regression produce Arena ELO estimates.</p>
+
+        <div class="pipeline-wrap fade-in stagger-2">
+          <canvas id="pipelineCanvas" aria-hidden="true"></canvas>
+          <p class="sr-only">Pipeline diagram: 4 custom benchmarks and 12 public benchmarks feed into a combine step producing 157 models by 65+ columns, then through ModelBankImputer and ARD+Huber regression to predict Arena ELO scores.</p>
+        </div>
+
+        <div class="stats-row fade-in stagger-3">
+          <div class="stat-card"><div class="stat-num" data-target="157">0</div><div class="stat-label">Models evaluated</div></div>
+          <div class="stat-card"><div class="stat-num" data-target="65">0</div><div class="stat-label">Benchmark features</div></div>
+          <div class="stat-card"><div class="stat-num" data-target="123">0</div><div class="stat-label">Training samples</div></div>
+          <div class="stat-card"><div class="stat-num decimal" data-target="0.93">0</div><div class="stat-label">R&sup2;</div></div>
+        </div>
+      </section>
+
+      <!-- 2. Data Sources -->
+      <section>
+        <h2 class="section-heading fade-in"><span class="section-number">2.</span> Data Sources</h2>
+        <p class="subtitle fade-in stagger-1">Four custom benchmarks run alongside 12 scraped public benchmark sources. All converge into a single combined dataset.</p>
+        <div class="source-cloud fade-in stagger-2">
+          <span class="source-bubble custom">Soothsayer EQ</span>
+          <span class="source-bubble custom">Soothsayer Writing</span>
+          <span class="source-bubble custom">Soothsayer Logic</span>
+          <span class="source-bubble custom">Soothsayer Style</span>
+          <span class="source-bubble">Arena.ai</span>
+          <span class="source-bubble">LiveBench</span>
+          <span class="source-bubble">ARC-AGI</span>
+          <span class="source-bubble">Aider</span>
+          <span class="source-bubble">EQ-Bench</span>
+          <span class="source-bubble">UGI</span>
+          <span class="source-bubble">Artificial Analysis</span>
+          <span class="source-bubble">Lechmazur</span>
+          <span class="source-bubble">Long-context Arena</span>
+          <span class="source-bubble">WeirdML</span>
+          <span class="source-bubble">Yupp</span>
+        </div>
+        <div class="flow-row fade-in stagger-3">
+          <div class="flow-box"><div class="box-header">scrape.bash</div><div class="box-detail">12 Python scrapers pull latest leaderboard CSVs in parallel. Gemini API handles model name canonicalization.</div></div>
+          <div class="flow-box"><div class="box-header">combine.py</div><div class="box-detail">Outer-join on unified model names. Handles aliases, renames, deduplication. Drops low-variance columns.</div></div>
+          <div class="flow-box"><div class="box-header">clean_combined.csv</div><div class="box-detail">157 models &times; 65+ columns. ~40% of cells missing&mdash;not every model tested on every benchmark.</div></div>
+        </div>
+      </section>
+
+      <!-- 3. Custom Benchmarks -->
+      <section>
+        <h2 class="section-heading fade-in"><span class="section-number">3.</span> Four Custom Benchmarks</h2>
+        <p class="subtitle fade-in stagger-1">Each tests a dimension of intelligence that public benchmarks miss.</p>
+        <div class="card-grid">
+          <div class="card fade-in stagger-1"><h3>Soothsayer EQ</h3><span class="method-tag">TrueSkill Arena</span><p>Tests emotional intelligence: empathy, social nuance, conflict resolution. Models compete head-to-head, judged by an LLM referee.</p></div>
+          <div class="card fade-in stagger-2"><h3>Soothsayer Writing</h3><span class="method-tag">TrueSkill Arena</span><p>Evaluates creative writing quality. Same pairwise tournament&mdash;each matchup run in both A/B orientations to cancel position bias.</p></div>
+          <div class="card fade-in stagger-3"><h3>Soothsayer Logic</h3><span class="method-tag">LLM Grading</span><p>12 physics and lateral-thinking puzzles that test commonsense reasoning. Graded by an LLM judge.</p></div>
+          <div class="card fade-in stagger-4"><h3>Soothsayer Style</h3><span class="method-tag">Style Analysis</span><p>Profiles each model&rsquo;s writing fingerprint&mdash;vocabulary richness, sentence patterns, tone. Captures stylistic qualities humans instinctively prefer.</p></div>
+        </div>
+      </section>
+
+      <!-- 4. TrueSkill -->
+      <section>
+        <div class="trueskill-box fade-in">
+          <h3>TrueSkill Arena in Action</h3>
+          <p class="ts-desc">Models battle pairwise. Each match updates ELO and uncertainty (&sigma;). High-uncertainty models get priority matchups.</p>
+          <div class="battle-arena">
+            <div class="fighter" id="fighterA"><div class="model-name" id="nameA">GPT-4o</div><div class="elo" id="eloA">1500</div><div class="sigma" id="sigmaA">&sigma; = 8.33</div></div>
+            <span class="vs">vs</span>
+            <div class="fighter" id="fighterB"><div class="model-name" id="nameB">Claude 4</div><div class="elo" id="eloB">1500</div><div class="sigma" id="sigmaB">&sigma; = 8.33</div></div>
+          </div>
+          <div class="battle-log" id="battleLog">Waiting for first match&hellip;</div>
+        </div>
+      </section>
+
+      <!-- 5. ModelBankImputer -->
+      <section id="imputerSection">
+        <h2 class="section-heading fade-in"><span class="section-number">4.</span> The ModelBankImputer</h2>
+        <p class="subtitle fade-in stagger-1">The real innovation. 40% of cells are missing. Instead of one-size-fits-all, this picks the best predictor set for each individual cell.</p>
+
+        <div class="imputer-wrap fade-in stagger-2">
+          <div class="phase-bar" id="phaseBar">
+            <div class="phase-pip active" data-phase="0">The Problem</div>
+            <div class="phase-pip" data-phase="1">Rank Predictors</div>
+            <div class="phase-pip" data-phase="2">Pass 1: Per-Cell</div>
+            <div class="phase-pip" data-phase="3">Expansion Pass</div>
+            <div class="phase-pip" data-phase="4">Coherence</div>
+            <div class="phase-pip" data-phase="5">Complete</div>
+          </div>
+          <div class="phase-narration">
+            <h4 id="phaseTitle">The Problem: A Sparse Matrix</h4>
+            <p id="phaseDesc">157 models, 65+ benchmarks. Not every model has been tested everywhere. The matrix is ~40% empty.</p>
+          </div>
+          <div class="matrix-viewport">
+            <canvas id="imputerCanvas" aria-hidden="true"></canvas>
+            <p class="sr-only">Interactive matrix visualization showing how the ModelBankImputer fills missing benchmark scores through 5 phases: identifying sparse cells, ranking predictors, per-cell imputation, expansion pass, and SVD coherence projection.</p>
+          </div>
+          <div class="imputer-controls">
+            <button class="imp-btn" id="btnPrev" disabled>&larr; Prev</button>
+            <button class="imp-btn primary" id="btnNext">Next &rarr;</button>
+            <button class="imp-btn" id="btnAutoPlay">Auto-play</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Prediction -->
+      <section>
+        <h2 class="section-heading fade-in"><span class="section-number">5.</span> From Features to Predictions</h2>
+        <p class="subtitle fade-in stagger-1">Feature selection and regression turn imputed benchmark scores into Arena ELO estimates.</p>
+        <div class="ml-steps fade-in stagger-2">
+          <div class="ml-step"><span class="step-icon">1.</span><div class="step-content"><h4>Tree-Based Feature Selection</h4><p>LightGBM ranks 65+ features by importance gain. The 1-SE rule picks the most parsimonious subset&mdash;typically 10&ndash;15 features.</p></div></div>
+          <div class="ml-step"><span class="step-icon">2.</span><div class="step-content"><h4>50/50 Blend: ARD + Huber</h4><p>With only 123 training samples, nonlinear models overfit. The final model is a 50/50 blend of ARD Regression (which zeros out irrelevant features) and Huber Regression (which is robust to outliers).</p></div></div>
+        </div>
+
+        <h3 class="fade-in" style="margin-top:2rem;margin-bottom:1rem;font-size:1.1rem;">Predicted vs. Actual Arena ELO</h3>
+        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">Out-of-fold predictions on 123 models. Every point is a prediction the model never trained on.</p>
+        <div class="fade-in stagger-2" style="border:1px solid var(--card-border);background:var(--card-bg);padding:1rem;">
+          <canvas id="scatterCanvas" style="width:100%;display:block;" aria-hidden="true"></canvas>
+          <p class="sr-only">Scatter plot of predicted versus actual Arena ELO scores for 123 models. Points cluster tightly around the diagonal line, with R-squared of 0.93, Spearman rho of 0.97, and RMSE of 18.2.</p>
+        </div>
+
+        <h3 class="fade-in" style="margin-top:2.5rem;margin-bottom:1rem;font-size:1.1rem;">Why Not Just Median-Impute?</h3>
+        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">Same 10&times;5 repeated cross-validation. Only the imputation and feature pipeline differ.</p>
+        <table class="comparison-table fade-in stagger-2">
+          <thead><tr><th>Method</th><th>RMSE</th><th>R&sup2;</th><th>Spearman &rho;</th></tr></thead>
+          <tbody>
+            <tr><td>Predict mean (dummy)</td><td>68.3</td><td>0.00</td><td>&mdash;</td></tr>
+            <tr><td>Public benchmarks + median impute</td><td>42.3</td><td>0.62</td><td>0.79</td></tr>
+            <tr><td>All benchmarks + median impute</td><td>27.7</td><td>0.84</td><td>0.91</td></tr>
+            <tr class="highlight"><td>Full Soothsayer pipeline</td><td>18.2</td><td>0.93</td><td>0.97</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+
+    <footer>
+      <span>&copy; 2026 Alexander King</span>
+      <span class="footer-note">Project Soothsayer</span>
+    </footer>
+  </div>
+
+<!-- ═══════════════════════════════════════════════
+     SCRIPTS
+     ═══════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  // Fade-in observer
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+  // Stat counters
+  let statsDone = false;
+  const statsObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !statsDone) {
+        statsDone = true;
+        document.querySelectorAll('.stat-num').forEach(el => {
+          const target = parseFloat(el.dataset.target);
+          const isDec = el.classList.contains('decimal');
+          const dur = 1800, start = performance.now();
+          (function tick(now) {
+            const t = Math.min((now - start) / dur, 1), ease = 1 - Math.pow(1 - t, 3);
+            el.textContent = isDec ? (target * ease).toFixed(2) : Math.round(target * ease);
+            if (t < 1) requestAnimationFrame(tick);
+          })(start);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.stats-row').forEach(s => statsObs.observe(s));
+
+  // (pipeline merge lines removed — now canvas-based)
+
+  // TrueSkill battles
+  const mdls = [
+    {n:'Claude Opus 4.6',mu:1500,s:5.1},{n:'GPT-5.2',mu:1420,s:6.2},{n:'Gemini 3.1 Pro',mu:1488,s:5.5},
+    {n:'Grok 4',mu:1410,s:6.9},{n:'Claude Son. 4.6',mu:1444,s:5.8},{n:'DeepSeek V3.2',mu:1424,s:6.0},
+    {n:'Qwen3.5 397B',mu:1448,s:6.5},{n:'GLM-5',mu:1443,s:7.0},{n:'Kimi K2.5',mu:1449,s:6.8},{n:'Mistral Large 3',mu:1432,s:7.2},
+  ];
+  let bCount = 0, bInterval;
+  function runBattle() {
+    const i = Math.floor(Math.random()*mdls.length); let j; do { j = Math.floor(Math.random()*mdls.length); } while(j===i);
+    const a=mdls[i],b=mdls[j];
+    document.getElementById('nameA').textContent=a.n; document.getElementById('eloA').textContent=Math.round(a.mu);
+    document.getElementById('sigmaA').textContent='\u03C3 = '+a.s.toFixed(2);
+    document.getElementById('nameB').textContent=b.n; document.getElementById('eloB').textContent=Math.round(b.mu);
+    document.getElementById('sigmaB').textContent='\u03C3 = '+b.s.toFixed(2);
+    const fA=document.getElementById('fighterA'),fB=document.getElementById('fighterB');
+    fA.classList.remove('winner','loser');fB.classList.remove('winner','loser');
+    document.getElementById('battleLog').textContent='Judging\u2026';
+    setTimeout(()=>{
+      const p=1/(1+Math.exp(-(a.mu-b.mu)/(400/Math.log(10)))),aW=Math.random()<p;
+      const w=aW?a:b,l=aW?b:a,k=16,exp=1/(1+Math.exp(-(w.mu-l.mu)/(400/Math.log(10))));
+      w.mu+=k*(1-exp);l.mu-=k*exp;w.s=Math.max(w.s*0.97,2);l.s=Math.max(l.s*0.97,2);
+      fA.classList.add(aW?'winner':'loser');fB.classList.add(aW?'loser':'winner');
+      document.getElementById('eloA').textContent=Math.round(a.mu);
+      document.getElementById('sigmaA').textContent='\u03C3 = '+a.s.toFixed(2);
+      document.getElementById('eloB').textContent=Math.round(b.mu);
+      document.getElementById('sigmaB').textContent='\u03C3 = '+b.s.toFixed(2);
+      bCount++;
+      document.getElementById('battleLog').textContent='Battle #'+bCount+': '+w.n+' wins! ELO '+(aW?'\u2191':'\u2193')+Math.abs(k*(1-exp)).toFixed(1);
+    },700);
+  }
+  const bObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !bInterval) { runBattle(); bInterval=setInterval(runBattle,2500); }
+      else if (!e.isIntersecting && bInterval) { clearInterval(bInterval); bInterval=null; }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.trueskill-box').forEach(s => bObs.observe(s));
+})();
+
+// ═══════════════════════════════════════════════
+// IMPUTER DEEP-DIVE
+// ═══════════════════════════════════════════════
+(function() {
+  'use strict';
+  const canvas = document.getElementById('imputerCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+
+  // Palette
+  const darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
+  function makePal(dark) {
+    return {
+      dark,
+      bg:           dark ? '#141414' : '#fafaf8',
+      cellBg:       dark ? '#1a1a1a' : '#ffffff',
+      text:         dark ? '#d8d4cf' : '#1a1a1a',
+      textMuted:    dark ? '#a09a90' : '#555555',
+      textLight:    dark ? '#7a756d' : '#777777',
+      accent:       dark ? [196,107,107] : [122,46,46],
+      accentStr:    dark ? '#c46b6b' : '#7a2e2e',
+      border:       dark ? '#2e2e2e' : '#d4d0c8',
+      borderLight:  dark ? '#252525' : '#e8e5de',
+      valLow:       dark ? [60,58,52]   : [210,205,195],
+      valMid:       dark ? [110,85,70]  : [185,150,115],
+      valHi:        dark ? [196,107,107]: [122,46,46],
+      impTeal:      dark ? [70,140,125] : [75,150,130],
+      impTeal2:     dark ? [80,155,138] : [65,140,118],
+      missingBg:    dark ? 'rgba(196,107,107,0.06)' : 'rgba(122,46,46,0.04)',
+      missingBrd:   dark ? 'rgba(196,107,107,0.2)'  : 'rgba(122,46,46,0.15)',
+      sigmaColor:   dark ? 'rgba(196,107,107,VAR)'  : 'rgba(122,46,46,VAR)',
+      connAlpha:    dark ? 0.55 : 0.45,
+    };
+  }
+  let pal = makePal(darkMQ.matches);
+  darkMQ.addEventListener('change', e => { pal = makePal(e.matches); draw(); });
+
+  // Dimensions
+  const ROWS = 14, COLS = 10;
+  const modelNames = ['Cl. Opus 4.6','Cl. Opus 4.6 Th.','Gemini 3.1 Pro','Gemini 3.0 Pro','Gemini 3.0 Flash','Gemini 2.5 Pro','Gemini 3.0 Flash M..','Kimi K2.5','Qwen3.5 397B Th.','Cl. Opus 4.5 Th.','Cl. Opus 4.5','Cl. Son. 4.6 Th.','GPT-5.1','GLM-5'];
+  const benchNames = ['EQ','Writing','Logic','Style','ARC-AGI 2','GPQA','GDPVal','AIME','Terminal','Simple'];
+
+  const PAD = 12, LABEL_W = 82, HEADER_H = 24, ARC_H = 50, CELL_W = 58, CELL_H = 26, GAP = 3, LEGEND_H = 22;
+  const totalW = PAD + LABEL_W + COLS*(CELL_W+GAP) + PAD;
+  const totalH = PAD + ARC_H + HEADER_H + ROWS*(CELL_H+GAP) + LEGEND_H + PAD;
+
+  function cellX(c) { return PAD + LABEL_W + c*(CELL_W+GAP); }
+  function cellY(r) { return PAD + ARC_H + HEADER_H + r*(CELL_H+GAP); }
+
+  function resize() {
+    const w = canvas.parentElement.getBoundingClientRect().width;
+    const scale = w / totalW;
+    canvas.width = totalW * dpr;
+    canvas.height = totalH * dpr;
+    canvas.style.height = (totalH * scale) + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Seeded PRNG
+  function createRNG(seed) { let s = seed; return function() { s = (s * 16807) % 2147483647; return s / 2147483647; }; }
+
+  // Pre-compute all animation data
+  function precomputeAll(seed) {
+    const rng = createRNG(seed);
+    const clamp = (v, lo=0, hi=1) => Math.max(lo, Math.min(hi, v));
+
+    // Realistic min-max normalized scores (0-1) from actual benchmark data.
+    // Columns: EQ=0 Writing=1 Logic=2 Style=3 ARC-AGI2=4 GPQA=5 GDPVal=6 AIME=7 Terminal=8 Simple=9
+    // null = missing. EQ uses Flash judge (154/157 coverage).
+    const rawScores = [
+      [0.95,0.88,0.29,0.41,null,0.85,0.94,null,0.84,null],
+      [1.0,0.95,0.64,0.37,0.89,0.93,0.96,null,0.80,0.83],
+      [0.84,0.59,1.0,0.24,1.0,1.0,0.75,null,0.93,1.0],
+      [0.65,0.68,0.90,0.23,0.40,0.95,0.66,0.97,0.72,0.95],
+      [0.67,0.57,0.88,0.24,0.44,0.94,0.66,0.98,0.67,0.73],
+      [0.75,0.73,0.52,0.12,0.06,0.86,0.46,0.88,0.45,0.75],
+      [0.75,0.43,0.40,0.30,0.04,0.81,0.61,0.55,0.55,null],
+      [0.84,0.61,0.47,0.40,0.15,0.91,0.73,null,0.60,null],
+      [0.81,0.39,0.74,0.19,null,0.93,0.67,null,0.71,null],
+      [0.72,0.86,0.49,0.64,0.49,0.89,0.81,0.92,0.81,0.74],
+      [0.83,0.80,0.23,0.45,0.10,0.81,0.82,0.62,0.71,null],
+      [0.91,0.85,0.55,0.30,0.76,0.90,0.97,null,0.92,null],
+      [0.72,0.85,0.61,0.29,0.23,0.90,0.69,0.95,0.79,0.62],
+      [0.79,0.75,0.65,0.22,0.06,0.82,0.82,null,0.75,null],
+    ];
+
+    const trueVals = [], tier = [];
+    for (let r = 0; r < ROWS; r++) {
+      trueVals[r] = [];
+      // Compute tier from available scores
+      let sum=0, cnt=0;
+      for (let c = 0; c < COLS; c++) { if (rawScores[r][c] !== null) { sum += rawScores[r][c]; cnt++; } }
+      tier[r] = cnt > 0 ? sum/cnt : 0.5;
+      for (let c = 0; c < COLS; c++) {
+        // Use real score if available, or estimate from tier + noise for imputation targets
+        trueVals[r][c] = rawScores[r][c] !== null ? rawScores[r][c] : clamp(tier[r] + (rng()-0.5)*0.2);
+      }
+    }
+
+    // Missing mask: derived from actual null pattern in rawScores
+    const missing = [], missingList = [];
+    for (let r = 0; r < ROWS; r++) {
+      missing[r] = [];
+      for (let c = 0; c < COLS; c++) {
+        missing[r][c] = rawScores[r][c] === null;
+        if (missing[r][c]) missingList.push({r, c});
+      }
+    }
+
+    // Predictor arcs per column (pre-computed, stable)
+    // Columns: EQ=0 Writing=1 Logic=2 Style=3 ARC-AGI2=4 GPQA=5 GDPVal=6 AIME=7 Terminal=8 Simple=9
+    const predictorArcs = [];
+    for (let tc = 0; tc < COLS; tc++) {
+      const arcs = [];
+      for (let pc = 0; pc < COLS; pc++) {
+        if (pc === tc) continue;
+        const strength = clamp(1 - Math.abs(pc-tc)*0.09 + (rng()-0.5)*0.25);
+        if (strength > 0.2) arcs.push({fromCol: pc, strength});
+      }
+      arcs.sort((a,b) => b.strength - a.strength);
+      predictorArcs[tc] = arcs.slice(0, 6);
+    }
+    // Override the 3 demo target columns with realistic predictor relationships
+    predictorArcs[4] = [ // ARC-AGI 2: grabs from EQ, Logic, Terminal
+      {fromCol:2, strength:0.85}, {fromCol:0, strength:0.70}, {fromCol:8, strength:0.60},
+    ];
+    predictorArcs[5] = [ // GPQA: grabs from Logic, AIME, Simple
+      {fromCol:2, strength:0.90}, {fromCol:7, strength:0.75}, {fromCol:9, strength:0.65},
+    ];
+    predictorArcs[9] = [ // Simple: grabs from Writing, Logic, ARC-AGI 2
+      {fromCol:2, strength:0.88}, {fromCol:1, strength:0.72}, {fromCol:4, strength:0.60},
+    ];
+
+    // Pass 1 fills ALL missing cells. Sort column-by-column.
+    const pass1Cells = missingList.slice().sort((a,b) => a.c-b.c || a.r-b.r);
+
+    // Pass 1: predictors + values + sigmas for every missing cell
+    const pass1Preds = [], pass1Vals = [], pass1Sigs = [];
+    for (const cell of pass1Cells) {
+      const preds = [];
+      const topCols = predictorArcs[cell.c].map(a => a.fromCol);
+      for (const pc of topCols) {
+        if (!missing[cell.r][pc]) { preds.push({r:cell.r, c:pc, imputed:false}); if (preds.length>=3) break; }
+      }
+      pass1Preds.push(preds);
+      pass1Vals.push(clamp(trueVals[cell.r][cell.c] + (rng()-0.5)*0.15));
+      pass1Sigs.push(0.15 + rng()*0.55);
+    }
+
+    // Pass 2: retry the UNCERTAIN cells (high sigma), worst-first.
+    // These are a subset of pass1Cells — they already have values, pass 2 improves them.
+    const uncertainIdx = [];
+    for (let i = 0; i < pass1Cells.length; i++) {
+      if (pass1Sigs[i] > 0.35) uncertainIdx.push(i); // above confidence threshold
+    }
+    uncertainIdx.sort((a,b) => pass1Sigs[b] - pass1Sigs[a]); // worst-first
+
+    const pass2Cells = uncertainIdx.map(i => pass1Cells[i]);
+    const pass2Preds = [], pass2Vals = [], pass2Sigs = [];
+    for (const idx of uncertainIdx) {
+      const cell = pass1Cells[idx];
+      const preds = [];
+      const topCols = predictorArcs[cell.c].map(a => a.fromCol);
+      for (const pc of topCols) {
+        if (!missing[cell.r][pc]) { preds.push({r:cell.r, c:pc, imputed:false}); }
+        else { preds.push({r:cell.r, c:pc, imputed:true}); } // use pass-1 imputed value
+        if (preds.length >= 3) break;
+      }
+      pass2Preds.push(preds);
+      pass2Vals.push(clamp(trueVals[cell.r][cell.c] + (rng()-0.5)*0.1));
+      pass2Sigs.push(Math.max(0.05, pass1Sigs[idx] * 0.4 + rng()*0.1)); // improved sigma
+    }
+
+    return { trueVals, missing, missingList, predictorArcs, pass1Cells, pass1Preds, pass1Vals, pass1Sigs, pass2Cells, pass2Preds, pass2Vals, pass2Sigs };
+  }
+
+  const AD = precomputeAll(42);
+
+  // Mutable matrix state
+  const cellState = [], cellVal = [], cellSigma = [];
+  for (let r = 0; r < ROWS; r++) { cellState[r]=[]; cellVal[r]=[]; cellSigma[r]=[]; }
+
+  // Reset to START state of phase n (= end of phase n-1)
+  function resetToPhase(n) {
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      cellState[r][c] = AD.missing[r][c] ? 'missing' : 'observed';
+      cellVal[r][c]   = AD.missing[r][c] ? null : AD.trueVals[r][c];
+      cellSigma[r][c] = AD.missing[r][c] ? 1.0 : 0;
+    }
+    // phases 0,1,2 start from raw matrix (0=static, 1=visual arcs, 2=animate pass1)
+    if (n >= 3) { // pass 1 done
+      AD.pass1Cells.forEach((cell, i) => {
+        cellState[cell.r][cell.c] = 'imputed_p1';
+        cellVal[cell.r][cell.c]   = AD.pass1Vals[i];
+        cellSigma[cell.r][cell.c] = AD.pass1Sigs[i];
+      });
+    }
+    if (n >= 4) { // pass 2 done
+      AD.pass2Cells.forEach((cell, i) => {
+        cellState[cell.r][cell.c] = 'imputed_p2';
+        cellVal[cell.r][cell.c]   = AD.pass2Vals[i];
+        cellSigma[cell.r][cell.c] = AD.pass2Sigs[i];
+      });
+    }
+    if (n >= 5) { // coherence done
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+        if (cellState[r][c] === 'imputed_p1' || cellState[r][c] === 'imputed_p2') {
+          const bl = cellSigma[r][c] * 0.6;
+          cellVal[r][c] = cellVal[r][c]*(1-bl) + AD.trueVals[r][c]*bl;
+          cellSigma[r][c] *= 0.3;
+          cellState[r][c] = 'coherence';
+        }
+      }
+    }
+  }
+
+  // Drawing helpers
+  function lerp(a,b,t) { return a + (b-a)*t; }
+  function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+
+  function valColor(v) {
+    const t = clamp01(v);
+    const lo=pal.valLow, mid=pal.valMid, hi=pal.valHi;
+    let r,g,b;
+    if (t < 0.5) { const s=t/0.5; r=lerp(lo[0],mid[0],s); g=lerp(lo[1],mid[1],s); b=lerp(lo[2],mid[2],s); }
+    else { const s=(t-0.5)/0.5; r=lerp(mid[0],hi[0],s); g=lerp(mid[1],hi[1],s); b=lerp(mid[2],hi[2],s); }
+    return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+  }
+
+  function cellColor(state, val, sigma) {
+    if (state === 'observed') return valColor(val);
+    if (state === 'missing') return pal.missingBg;
+    if (state === 'imputed_p1') { const c=pal.impTeal; return `rgba(${c[0]},${c[1]},${c[2]},${0.35+0.55*(1-Math.min(sigma,1))})`; }
+    if (state === 'imputed_p2') { const c=pal.impTeal2; return `rgba(${c[0]},${c[1]},${c[2]},${0.4+0.5*(1-Math.min(sigma,1))})`; }
+    if (state === 'coherence') { const c=pal.impTeal; return `rgba(${c[0]},${c[1]},${c[2]},${0.5+0.45*(1-Math.min(sigma,1))})`; }
+    if (state === 'final') return valColor(val);
+    return pal.bg;
+  }
+
+  function cellTextColor(state, val) {
+    if (state === 'missing') return pal.textLight;
+    if (state === 'imputed_p1' || state === 'imputed_p2' || state === 'coherence') return pal.dark ? '#d8d4cf' : '#1a1a1a';
+    // observed / final
+    if (pal.dark) return val > 0.6 ? '#1a1a1a' : '#d8d4cf';
+    return val > 0.5 ? '#fafaf8' : '#1a1a1a';
+  }
+
+  // Ephemeral visual state
+  let highlightCol = -1, activeArcs = [], connectors = [], focusCell = null, coherenceWave = -1;
+
+  // Draw
+  function draw() {
+    ctx.clearRect(0, 0, totalW, totalH);
+
+    // Column headers
+    ctx.font = '400 8.5px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    for (let c = 0; c < COLS; c++) {
+      const x = cellX(c) + CELL_W/2;
+      const y = PAD + ARC_H + HEADER_H - 6;
+      const hl = (c === highlightCol);
+      ctx.fillStyle = hl ? pal.accentStr : pal.textMuted;
+      ctx.fillText(benchNames[c], x, y);
+      if (hl) {
+        ctx.fillStyle = pal.dark ? 'rgba(196,107,107,0.06)' : 'rgba(122,46,46,0.04)';
+        ctx.fillRect(cellX(c)-1, PAD+ARC_H+HEADER_H, CELL_W+2, ROWS*(CELL_H+GAP));
+      }
+    }
+
+    // Row labels
+    ctx.font = '400 8.5px Inter, sans-serif';
+    ctx.textAlign = 'right';
+    for (let r = 0; r < ROWS; r++) {
+      ctx.fillStyle = pal.textMuted;
+      ctx.fillText(modelNames[r], PAD+LABEL_W-8, cellY(r)+CELL_H/2+3);
+    }
+
+    // Cells
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      const x=cellX(c), y=cellY(r), st=cellState[r][c], v=cellVal[r][c], sig=cellSigma[r][c];
+      ctx.fillStyle = cellColor(st, v, sig);
+      ctx.fillRect(x, y, CELL_W, CELL_H);
+
+      if (st === 'missing') {
+        ctx.strokeStyle = pal.missingBrd; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+        ctx.strokeRect(x+0.5, y+0.5, CELL_W-1, CELL_H-1);
+        ctx.setLineDash([]);
+        ctx.fillStyle = pal.missingBrd; ctx.font = '500 10px Inter, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('?', x+CELL_W/2, y+CELL_H/2+4);
+      } else if (v !== null) {
+        ctx.fillStyle = cellTextColor(st, v);
+        ctx.font = '400 8px JetBrains Mono, monospace'; ctx.textAlign = 'center';
+        ctx.fillText((v*100).toFixed(0), x+CELL_W/2, y+CELL_H/2+3);
+      }
+
+      // (sigma bar removed — visually confusing without context)
+
+      // Focus glow
+      if (focusCell && focusCell.r===r && focusCell.c===c) {
+        ctx.strokeStyle = pal.accentStr; ctx.lineWidth = 2; ctx.setLineDash([]);
+        ctx.strokeRect(x-1, y-1, CELL_W+2, CELL_H+2);
+      }
+    }
+
+    // Bezier arcs (Phase 1)
+    for (const arc of activeArcs) {
+      const x1 = cellX(highlightCol) + CELL_W/2;
+      const x2 = cellX(arc.fromCol) + CELL_W/2;
+      const y0 = PAD + ARC_H + HEADER_H - 10;
+      const cpY = PAD + ARC_H - 5 - arc.strength * 30;
+      const a = pal.accent;
+      ctx.strokeStyle = `rgba(${a[0]},${a[1]},${a[2]},${arc.opacity * arc.strength * 0.7})`;
+      ctx.lineWidth = 1 + arc.strength * 2;
+      ctx.setLineDash([]);
+      // Partial bezier
+      const steps = Math.max(2, Math.ceil(arc.drawProgress * 40));
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const t = (i/40) * (arc.drawProgress > 0 ? (40/steps) : 0);
+        const tt = Math.min(t * (steps/40) / (arc.drawProgress||1), 1) * arc.drawProgress;
+        const px = (1-tt)*(1-tt)*x1 + 2*(1-tt)*tt*(x1+x2)/2 + tt*tt*x2;
+        const py = (1-tt)*(1-tt)*y0 + 2*(1-tt)*tt*cpY + tt*tt*y0;
+        if (i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+    }
+
+    // Connector lines (Pass 1/2)
+    for (const conn of connectors) {
+      const fx = cellX(conn.fromC) + CELL_W/2;
+      const fy = cellY(conn.fromR) + CELL_H/2;
+      const tx = cellX(conn.toC) + CELL_W/2;
+      const ty = cellY(conn.toR) + CELL_H/2;
+      const cpY = fy - 10 - Math.abs(conn.fromC - conn.toC) * 2;
+
+      const a = pal.accent;
+      ctx.strokeStyle = `rgba(${a[0]},${a[1]},${a[2]},${pal.connAlpha * conn.progress})`;
+      ctx.fillStyle   = ctx.strokeStyle;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash(conn.dashed ? [4,3] : []);
+
+      // Draw curved connector
+      const segs = Math.max(2, Math.ceil(conn.progress * 20));
+      ctx.beginPath();
+      for (let i = 0; i <= segs; i++) {
+        const t = (i/segs) * conn.progress;
+        const px = (1-t)*(1-t)*fx + 2*(1-t)*t*(fx+tx)/2 + t*t*tx;
+        const py = (1-t)*(1-t)*fy + 2*(1-t)*t*cpY + t*t*ty;
+        if (i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Arrowhead at target
+      if (conn.progress > 0.9) {
+        const angle = Math.atan2(ty-cpY, tx-(fx+tx)/2);
+        ctx.beginPath();
+        ctx.moveTo(tx, ty);
+        ctx.lineTo(tx - 5*Math.cos(angle-0.4), ty - 5*Math.sin(angle-0.4));
+        ctx.lineTo(tx - 5*Math.cos(angle+0.4), ty - 5*Math.sin(angle+0.4));
+        ctx.closePath(); ctx.fill();
+      }
+    }
+
+    // Coherence wave
+    if (coherenceWave >= 0 && coherenceWave < COLS) {
+      const x = cellX(coherenceWave);
+      const a = pal.accent;
+      ctx.fillStyle = `rgba(${a[0]},${a[1]},${a[2]},0.05)`;
+      ctx.fillRect(x-2, PAD+ARC_H+HEADER_H, CELL_W+GAP+4, ROWS*(CELL_H+GAP));
+      ctx.strokeStyle = `rgba(${a[0]},${a[1]},${a[2]},0.3)`;
+      ctx.lineWidth = 1.5; ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(x+CELL_W/2, PAD+ARC_H+HEADER_H);
+      ctx.lineTo(x+CELL_W/2, PAD+ARC_H+HEADER_H+ROWS*(CELL_H+GAP)); ctx.stroke();
+    }
+
+    // Legend
+    const ly = totalH - PAD - 2;
+    ctx.font = '400 8px Inter, sans-serif'; ctx.textAlign = 'left';
+    let lx = PAD + LABEL_W;
+    const legs = [
+      {color: valColor(0.65), label:'Observed'},
+      {color: pal.missingBg, border: pal.missingBrd, label:'Missing'},
+      {color: `rgba(${pal.impTeal[0]},${pal.impTeal[1]},${pal.impTeal[2]},0.7)`, label:'Imputed'},
+    ];
+    for (const leg of legs) {
+      ctx.fillStyle = leg.color;
+      ctx.fillRect(lx, ly-8, 10, 10);
+      if (leg.border) { ctx.strokeStyle = leg.border; ctx.lineWidth=1; ctx.setLineDash([2,2]); ctx.strokeRect(lx,ly-8,10,10); ctx.setLineDash([]); }
+      ctx.fillStyle = pal.textLight;
+      ctx.fillText(leg.label, lx+14, ly);
+      lx += ctx.measureText(leg.label).width + 30;
+    }
+  }
+
+  // Animation state
+  let animating = false, animFrame, animDoneResolve;
+  function stopAnim() { animating = false; if (animFrame) cancelAnimationFrame(animFrame); highlightCol=-1; activeArcs=[]; connectors=[]; focusCell=null; coherenceWave=-1; }
+
+  // Phase data
+  const phases = [
+    { title:'The Problem: A Sparse Matrix', desc:'157 models, 65+ benchmarks. Not every model has been tested everywhere. The matrix is ~40% empty.' },
+    { title:'Step 1: Rank Predictors Per Column', desc:'For each target column, rank every other column by |correlation| \u00d7 \u221an. The stronger the arc, the better the predictor. Three examples shown.' },
+    { title:'Step 2: Per-Cell Prediction (Pass 1)', desc:'The core of the ModelBankImputer. For each missing cell, select the best predictors that model actually has observed values for, then pick from a bank of fitted regressors. Each regressor estimates its own leave-one-out error; a fill is \u201cconfident\u201d when that error is under 40% of the column\u2019s natural spread.' },
+    { title:'Step 3: Expansion Pass', desc:'Pass 1 filled every cell, but some fits are uncertain. Pass 2 retries them worst-first, now allowing confident pass-1 fills (dashed connector) as additional predictors. The new estimate only replaces the old one if \u03c3\u00b2 improves by at least 5%. Any cells that couldn\u2019t be filled at all fall back to column median.' },
+    { title:'Step 4: SVD Coherence Projection', desc:'A low-rank SVD decomposes the filled matrix. Each imputed value blends toward its coherent estimate, weighted by uncertainty.' },
+    { title:'Complete: Ready for Prediction', desc:'Every cell filled. The matrix is dense, coherent, and ready for feature selection and regression. 157 models \u00d7 65+ features \u2192 Arena ELO predictions.' },
+  ];
+
+  let currentPhase = 0;
+  function setPhaseUI(p) {
+    currentPhase = p;
+    document.querySelectorAll('.phase-pip').forEach(pip => {
+      const pp = parseInt(pip.dataset.phase);
+      pip.classList.remove('active','done');
+      if (pp===p) pip.classList.add('active');
+      else if (pp<p) pip.classList.add('done');
+    });
+    document.getElementById('phaseTitle').textContent = phases[p].title;
+    document.getElementById('phaseDesc').textContent = phases[p].desc;
+    document.getElementById('btnPrev').disabled = (p===0);
+    document.getElementById('btnNext').disabled = (p===phases.length-1);
+  }
+
+  function goToPhase(p) {
+    stopAnim();
+    resetToPhase(p);
+    setPhaseUI(p);
+    draw();
+    return new Promise(resolve => {
+      animDoneResolve = resolve;
+      const animators = [animP0,animP1,animP2,animP3,animP4,animP5];
+      animators[p]();
+    });
+  }
+
+  function animDone() { animating=false; if (animDoneResolve) { const r=animDoneResolve; animDoneResolve=null; r(); } }
+
+  // Phase 0: static
+  function animP0() { draw(); animDone(); }
+
+  // Phase 1: rank predictors arcs
+  function animP1() {
+    animating = true;
+    const targets = [4, 5, 9]; // ARC-AGI 2, GPQA, Simple
+    const drawIn=700, hold=1200, fadeOut=500, total=drawIn+hold+fadeOut;
+    let start = null;
+
+    function tick(now) {
+      if (!animating) return;
+      if (!start) start = now;
+      const elapsed = now - start;
+      if (elapsed >= targets.length * total) { highlightCol=-1; activeArcs=[]; draw(); animDone(); return; }
+
+      const ci = Math.min(Math.floor(elapsed/total), targets.length-1);
+      const ce = elapsed - ci*total;
+      highlightCol = targets[ci];
+      const arcs = AD.predictorArcs[highlightCol];
+
+      if (ce < drawIn) {
+        const p = ce / drawIn;
+        activeArcs = arcs.map((arc,i) => ({ ...arc, drawProgress: clamp01((p - i*0.08)/0.5), opacity:1 }));
+      } else if (ce < drawIn+hold) {
+        activeArcs = arcs.map(arc => ({...arc, drawProgress:1, opacity:1}));
+      } else {
+        const fp = (ce - drawIn - hold) / fadeOut;
+        activeArcs = arcs.map(arc => ({...arc, drawProgress:1, opacity:1-fp}));
+      }
+
+      draw();
+      animFrame = requestAnimationFrame(tick);
+    }
+    animFrame = requestAnimationFrame(tick);
+  }
+
+  // Phase 2: pass 1 per-cell
+  function animP2() {
+    animating = true;
+    const cells = AD.pass1Cells, preds = AD.pass1Preds;
+    const slowN = Math.min(8, cells.length), slowT = 550, fastT = 25;
+    let idx = 0, start = null;
+
+    function tick(now) {
+      if (!animating) return;
+      if (!start) start = now;
+      const elapsed = now - start;
+
+      const slowTotal = slowN * slowT;
+      let targetIdx;
+      if (elapsed < slowTotal) { targetIdx = Math.floor(elapsed / slowT); }
+      else { targetIdx = slowN + Math.floor((elapsed - slowTotal) / fastT); }
+      targetIdx = Math.min(targetIdx, cells.length);
+
+      // Fill cells up to targetIdx
+      while (idx < targetIdx) {
+        const cell = cells[idx];
+        cellState[cell.r][cell.c] = 'imputed_p1';
+        cellVal[cell.r][cell.c]   = AD.pass1Vals[idx];
+        cellSigma[cell.r][cell.c] = AD.pass1Sigs[idx];
+        idx++;
+      }
+
+      // Show connectors for slow cells
+      if (targetIdx < slowN && targetIdx < cells.length) {
+        const cell = cells[targetIdx];
+        const ps = preds[targetIdx];
+        const progress = clamp01(((elapsed < slowTotal ? elapsed%slowT : 0) / slowT) * 2);
+        connectors = ps.map(p => ({fromR:p.r, fromC:p.c, toR:cell.r, toC:cell.c, progress, dashed:false}));
+        focusCell = cell;
+      } else {
+        connectors = []; focusCell = null;
+      }
+
+      draw();
+      if (idx >= cells.length) { connectors=[]; focusCell=null; draw(); animDone(); return; }
+      animFrame = requestAnimationFrame(tick);
+    }
+    animFrame = requestAnimationFrame(tick);
+  }
+
+  // Phase 3: pass 2 retry
+  function animP3() {
+    animating = true;
+    const cells = AD.pass2Cells, preds = AD.pass2Preds;
+    const slowN = Math.min(4, cells.length), slowT = 700, fastT = 35;
+    let idx = 0, start = null;
+
+    function tick(now) {
+      if (!animating) return;
+      if (!start) start = now;
+      const elapsed = now - start;
+
+      const slowTotal = slowN * slowT;
+      let targetIdx;
+      if (elapsed < slowTotal) targetIdx = Math.floor(elapsed / slowT);
+      else targetIdx = slowN + Math.floor((elapsed - slowTotal) / fastT);
+      targetIdx = Math.min(targetIdx, cells.length);
+
+      while (idx < targetIdx) {
+        const cell = cells[idx];
+        cellState[cell.r][cell.c] = 'imputed_p2';
+        cellVal[cell.r][cell.c]   = AD.pass2Vals[idx];
+        cellSigma[cell.r][cell.c] = AD.pass2Sigs[idx];
+        idx++;
+      }
+
+      if (targetIdx < slowN && targetIdx < cells.length) {
+        const cell = cells[targetIdx];
+        const ps = preds[targetIdx];
+        const progress = clamp01(((elapsed < slowTotal ? elapsed%slowT : 0) / slowT) * 2);
+        connectors = ps.map(p => ({fromR:p.r, fromC:p.c, toR:cell.r, toC:cell.c, progress, dashed:!!p.imputed}));
+        focusCell = cell;
+      } else {
+        connectors = []; focusCell = null;
+      }
+
+      draw();
+      if (idx >= cells.length) { connectors=[]; focusCell=null; draw(); animDone(); return; }
+      animFrame = requestAnimationFrame(tick);
+    }
+    animFrame = requestAnimationFrame(tick);
+  }
+
+  // Phase 4: coherence sweep
+  function animP4() {
+    animating = true;
+    // Snapshot start state
+    const startVals = cellVal.map(row => [...row]);
+    const startSigs = cellSigma.map(row => [...row]);
+    const startStates = cellState.map(row => [...row]);
+    // Compute end state
+    const endVals = startVals.map(row => [...row]);
+    const endSigs = startSigs.map(row => [...row]);
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      if (startStates[r][c]==='imputed_p1' || startStates[r][c]==='imputed_p2') {
+        const bl = startSigs[r][c] * 0.6;
+        endVals[r][c] = startVals[r][c]*(1-bl) + AD.trueVals[r][c]*bl;
+        endSigs[r][c] = startSigs[r][c] * 0.3;
+      }
+    }
+
+    const perCol = 280;
+    let start = null;
+    function tick(now) {
+      if (!animating) return;
+      if (!start) start = now;
+      const elapsed = now - start;
+      const wave = elapsed / perCol;
+      coherenceWave = Math.min(Math.floor(wave), COLS-1);
+
+      for (let c = 0; c < COLS; c++) {
+        const cp = clamp01((wave - c) / 1.5);
+        for (let r = 0; r < ROWS; r++) {
+          if (startStates[r][c]==='imputed_p1' || startStates[r][c]==='imputed_p2') {
+            cellVal[r][c]   = lerp(startVals[r][c], endVals[r][c], cp);
+            cellSigma[r][c] = lerp(startSigs[r][c], endSigs[r][c], cp);
+            if (cp >= 1) cellState[r][c] = 'coherence';
+          }
+        }
+      }
+
+      draw();
+      if (elapsed >= COLS * perCol + 400) { coherenceWave=-1; draw(); animDone(); return; }
+      animFrame = requestAnimationFrame(tick);
+    }
+    animFrame = requestAnimationFrame(tick);
+  }
+
+  // Phase 5: snap to final
+  function animP5() {
+    animating = true;
+    const perCol = 50;
+    let col = 0, start = null;
+    function tick(now) {
+      if (!animating) return;
+      if (!start) start = now;
+      const elapsed = now - start;
+      const newCol = Math.min(Math.floor(elapsed/perCol), COLS);
+      while (col < newCol) {
+        for (let r = 0; r < ROWS; r++) {
+          if (cellState[r][col] !== 'observed') {
+            cellState[r][col] = 'final';
+            cellSigma[r][col] = 0;
+          }
+        }
+        col++;
+      }
+      draw();
+      if (col >= COLS) { animDone(); return; }
+      animFrame = requestAnimationFrame(tick);
+    }
+    animFrame = requestAnimationFrame(tick);
+  }
+
+  // Controls
+  document.getElementById('btnNext').addEventListener('click', () => { if (currentPhase < 5) goToPhase(currentPhase+1); });
+  document.getElementById('btnPrev').addEventListener('click', () => { if (currentPhase > 0) goToPhase(currentPhase-1); });
+  document.querySelectorAll('.phase-pip').forEach(pip => {
+    pip.addEventListener('click', () => {
+      stopAutoPlay();
+      goToPhase(parseInt(pip.dataset.phase));
+    });
+  });
+
+  let autoPlaying = false, autoAbort = false;
+  function stopAutoPlay() { autoPlaying = false; autoAbort = true; document.getElementById('btnAutoPlay').textContent = 'Auto-play'; }
+
+  document.getElementById('btnAutoPlay').addEventListener('click', async () => {
+    if (autoPlaying) { stopAutoPlay(); return; }
+    autoPlaying = true; autoAbort = false;
+    document.getElementById('btnAutoPlay').textContent = 'Pause';
+    for (let p = 0; p < 6; p++) {
+      if (autoAbort) break;
+      await goToPhase(p);
+      if (autoAbort) break;
+      await new Promise(r => setTimeout(r, 1200));
+    }
+    if (!autoAbort) { autoPlaying = false; document.getElementById('btnAutoPlay').textContent = 'Auto-play'; }
+  });
+
+  // Init
+  document.fonts.ready.then(() => { resetToPhase(0); setPhaseUI(0); draw(); });
+})();
+
+// ═══════════════════════════════════════════════
+// SCATTER PLOT: Predicted vs Actual
+// ═══════════════════════════════════════════════
+(function() {
+  'use strict';
+  const canvas = document.getElementById('scatterCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+
+  // OOF data: [name, actual, predicted]
+  const DATA = [["Command R", 1188.0, 1218.5], ["Claude 3 Opus", 1263.0, 1264.7], ["Command R Plus", 1230.0, 1236.3], ["GPT-4o Mini", 1287.0, 1249.8], ["Llama 3.1 405B Instruct Turbo", 1284.0, 1287.7], ["Llama 3.1 70B Instruct Turbo", 1262.0, 1227.1], ["Llama 3.1 8B Instruct Turbo", 1187.0, 1171.5], ["GPT-4o (2024-08-06)", 1283.0, 1297.0], ["Mistral Small", 1279.0, 1245.3], ["Qwen2.5 72B Instruct Turbo", 1270.0, 1302.4], ["Gemini 1.5 Flash 8B", 1227.0, 1238.8], ["Claude 3.5 Sonnet", 1298.0, 1296.8], ["Claude 3.5 Haiku", 1257.0, 1228.0], ["Nova Lite", 1229.0, 1271.3], ["Nova Micro", 1209.0, 1242.5], ["Nova Pro", 1259.0, 1285.7], ["Llama 3.3 70B Instruct Turbo", 1276.0, 1268.7], ["Gemini 2.0 Flash", 1355.0, 1341.6], ["DeepSeek V3 (2024-12-26)", 1333.0, 1338.4], ["Phi-4", 1217.0, 1276.7], ["DeepSeek R1", 1373.0, 1392.3], ["Qwen2.5 Max", 1367.0, 1352.2], ["o3-Mini High", 1337.0, 1304.2], ["o3-Mini Medium", 1320.0, 1311.7], ["Gemini 2.0 Flash Lite", 1330.0, 1327.8], ["Grok 3 Beta", 1425.0, 1419.5], ["Grok 3 Mini Beta (High)", 1368.0, 1369.9], ["Claude 3.7 Sonnet", 1300.0, 1335.3], ["Claude 3.7 Sonnet Thinking", 1316.0, 1358.5], ["QwQ 32B", 1330.0, 1353.9], ["Gemma 3 12B", 1335.0, 1358.1], ["Gemma 3 27B", 1358.0, 1347.4], ["Gemma 3 4B", 1291.0, 1285.1], ["Command A", 1331.0, 1332.7], ["DeepSeek V3 (2025-03-24)", 1375.0, 1371.4], ["ChatGPT-4o", 1429.0, 1402.2], ["Llama 4 Maverick 17B 128E Instruct", 1289.0, 1298.0], ["llama-4-scout", 1281.0, 1259.0], ["GPT-4.1", 1382.0, 1395.4], ["GPT-4.1 Mini", 1341.0, 1333.5], ["GPT-4.1 Nano", 1285.0, 1278.7], ["o3 Medium", 1410.0, 1404.9], ["o4-Mini Medium", 1354.0, 1363.6], ["Qwen 3 235B A22B Thinking", 1366.0, 1361.1], ["Qwen 3 30B A3B Thinking", 1319.0, 1311.2], ["Qwen 3 32B Thinking", 1341.0, 1374.9], ["Mistral Medium 3", 1369.0, 1357.4], ["Gemini 2.5 Flash Preview (2025-05-20)", 1418.0, 1413.2], ["Gemma 3n 4B", 1308.0, 1298.4], ["Claude 4 Opus", 1365.0, 1386.7], ["Claude 4 Opus Thinking", 1376.0, 1375.5], ["Claude 4 Sonnet", 1339.0, 1368.2], ["Claude 4 Sonnet Thinking", 1349.0, 1360.1], ["DeepSeek R1 (2025-05-28)", 1426.0, 1418.7], ["Gemini 2.5 Pro Preview (2025-06-05)", 1462.0, 1471.3], ["Gemini 2.5 Flash Lite Preview (2025-06-17)", 1369.0, 1354.2], ["Grok 4", 1410.0, 1401.1], ["Kimi K2", 1371.0, 1387.3], ["Qwen 3 235B A22B Nonthinking (2025-07-21)", 1419.0, 1402.9], ["Qwen 3 235B A22B Thinking (2025-07-21)", 1414.0, 1416.2], ["Qwen 3 Coder 480B A35B Instruct", 1357.0, 1343.4], ["GLM 4.5 Air", 1382.0, 1377.3], ["GLM-4.5", 1429.0, 1407.8], ["Claude Opus 4.1", 1418.0, 1375.1], ["Claude Opus 4.1 Thinking", 1418.0, 1409.2], ["GPT OSS 120B", 1367.0, 1363.9], ["GPT OSS 20B", 1288.0, 1337.0], ["GPT-5 (high)", 1406.0, 1415.1], ["GPT-5 Chat", 1404.0, 1400.0], ["GPT-5 Mini (High)", 1374.0, 1400.3], ["GPT-5 Nano (high)", 1321.0, 1348.7], ["Mistral Medium 3.1 (2025-08-12)", 1427.0, 1415.5], ["DeepSeek V3.1 (Non-Reasoning)", 1420.0, 1426.3], ["DeepSeek V3.1 (Reasoning)", 1417.0, 1407.9], ["Grok 4 Fast", 1398.0, 1393.4], ["Qwen3 Max", 1414.0, 1409.5], ["Kimi K2 0905", 1379.0, 1390.3], ["Qwen3 Next 80B A3B Instruct", 1419.0, 1419.4], ["Qwen3 Next 80B A3B Thinking", 1367.0, 1386.8], ["DeepSeek V3.1 Terminus", 1418.0, 1431.4], ["DeepSeek V3.1 Terminus (Reasoning)", 1417.0, 1417.1], ["Gemini 2.5 Flash Lite Preview 09-2025 Nonthinking", 1379.0, 1381.1], ["Gemini 2.5 Flash Preview 09-2025", 1407.0, 1431.3], ["Claude Sonnet 4.5", 1432.0, 1424.0], ["Claude Sonnet 4.5 Thinking", 1426.0, 1432.9], ["DeepSeek V3.2 Exp", 1424.0, 1424.9], ["DeepSeek V3.2 Exp (Reasoning)", 1423.0, 1412.5], ["GLM-4.6", 1441.0, 1428.0], ["Claude Haiku 4.5", 1386.0, 1382.5], ["MiniMax M2", 1343.0, 1364.4], ["Kimi K2 Thinking", 1413.0, 1408.4], ["GPT-5.1 (high)", 1443.0, 1449.4], ["GPT-5.1 (Non-reasoning)", 1422.0, 1420.7], ["Grok 4.1 Fast", 1408.0, 1410.1], ["Gemini 3.0 Pro Preview (2025-11-18)", 1479.0, 1476.2], ["Olmo 3 32B (Reasoning)", 1300.0, 1331.9], ["Claude Opus 4.5", 1445.0, 1438.4], ["Claude Opus 4.5 Thinking", 1446.0, 1442.6], ["DeepSeek V3.2", 1418.0, 1420.2], ["DeepSeek V3.2 (Non-Reasoning)", 1423.0, 1441.7], ["Mistral Large 3 (2025-12-1)", 1432.0, 1420.1], ["Nova 2 Lite", 1364.0, 1374.1], ["GPT-5.2 (high)", 1421.0, 1449.2], ["GPT-5.2 (Non-reasoning)", 1417.0, 1419.0], ["Nemotron 3 Nano 30B A3B (Reasoning)", 1351.0, 1350.3], ["MiMo-V2-Flash (Reasoning)", 1395.0, 1394.2], ["Gemini 3.0 Flash Preview (2025-12-17)", 1467.0, 1468.6], ["Gemini 3.0 Flash Preview (2025-12-17) (Minimal)", 1449.0, 1462.0], ["GLM-4.7", 1435.0, 1419.8], ["MiniMax M2.1", 1391.0, 1399.8], ["GLM-4.7 Flash", 1353.0, 1338.8], ["Kimi K2.5", 1449.0, 1440.6], ["Step 3.5 Flash", 1400.0, 1399.7], ["Claude Opus 4.6", 1502.0, 1481.3], ["Claude Opus 4.6 Thinking", 1500.0, 1486.9], ["GLM-5", 1443.0, 1452.9], ["MiniMax M2.5", 1380.0, 1392.2], ["Qwen3.5 397B A17B Thinking", 1448.0, 1444.9], ["Claude Sonnet 4.6 Thinking", 1444.0, 1466.9], ["Gemini 3.1 Pro Preview (2026-02-19)", 1488.0, 1476.0], ["Qwen3.5 27B Thinking", 1410.0, 1384.9], ["Gemini 3.1 Flash Lite Preview (2026-03-03)", 1425.0, 1429.2], ["Nemotron 3 Super", 1384.0, 1391.9]];
+
+  const darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
+  function getPal(dark) {
+    return {
+      bg: dark ? '#1a1a1a' : '#ffffff',
+      grid: dark ? '#2a2a2a' : '#e8e5de',
+      text: dark ? '#a09a90' : '#555',
+      textLight: dark ? '#7a756d' : '#999',
+      dot: dark ? 'rgba(196,107,107,0.75)' : 'rgba(122,46,46,0.7)',
+      dotHover: dark ? '#d98e8e' : '#7a2e2e',
+      line: dark ? 'rgba(196,107,107,0.3)' : 'rgba(122,46,46,0.25)',
+      labelBg: dark ? '#1c1c1c' : '#fff',
+      labelBorder: dark ? '#333' : '#d4d0c8',
+      accent: dark ? '#c46b6b' : '#7a2e2e',
+    };
+  }
+  let pal = getPal(darkMQ.matches);
+  darkMQ.addEventListener('change', e => { pal = getPal(e.matches); drawScatter(); });
+
+  // Layout
+  const PAD_L = 52, PAD_R = 20, PAD_T = 20, PAD_B = 46;
+  const W = 780, H = 420;
+  const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
+
+  // Data range
+  const allVals = DATA.flatMap(d => [d[1], d[2]]);
+  const minV = Math.floor(Math.min(...allVals) / 50) * 50;
+  const maxV = Math.ceil(Math.max(...allVals) / 50) * 50;
+
+  function toX(v) { return PAD_L + (v - minV) / (maxV - minV) * plotW; }
+  function toY(v) { return PAD_T + plotH - (v - minV) / (maxV - minV) * plotH; }
+
+  function resize() {
+    const cw = canvas.parentElement.getBoundingClientRect().width - 32; // padding
+    const scale = Math.min(cw / W, 1);
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = (W * scale) + 'px';
+    canvas.style.height = (H * scale) + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', () => { resize(); drawScatter(); });
+
+  let hoverIdx = -1;
+
+  function drawScatter() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Grid lines
+    ctx.strokeStyle = pal.grid;
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([]);
+    for (let v = minV; v <= maxV; v += 50) {
+      const x = toX(v), y = toY(v);
+      ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(W - PAD_R, y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, PAD_T + plotH); ctx.stroke();
+    }
+
+    // Perfect prediction line
+    ctx.strokeStyle = pal.line;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(toX(minV), toY(minV));
+    ctx.lineTo(toX(maxV), toY(maxV));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Axis labels
+    ctx.font = '400 9px Inter, sans-serif';
+    ctx.fillStyle = pal.text;
+    ctx.textAlign = 'center';
+    for (let v = minV; v <= maxV; v += 50) {
+      ctx.fillText(v, toX(v), PAD_T + plotH + 16);
+    }
+    ctx.textAlign = 'right';
+    for (let v = minV; v <= maxV; v += 50) {
+      ctx.fillText(v, PAD_L - 6, toY(v) + 3);
+    }
+
+    // Axis titles
+    ctx.font = '400 10px Inter, sans-serif';
+    ctx.fillStyle = pal.text;
+    ctx.textAlign = 'center';
+    ctx.fillText('Actual Arena ELO', PAD_L + plotW / 2, H - 4);
+    ctx.save();
+    ctx.translate(13, PAD_T + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('Predicted ELO', 0, 0);
+    ctx.restore();
+
+    // Dots
+    for (let i = 0; i < DATA.length; i++) {
+      const d = DATA[i];
+      const x = toX(d[1]), y = toY(d[2]);
+      const isHover = (i === hoverIdx);
+      ctx.beginPath();
+      ctx.arc(x, y, isHover ? 5.5 : 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = isHover ? pal.dotHover : pal.dot;
+      ctx.fill();
+    }
+
+    // Hover label
+    if (hoverIdx >= 0) {
+      const d = DATA[hoverIdx];
+      const x = toX(d[1]), y = toY(d[2]);
+      const label = d[0];
+      const err = (d[2] - d[1]).toFixed(1);
+      const errSign = d[2] >= d[1] ? '+' : '';
+      const text = `${label}  (${errSign}${err})`;
+
+      ctx.font = '400 9.5px Inter, sans-serif';
+      const tw = ctx.measureText(text).width;
+      const lx = Math.min(x + 10, W - PAD_R - tw - 12);
+      const ly = Math.max(y - 14, PAD_T + 4);
+
+      ctx.fillStyle = pal.labelBg;
+      ctx.strokeStyle = pal.labelBorder;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(lx - 4, ly - 11, tw + 8, 16, 3);
+      ctx.fill(); ctx.stroke();
+
+      ctx.fillStyle = pal.accent;
+      ctx.textAlign = 'left';
+      ctx.fillText(text, lx, ly);
+    }
+
+    // Stats annotation
+    ctx.font = '400 10px JetBrains Mono, monospace';
+    ctx.fillStyle = pal.text;
+    ctx.textAlign = 'left';
+    ctx.fillText('R\u00B2 = 0.93    Spearman \u03C1 = 0.97    RMSE = 18.2', PAD_L + 4, PAD_T + 14);
+  }
+
+  // Hover interaction
+  canvas.addEventListener('mousemove', function(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = W / rect.width, scaleY = H / rect.height;
+    const mx = (e.clientX - rect.left) * scaleX;
+    const my = (e.clientY - rect.top) * scaleY;
+
+    let closest = -1, closestDist = 15; // px threshold
+    for (let i = 0; i < DATA.length; i++) {
+      const dx = toX(DATA[i][1]) - mx, dy = toY(DATA[i][2]) - my;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < closestDist) { closestDist = dist; closest = i; }
+    }
+    if (closest !== hoverIdx) { hoverIdx = closest; drawScatter(); }
+  });
+  canvas.addEventListener('mouseleave', () => { hoverIdx = -1; drawScatter(); });
+  canvas.style.cursor = 'crosshair';
+
+  // Draw on scroll-in
+  const scatterObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { drawScatter(); scatterObs.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.fonts.ready.then(() => { scatterObs.observe(canvas); });
+})();
+
+// ═══════════════════════════════════════════════
+// PIPELINE FLOWCHART (canvas)
+// ═══════════════════════════════════════════════
+(function() {
+  'use strict';
+  const canvas = document.getElementById('pipelineCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+
+  const darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
+  function getPal(dark) {
+    return {
+      bg: dark ? '#141414' : '#fafaf8',
+      cardBg: dark ? '#1a1a1a' : '#ffffff',
+      border: dark ? '#2a2a2a' : '#e8e5de',
+      text: dark ? '#d8d4cf' : '#1a1a1a',
+      textMuted: dark ? '#a09a90' : '#555',
+      textLight: dark ? '#7a756d' : '#777',
+      accent: dark ? '#c46b6b' : '#7a2e2e',
+      arrow: dark ? 'rgba(196,107,107,0.4)' : 'rgba(122,46,46,0.35)',
+    };
+  }
+  let pal = getPal(darkMQ.matches);
+  darkMQ.addEventListener('change', e => { pal = getPal(e.matches); drawPipeline(); });
+
+  const boxes = [
+    { id:'custom', label:'4 Custom Benchmarks', sub:'EQ \u00b7 Writing \u00b7 Logic \u00b7 Style' },
+    { id:'public', label:'12 Public Benchmarks', sub:'LiveBench \u00b7 Aider \u00b7 ARC-AGI \u00b7 \u2026' },
+    { id:'combine', label:'Combine', sub:'157 models \u00d7 65+ columns' },
+    { id:'impute', label:'Impute & Predict', sub:'ModelBankImputer \u2192 ARD + Huber' },
+    { id:'elo', label:'Arena ELO', sub:'Spearman \u03c1 = 0.97 \u00b7 RMSE 18.2' },
+  ];
+
+  function fitText(text, maxW, baseSize, font) {
+    // Shrink font until text fits within maxW
+    let size = baseSize;
+    while (size > 7) {
+      ctx.font = font.replace('__SIZE__', size + 'px');
+      if (ctx.measureText(text).width <= maxW) break;
+      size -= 0.5;
+    }
+    return size;
+  }
+
+  function drawBox(x, y, w, h, label, sub) {
+    ctx.fillStyle = pal.cardBg;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = pal.border;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    // Label — auto-shrink to fit
+    const pad = 10;
+    const labelSize = fitText(label, w - pad*2, 13, "500 __SIZE__ 'EB Garamond', Georgia, serif");
+    ctx.fillStyle = pal.text;
+    ctx.font = `500 ${labelSize}px 'EB Garamond', Georgia, serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, x + w/2, y + h/2 - (sub ? 8 : 0));
+    // Sub — auto-shrink to fit
+    if (sub) {
+      const subSize = fitText(sub, w - pad*2, 9.5, "400 __SIZE__ Inter, sans-serif");
+      ctx.fillStyle = pal.textLight;
+      ctx.font = `400 ${subSize}px Inter, sans-serif`;
+      ctx.fillText(sub, x + w/2, y + h/2 + 10);
+    }
+  }
+
+  function drawArrow(x1, y1, x2, y2, opts) {
+    const curved = opts && opts.curved;
+    const noHead = opts && opts.noHead;
+    const midFrac = (opts && opts.midFrac) || 0.5;
+    ctx.strokeStyle = pal.arrow;
+    ctx.fillStyle = pal.arrow;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    if (curved) {
+      // Right-angle elbow: down from source, then horizontal, then down to target
+      const midY = y1 + (y2 - y1) * midFrac;
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x1, midY);
+      ctx.lineTo(x2, midY);
+      ctx.lineTo(x2, y2);
+    } else {
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+    }
+    ctx.stroke();
+    if (!noHead) {
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      const ax = curved ? Math.PI / 2 : angle; // curved arrows arrive vertically
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - 6*Math.cos(ax - 0.35), y2 - 6*Math.sin(ax - 0.35));
+      ctx.lineTo(x2 - 6*Math.cos(ax + 0.35), y2 - 6*Math.sin(ax + 0.35));
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  function drawPipeline() {
+    const cw = canvas.parentElement.getBoundingClientRect().width;
+    const narrow = cw < 520;
+
+    let W, H;
+    if (narrow) {
+      // Vertical layout
+      W = Math.min(cw, 320);
+      const boxW = W - 20, boxH = 48, gap = 36;
+      H = 10 + boxes.length * (boxH + gap) - gap + 10;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+
+      const x = 10;
+      let y = 10;
+      for (let i = 0; i < boxes.length; i++) {
+        drawBox(x, y, boxW, boxH, boxes[i].label, boxes[i].sub);
+        if (i < boxes.length - 1) {
+          drawArrow(x + boxW/2, y + boxH, x + boxW/2, y + boxH + gap);
+        }
+        y += boxH + gap;
+      }
+    } else {
+      // Wide layout: 2 rows
+      W = cw;
+      const boxH = 52;
+      const mergeGap = 40; // vertical space for merge arrows
+      const rowGap = 12;   // between arrow tip and lower boxes
+      const topY = 10;
+      const lowerY = topY + boxH + mergeGap + rowGap;
+      H = lowerY + boxH + 10;
+
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+
+      // Compute lower row box widths and positions
+      const lowerPad = 8;
+      const arrowSpace = 28;
+      const lowerCount = 3; // combine, impute, elo
+      const totalArrowSpace = (lowerCount - 1) * arrowSpace;
+      const lowerBoxW = Math.min(200, (W - lowerPad*2 - totalArrowSpace) / lowerCount);
+      const lowerTotalW = lowerCount * lowerBoxW + totalArrowSpace;
+      const lowerStartX = (W - lowerTotalW) / 2;
+
+      const lowerBoxes = [];
+      let lx = lowerStartX;
+      for (let i = 0; i < lowerCount; i++) {
+        lowerBoxes.push({ x: lx, y: lowerY, w: lowerBoxW, h: boxH });
+        lx += lowerBoxW + arrowSpace;
+      }
+
+      // Draw lower boxes
+      drawBox(lowerBoxes[0].x, lowerBoxes[0].y, lowerBoxes[0].w, lowerBoxes[0].h, boxes[2].label, boxes[2].sub);
+      drawBox(lowerBoxes[1].x, lowerBoxes[1].y, lowerBoxes[1].w, lowerBoxes[1].h, boxes[3].label, boxes[3].sub);
+      drawBox(lowerBoxes[2].x, lowerBoxes[2].y, lowerBoxes[2].w, lowerBoxes[2].h, boxes[4].label, boxes[4].sub);
+
+      // Horizontal arrows between lower boxes
+      for (let i = 0; i < lowerCount - 1; i++) {
+        const fromX = lowerBoxes[i].x + lowerBoxes[i].w;
+        const toX = lowerBoxes[i+1].x;
+        const ay = lowerY + boxH / 2;
+        drawArrow(fromX + 4, ay, toX - 4, ay);
+      }
+
+      // Upper row: position above the first and third lower boxes
+      const topBoxW = Math.min(200, (W - 40) / 2.5);
+      const combineCenter = lowerBoxes[0].x + lowerBoxes[0].w / 2;
+      // Center the two top boxes symmetrically above the lower row
+      const topSpan = lowerBoxes[2].x + lowerBoxes[2].w/2 - (lowerBoxes[0].x + lowerBoxes[0].w/2);
+      const topBox1X = combineCenter + topSpan * 0.15 - topBoxW / 2;
+      const topBox2X = combineCenter + topSpan * 0.85 - topBoxW / 2;
+
+      drawBox(topBox1X, topY, topBoxW, boxH, boxes[0].label, boxes[0].sub);
+      drawBox(topBox2X, topY, topBoxW, boxH, boxes[1].label, boxes[1].sub);
+
+      // Merge arrows: right-angle elbows, different rail heights so lines don't touch
+      const combineTopY = lowerY;
+      drawArrow(topBox1X + topBoxW/2, topY + boxH, combineCenter - 10, combineTopY, {curved:true, midFrac:0.45});
+      drawArrow(topBox2X + topBoxW/2, topY + boxH, combineCenter + 10, combineTopY, {curved:true, midFrac:0.55});
+    }
+  }
+
+  function onResize() { drawPipeline(); }
+  window.addEventListener('resize', onResize);
+
+  const pipeObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { drawPipeline(); pipeObs.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.fonts.ready.then(() => { pipeObs.observe(canvas); });
+})();
+</script>
+</body>
+</html>

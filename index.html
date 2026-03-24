@@ -299,6 +299,12 @@
       white-space: nowrap;
     }
 
+    .card-links {
+      display: flex;
+      gap: 1.25rem;
+      white-space: nowrap;
+    }
+
     .read-more::after {
       content: '';
       position: absolute;
@@ -717,7 +723,10 @@
               <span class="tag">Bayesian Regression</span>
               <span class="tag">pytest</span>
             </div>
-            <a href="https://github.com/AlexanderJulianKing/project-soothsayer" class="read-more" aria-label="View Soothsayer on GitHub">GitHub &rarr;</a>
+            <span class="card-links">
+              <a href="soothsayer_explainer.html" class="read-more" aria-label="Read the Soothsayer deep dive">How it works &rarr;</a>
+              <a href="https://github.com/AlexanderJulianKing/project-soothsayer" class="read-more" aria-label="View Soothsayer on GitHub">GitHub &rarr;</a>
+            </span>
           </div>
         </article>
 

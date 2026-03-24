@@ -103,6 +103,24 @@
     .hero-rule { border: none; height: 1px; background: var(--rule); margin-bottom: 1.5rem; }
     .abstract p { font-size: 1.15rem; line-height: 1.65; color: var(--text-muted); margin-left: 1rem; margin-right: 1rem; }
 
+    /* Problem explainer */
+    .problem-explainer {
+      border-top: 1px solid var(--border-light);
+      padding: 2rem 0 0.5rem;
+    }
+    .problem-explainer h2 {
+      font-size: 1.3rem; font-weight: 500; margin-bottom: 1.25rem;
+      color: var(--text);
+    }
+    .explainer-columns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+    .explainer-col h3 {
+      font-family: var(--font-sans); font-size: 0.75rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--accent); margin-bottom: 0.6rem;
+    }
+    .explainer-col p { font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0; }
+    @media (max-width: 600px) { .explainer-columns { grid-template-columns: 1fr; gap: 1rem; } }
+
     /* Cards */
     .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin-top: 1.5rem; }
     .card {
@@ -288,6 +306,24 @@
         <p>A multi-benchmark evaluation suite that predicts how well LLMs will perform in the Chatbot Arena&mdash;before anyone votes. Four custom benchmarks join 20+ public leaderboards, feed through a per-cell imputation engine, and emerge as ELO predictions within 1.3% of actual scores.</p>
       </div>
     </header>
+
+    <div class="problem-explainer fade-in">
+      <h2>Why does this exist?</h2>
+      <div class="explainer-columns">
+        <div class="explainer-col">
+          <h3>The Problem</h3>
+          <p>Arena.ai captures something no benchmark can&mdash;real human preference, derived from millions of blind head-to-head votes. But what it measures is difficult to pin down. It isn&rsquo;t model intelligence in any strict sense, and it isn&rsquo;t objective quality. It reflects what people <em>prefer</em>, which is a fundamentally different signal. Traditional benchmarks don&rsquo;t measure it, and it&rsquo;s not clear they can.</p>
+        </div>
+        <div class="explainer-col">
+          <h3>Why It&rsquo;s Hard</h3>
+          <p>Benchmarks evaluate well-defined capabilities: coding, mathematics, logical reasoning. Human preference is nearly a black box. Intelligence is multidimensional and context-dependent&mdash;the gap between &ldquo;this model performs well&rdquo; and &ldquo;people prefer this model&rdquo; is real and nontrivial. Compounding this, the benchmark matrix is roughly 40% sparse&mdash;not every model is evaluated on every test.</p>
+        </div>
+        <div class="explainer-col">
+          <h3>What Soothsayer Does</h3>
+          <p>Predicts Arena.ai ELO from benchmark data alone&mdash;within 1.3% of actual scores (R&sup2;&nbsp;=&nbsp;0.93). A custom per-cell imputation engine fills the sparse benchmark matrix, then robust regression maps diverse concrete measurements onto the black box of human preference. The full system&mdash;35,000 lines of Python, 4 custom benchmarks, 13+ public sources&mdash;was built solo.</p>
+        </div>
+      </div>
+    </div>
 
     <main>
 

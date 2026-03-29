@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Alexander King — Data Science & Computational Biology</title>
   <meta name="description" content="Neuroscience PhD building systems that extract signal from messy, high-dimensional data. Single-cell genomics, LLM evaluation, and end-to-end data pipelines.">
+  <meta property="og:title" content="Alexander King — Data Science & Computational Biology">
+  <meta property="og:description" content="Neuroscience PhD building systems that extract signal from messy, high-dimensional data. Single-cell genomics, LLM evaluation, and end-to-end data pipelines.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Alexander King — Data Science & Computational Biology">
+  <meta name="twitter:description" content="Neuroscience PhD building systems that extract signal from messy, high-dimensional data.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>A</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
@@ -17,7 +25,7 @@
       --bg-alt: #f3f2ef;
       --text: #1a1a1a;
       --text-muted: #555;
-      --text-light: #777;
+      --text-light: #6a6a6a;
       --accent: #7a2e2e;
       --accent-hover: #5c1e1e;
       --border: #d4d0c8;
@@ -26,7 +34,7 @@
       --card-border: #e8e5de;
       --card-hover-shadow: 0 2px 8px rgba(0,0,0,0.06);
       --rule: #c4c0b8;
-      --sidenote-text: #767676;
+      --sidenote-text: #6e6e6e;
       --tag-bg: #eee;
       --tag-text: #555;
       --font-serif: 'EB Garamond', 'Georgia', serif;
@@ -40,7 +48,7 @@
         --bg-alt: #1c1c1c;
         --text: #d8d4cf;
         --text-muted: #a09a90;
-        --text-light: #7a756d;
+        --text-light: #8a8580;
         --accent: #c46b6b;
         --accent-hover: #d98e8e;
         --border: #2e2e2e;
@@ -246,6 +254,7 @@
       padding: 1.5rem;
       margin-bottom: 1.25rem;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
     }
 
     .project-card:hover {
@@ -305,15 +314,22 @@
       white-space: nowrap;
     }
 
-    .read-more::after {
+    .card-link-primary {
+      position: static;
+    }
+
+    .card-link-primary::after {
       content: '';
       position: absolute;
-      bottom: -1px;
-      left: 0;
-      width: 0;
-      height: 1px;
-      background: var(--accent-hover);
-      transition: width 0.25s ease;
+      inset: 0;
+      width: auto;
+      height: auto;
+      background: none;
+    }
+
+    .card-links a:not(.card-link-primary) {
+      position: relative;
+      z-index: 1;
     }
 
     /* ===== Skills Table ===== */
@@ -447,22 +463,6 @@
       font-family: var(--font-serif);
     }
 
-    /* ===== Network decoration (hero background) ===== */
-    .hero-decoration {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 400px;
-      height: 400px;
-      opacity: 0.06;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .hero-decoration { opacity: 0.04; }
-    }
-
     .hero { position: relative; z-index: 1; }
 
     /* ===== Scroll Animations ===== */
@@ -521,6 +521,26 @@
       }
     }
 
+    /* ===== Skip Link ===== */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      padding: 0.5rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      z-index: 200;
+      border-radius: 0 0 4px 4px;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    .skip-link::after { display: none; }
+
     /* ===== Navigation ===== */
     .site-nav {
       position: sticky;
@@ -568,7 +588,8 @@
 
     .nav-link::after { display: none; }
 
-    .nav-link:hover {
+    .nav-link:hover,
+    .nav-link.active {
       color: var(--accent);
     }
 
@@ -606,8 +627,7 @@
 
     /* ===== Print ===== */
     @media print {
-      .site-nav,
-      .hero-decoration { display: none; }
+      .site-nav { display: none; }
 
       body {
         font-size: 11pt;
@@ -643,6 +663,8 @@
 </head>
 <body>
 
+  <a href="#main" class="skip-link">Skip to content</a>
+
   <!-- Navigation -->
   <nav class="site-nav" aria-label="Primary navigation">
     <div class="nav-inner">
@@ -668,7 +690,7 @@
       </div>
     </header>
 
-    <main>
+    <main id="main">
 
       <!-- Section 1: About -->
       <section id="about" aria-labelledby="about-heading">
@@ -707,7 +729,7 @@
               <span class="tag">Seurat</span>
               <span class="tag">Confocal</span>
             </div>
-            <a href="https://www.jneurosci.org/content/early/2026/03/20/JNEUROSCI.0019-26.2026" class="read-more" aria-label="Read the paper in the Journal of Neuroscience">Paper &rarr;</a>
+            <a href="https://www.jneurosci.org/content/early/2026/03/20/JNEUROSCI.0019-26.2026" class="read-more card-link-primary" aria-label="Read the paper in the Journal of Neuroscience">Paper &rarr;</a>
           </div>
         </article>
 
@@ -724,7 +746,7 @@
               <span class="tag">pytest</span>
             </div>
             <span class="card-links">
-              <a href="soothsayer_explainer.html" class="read-more" aria-label="Read the Soothsayer deep dive">How it works &rarr;</a>
+              <a href="soothsayer_explainer.html" class="read-more card-link-primary" aria-label="Read the Soothsayer deep dive">How it works &rarr;</a>
               <a href="https://github.com/AlexanderJulianKing/project-soothsayer" class="read-more" aria-label="View Soothsayer on GitHub">GitHub &rarr;</a>
             </span>
           </div>
@@ -741,7 +763,7 @@
               <span class="tag">Google Cloud TTS</span>
               <span class="tag">YouTube API</span>
             </div>
-            <a href="https://www.youtube.com/@NewsFromAlex" class="read-more" aria-label="View Newscaster on YouTube">YouTube &rarr;</a>
+            <a href="https://www.youtube.com/@NewsFromAlex" class="read-more card-link-primary" aria-label="View Newscaster on YouTube">YouTube &rarr;</a>
           </div>
         </article>
 
@@ -756,7 +778,7 @@
               <span class="tag">GWAS</span>
               <span class="tag">Network Biology</span>
             </div>
-            <a href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2834-1" class="read-more" aria-label="Read the BMC Bioinformatics paper">Paper &rarr;</a>
+            <a href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2834-1" class="read-more card-link-primary" aria-label="Read the BMC Bioinformatics paper">Paper &rarr;</a>
           </div>
         </article>
       </section>
@@ -831,7 +853,7 @@ Bern, M.*, <strong>King, A.</strong>* (co-first), Applewhite, D.A., &amp; Ritz, 
         <h2 class="section-heading fade-in" id="contact-heading">
           <span class="section-number">5.</span> Contact
         </h2>
-        <p class="contact-preamble fade-in stagger-1">For inquiries regarding research collaboration or industry positions:</p>
+        <p class="contact-preamble fade-in stagger-1">I'm actively looking for roles starting summer 2026. Happy to chat about research, collaboration, or opportunities:</p>
         <p class="contact-email fade-in stagger-2"><a href="mailto:alexander.julian.king@gmail.com">alexander.julian.king@gmail.com</a></p>
         <ul class="contact-secondary fade-in stagger-3">
           <li><a href="https://github.com/AlexanderJulianKing" target="_blank" rel="noopener noreferrer">GitHub</a></li>
@@ -869,6 +891,32 @@ Bern, M.*, <strong>King, A.</strong>* (co-first), Applewhite, D.A., &amp; Ritz, 
       document.querySelectorAll('.fade-in').forEach(function(el) {
         observer.observe(el);
       });
+    })();
+
+    // Scroll-spy for active nav state
+    (function() {
+      var sections = document.querySelectorAll('section[id]');
+      var navLinks = document.querySelectorAll('.nav-link');
+      var navMap = {};
+      navLinks.forEach(function(link) {
+        var id = link.getAttribute('href').replace('#', '');
+        navMap[id] = link;
+      });
+
+      var spy = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            navLinks.forEach(function(l) { l.classList.remove('active'); });
+            var link = navMap[entry.target.id];
+            if (link) link.classList.add('active');
+          }
+        });
+      }, {
+        threshold: 0,
+        rootMargin: '-20% 0px -60% 0px'
+      });
+
+      sections.forEach(function(s) { spy.observe(s); });
     })();
   </script>
 

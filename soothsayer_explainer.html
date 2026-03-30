@@ -90,9 +90,21 @@
       font-size: 1.55rem;
       margin-bottom: 1.25rem;
       padding-bottom: 0.3rem;
-      border-bottom: 1px solid var(--border-light);
+      position: relative;
     }
-    .section-number { color: var(--accent); font-variant-numeric: oldstyle-nums; margin-right: 0.4em; font-weight: 400; }
+    .section-heading::after {
+      content: ''; display: block; position: absolute;
+      bottom: 0; left: 0; height: 1px; background: var(--border-light);
+      width: 0;
+      transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.12s;
+    }
+    .section-heading.visible::after { width: 100%; }
+    .section-number {
+      color: var(--accent); font-variant-numeric: oldstyle-nums;
+      margin-right: 0.4em; font-weight: 400;
+      opacity: 0.38; transition: opacity 0.55s ease 0.55s;
+    }
+    .section-heading.visible .section-number { opacity: 1; }
 
     p { margin-bottom: 1rem; }
     .subtitle { color: var(--text-muted); font-size: 1rem; font-style: italic; margin-bottom: 2rem; }
@@ -132,8 +144,17 @@
     .card {
       border: 1px solid var(--card-border); background: var(--card-bg); padding: 1.5rem;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative; overflow: hidden;
     }
+    .card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+      background: var(--accent); transform: scaleY(0);
+      transform-origin: top center; transition: transform 0.22s ease;
+    }
+    .card:hover::before { transform: scaleY(1); }
     .card:hover { transform: translateY(-2px); box-shadow: var(--card-hover-shadow); }
+    .card.fade-in { transform: translateX(-14px); }
+    .card.fade-in.visible { transform: translateX(0); }
     .card h3 { font-size: 1.05rem; margin-bottom: 0.4rem; color: var(--accent); }
     .card .method-tag {
       display: inline-block; font-family: var(--font-mono); font-size: 0.7rem;
@@ -220,10 +241,26 @@
     .imp-btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: #fff; }
 
     /* ML steps */
-    .ml-steps { display: flex; flex-direction: column; gap: 0.8rem; margin: 1.5rem 0; }
-    .ml-step { display: flex; align-items: flex-start; gap: 1rem; border: 1px solid var(--card-border); background: var(--card-bg); padding: 1.2rem; }
-    .step-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
-    .step-content h4 { font-family: var(--font-serif); font-weight: 500; font-size: 1rem; margin-bottom: 0.2rem; }
+    .ml-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+    @media (max-width: 640px) { .ml-steps { grid-template-columns: 1fr; } }
+    .ml-step {
+      display: flex; align-items: flex-start; gap: 1.1rem;
+      border: 1px solid var(--card-border); background: var(--card-bg); padding: 1.4rem;
+      position: relative; overflow: hidden;
+      transition: box-shadow 0.2s ease;
+    }
+    .ml-step::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+      background: var(--accent); transform: scaleY(0); transform-origin: top;
+      transition: transform 0.22s ease;
+    }
+    .ml-step:hover::before { transform: scaleY(1); }
+    .ml-step:hover { box-shadow: var(--card-hover-shadow); }
+    .step-icon {
+      font-family: var(--font-serif); font-size: 2rem; color: var(--accent);
+      flex-shrink: 0; opacity: 0.5; line-height: 1; padding-top: 0.05em;
+    }
+    .step-content h4 { font-family: var(--font-serif); font-weight: 500; font-size: 1rem; margin-bottom: 0.25rem; }
     .step-content p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0; }
     .code-tag {
       font-family: var(--font-mono); font-size: 0.7rem;
@@ -292,6 +329,97 @@
       .fade-in { opacity: 1; transform: none; transition: none; }
       .hero-anim { opacity: 1; transform: none; animation: none; }
       .card { transition: none; }
+      .card.fade-in { transform: none; }
+      .section-heading::after { transition: none; width: 100% !important; }
+      .section-number { opacity: 1 !important; transition: none; }
+      .reading-progress { animation: none; }
+      .elo.flash-gain, .elo.flash-loss { animation: none; }
+    }
+
+    /* TrueSkill leaderboard */
+    .ts-lb-wrap {
+      border-top: 1px solid var(--border-light);
+      padding-top: 1rem; margin-top: 1.2rem;
+    }
+    .ts-lb-header {
+      font-family: var(--font-sans); font-size: 0.7rem;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text-muted); margin-bottom: 0.5rem;
+    }
+    .ts-lb-wrap canvas { display: block; width: 100%; }
+    @media (max-width: 600px) {
+      .trueskill-box { padding: 1rem 1.2rem; }
+    }
+
+    /* Reading progress bar */
+    .reading-progress {
+      position: fixed; top: 0; left: 0; height: 2px; width: 100%;
+      background: var(--accent); transform: scaleX(0);
+      transform-origin: left center; opacity: 0.85;
+      pointer-events: none; z-index: 100;
+    }
+    @supports (animation-timeline: scroll()) {
+      .reading-progress {
+        animation: reading-progress-grow linear both;
+        animation-timeline: scroll(root block);
+      }
+      @keyframes reading-progress-grow {
+        from { transform: scaleX(0); }
+        to   { transform: scaleX(1); }
+      }
+    }
+
+    /* Sigma certainty bar */
+    .sigma-bar-wrap {
+      width: 80%; margin: 0.45rem auto 0; height: 3px;
+      background: var(--border-light); overflow: hidden;
+    }
+    .sigma-bar-fill {
+      height: 100%; background: var(--accent); opacity: 0.5;
+      transition: width 0.5s ease;
+    }
+
+    /* ELO sparkline */
+    .sparkline-canvas {
+      display: block; width: 80px; height: 28px; margin: 0.45rem auto 0;
+      opacity: 0.75;
+    }
+
+    /* ELO gain / loss flash */
+    .elo.flash-gain { animation: eloFlashGain 0.65s ease-out; }
+    .elo.flash-loss  { animation: eloFlashLoss  0.65s ease-out; }
+    @keyframes eloFlashGain {
+      0%   { color: var(--accent); }
+      30%  { color: #27ae60; }
+      100% { color: var(--accent); }
+    }
+    @keyframes eloFlashLoss {
+      0%   { color: var(--accent); }
+      30%  { color: #e67e22; }
+      100% { color: var(--accent); }
+    }
+
+    /* Comparison table row reveal */
+    .comparison-table tbody tr {
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: opacity 0.48s ease-out, transform 0.48s ease-out;
+    }
+    .comparison-table tbody tr.row-visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .comparison-table tbody tr.highlight.row-visible {
+      animation: rowLand 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+    }
+    @keyframes rowLand {
+      from { transform: translateX(-10px); opacity: 0; }
+      60%  { transform: translateX(3px); }
+      to   { transform: translateX(0); opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .comparison-table tbody tr { opacity: 1; transform: none; transition: none; }
+      .comparison-table tbody tr.highlight.row-visible { animation: none; }
     }
 
     @media print {
@@ -301,6 +429,7 @@
   </style>
 </head>
 <body>
+  <div class="reading-progress" aria-hidden="true"></div>
   <div class="page-wrapper">
     <a href="index.html" class="back-link">&larr; Back to portfolio</a>
 
@@ -393,11 +522,23 @@
           <h3>TrueSkill Arena in Action</h3>
           <p class="ts-desc">Models battle pairwise. Each match updates ELO and uncertainty (&sigma;). High-uncertainty models get priority matchups.</p>
           <div class="battle-arena">
-            <div class="fighter" id="fighterA"><div class="model-name" id="nameA">GPT-4o</div><div class="elo" id="eloA">1500</div><div class="sigma" id="sigmaA">&sigma; = 8.33</div></div>
+            <div class="fighter" id="fighterA">
+              <div class="model-name" id="nameA">—</div>
+              <div class="elo" id="eloA">—</div>
+              <div class="sigma" id="sigmaA">&sigma; = —</div>
+            </div>
             <span class="vs">vs</span>
-            <div class="fighter" id="fighterB"><div class="model-name" id="nameB">Claude 4</div><div class="elo" id="eloB">1500</div><div class="sigma" id="sigmaB">&sigma; = 8.33</div></div>
+            <div class="fighter" id="fighterB">
+              <div class="model-name" id="nameB">—</div>
+              <div class="elo" id="eloB">—</div>
+              <div class="sigma" id="sigmaB">&sigma; = —</div>
+            </div>
           </div>
-          <div class="battle-log" id="battleLog">Waiting for first match&hellip;</div>
+          <div class="battle-log" id="battleLog">Loading tournament&hellip;</div>
+          <div class="ts-lb-wrap">
+            <p class="ts-lb-header">Tournament standings</p>
+            <canvas id="tsLeaderboard" aria-hidden="true"></canvas>
+          </div>
         </div>
       </section>
 
@@ -503,45 +644,221 @@
   }, { threshold: 0.3 });
   document.querySelectorAll('.stats-row').forEach(s => statsObs.observe(s));
 
+  // Comparison table row stagger reveal
+  const tableEl = document.querySelector('.comparison-table');
+  if (tableEl) {
+    const rows = [...tableEl.querySelectorAll('tbody tr')];
+    const tableRevealObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          rows.forEach((row, i) => {
+            const delay = i * 140 + 80;
+            setTimeout(() => row.classList.add('row-visible'), delay);
+          });
+          tableRevealObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    tableRevealObs.observe(tableEl);
+  }
+
   // (pipeline merge lines removed — now canvas-based)
 
-  // TrueSkill battles
+  // TrueSkill battles — leaderboard redesign
+  // All models start equal; 30 silent battles pre-spread them before first render
   const mdls = [
-    {n:'Claude Opus 4.6',mu:1500,s:5.1},{n:'GPT-5.2',mu:1420,s:6.2},{n:'Gemini 3.1 Pro',mu:1488,s:5.5},
-    {n:'Grok 4',mu:1410,s:6.9},{n:'Claude Son. 4.6',mu:1444,s:5.8},{n:'DeepSeek V3.2',mu:1424,s:6.0},
-    {n:'Qwen3.5 397B',mu:1448,s:6.5},{n:'GLM-5',mu:1443,s:7.0},{n:'Kimi K2.5',mu:1449,s:6.8},{n:'Mistral Large 3',mu:1432,s:7.2},
+    {n:'Claude Opus 4.6', mu:1500, s:8.33}, {n:'GPT-5.2',         mu:1500, s:8.33},
+    {n:'Gemini 3.1 Pro',  mu:1500, s:8.33}, {n:'Grok 4',          mu:1500, s:8.33},
+    {n:'Claude Son. 4.6', mu:1500, s:8.33}, {n:'DeepSeek V3.2',   mu:1500, s:8.33},
+    {n:'Qwen3.5 397B',    mu:1500, s:8.33}, {n:'GLM-5',           mu:1500, s:8.33},
+    {n:'Kimi K2.5',       mu:1500, s:8.33}, {n:'Mistral Large 3', mu:1500, s:8.33},
   ];
-  let bCount = 0, bInterval;
-  function runBattle() {
-    const i = Math.floor(Math.random()*mdls.length); let j; do { j = Math.floor(Math.random()*mdls.length); } while(j===i);
-    const a=mdls[i],b=mdls[j];
-    document.getElementById('nameA').textContent=a.n; document.getElementById('eloA').textContent=Math.round(a.mu);
-    document.getElementById('sigmaA').textContent='\u03C3 = '+a.s.toFixed(2);
-    document.getElementById('nameB').textContent=b.n; document.getElementById('eloB').textContent=Math.round(b.mu);
-    document.getElementById('sigmaB').textContent='\u03C3 = '+b.s.toFixed(2);
-    const fA=document.getElementById('fighterA'),fB=document.getElementById('fighterB');
-    fA.classList.remove('winner','loser');fB.classList.remove('winner','loser');
-    document.getElementById('battleLog').textContent='Judging\u2026';
-    setTimeout(()=>{
-      const p=1/(1+Math.exp(-(a.mu-b.mu)/(400/Math.log(10)))),aW=Math.random()<p;
-      const w=aW?a:b,l=aW?b:a,k=16,exp=1/(1+Math.exp(-(w.mu-l.mu)/(400/Math.log(10))));
-      w.mu+=k*(1-exp);l.mu-=k*exp;w.s=Math.max(w.s*0.97,2);l.s=Math.max(l.s*0.97,2);
-      fA.classList.add(aW?'winner':'loser');fB.classList.add(aW?'loser':'winner');
-      document.getElementById('eloA').textContent=Math.round(a.mu);
-      document.getElementById('sigmaA').textContent='\u03C3 = '+a.s.toFixed(2);
-      document.getElementById('eloB').textContent=Math.round(b.mu);
-      document.getElementById('sigmaB').textContent='\u03C3 = '+b.s.toFixed(2);
-      bCount++;
-      document.getElementById('battleLog').textContent='Battle #'+bCount+': '+w.n+' wins! ELO '+(aW?'\u2191':'\u2193')+Math.abs(k*(1-exp)).toFixed(1);
-    },700);
+
+  // Leaderboard canvas
+  const lbCanvas = document.getElementById('tsLeaderboard');
+  const lbCtx = lbCanvas && lbCanvas.getContext('2d');
+  const LB_DPR = window.devicePixelRatio || 1;
+
+  function drawLeaderboard(hlA, hlB) {
+    if (!lbCanvas || !lbCtx) return;
+    const cw = lbCanvas.parentElement.getBoundingClientRect().width;
+    if (cw < 20) return;
+
+    const ROW_H = 22, LBW = cw, LBH = mdls.length * ROW_H + 2;
+    lbCanvas.width  = LBW * LB_DPR;
+    lbCanvas.height = LBH * LB_DPR;
+    lbCanvas.style.height = LBH + 'px';
+    lbCtx.setTransform(LB_DPR, 0, 0, LB_DPR, 0, 0);
+    lbCtx.clearRect(0, 0, LBW, LBH);
+
+    const sorted = [...mdls].sort((a, b) => b.mu - a.mu);
+    const elos = sorted.map(m => m.mu);
+    const minElo = Math.min(Math.min(...elos), 1350);
+    const maxElo = Math.max(Math.max(...elos), 1550);
+    const range = maxElo - minElo || 1;
+
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const textColor   = isDark ? '#a09a90' : '#555555';
+    const accentColor = isDark ? '#c46b6b' : '#7a2e2e';
+    const barNormal   = isDark ? 'rgba(196,107,107,0.22)' : 'rgba(122,46,46,0.18)';
+    const barHL       = isDark ? 'rgba(196,107,107,0.55)' : 'rgba(122,46,46,0.50)';
+    const hlBg        = isDark ? 'rgba(196,107,107,0.07)' : 'rgba(122,46,46,0.045)';
+
+    // Fully responsive: compute columns from available width
+    const RANK_W = 18, GAP = 4, ELO_W = 40;
+    const nameMax = Math.min(130, LBW * 0.44); // up to 44% width, max 130px
+    const barX    = RANK_W + GAP + nameMax + GAP;
+    const barAvail = LBW - barX - ELO_W - 4;
+    const showBars = barAvail >= 24;
+
+    lbCtx.textBaseline = 'middle';
+
+    sorted.forEach((m, i) => {
+      const y = i * ROW_H, midY = y + ROW_H / 2;
+      const isHL = m.n === hlA || m.n === hlB;
+
+      if (isHL) {
+        lbCtx.fillStyle = hlBg;
+        lbCtx.fillRect(0, y, LBW, ROW_H);
+      }
+
+      const baseFont = isHL ? '500 8.5px Inter, sans-serif' : '400 8.5px Inter, sans-serif';
+      lbCtx.font = baseFont;
+      lbCtx.fillStyle = isHL ? accentColor : textColor;
+
+      // Rank
+      lbCtx.textAlign = 'right';
+      lbCtx.fillText(i + 1, RANK_W, midY);
+
+      // Model name — measure-and-trim to fit nameMax
+      lbCtx.textAlign = 'left';
+      let label = m.n;
+      while (label.length > 2 && lbCtx.measureText(label).width > nameMax - 2) {
+        label = label.slice(0, -2) + '\u2026';
+      }
+      lbCtx.fillText(label, RANK_W + GAP, midY);
+
+      // Bar (only if there's room)
+      if (showBars) {
+        const bw = Math.max(((m.mu - minElo) / range) * barAvail, 2);
+        lbCtx.fillStyle = isHL ? barHL : barNormal;
+        lbCtx.fillRect(barX, y + ROW_H * 0.3, bw, ROW_H * 0.4);
+      }
+
+      // ELO — right-aligned
+      lbCtx.font = '400 8.5px JetBrains Mono, monospace';
+      lbCtx.fillStyle = isHL ? accentColor : textColor;
+      lbCtx.textAlign = 'right';
+      lbCtx.fillText(Math.round(m.mu), LBW - 2, midY);
+    });
   }
+
+  function animElo(elId, from, to) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || from === to) {
+      el.textContent = Math.round(to); return;
+    }
+    const gain = to > from;
+    el.classList.remove('flash-gain', 'flash-loss');
+    void el.offsetWidth;
+    el.classList.add(gain ? 'flash-gain' : 'flash-loss');
+    const dur = 380, t0 = performance.now();
+    (function tick(now) {
+      const t = Math.min((now - t0) / dur, 1);
+      el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - t, 2)));
+      if (t < 1) requestAnimationFrame(tick);
+      else el.textContent = Math.round(to);
+    })(t0);
+  }
+
+  // Simulate n battles instantly (no rendering) to pre-spread the distribution
+  function runSilentBattles(n) {
+    const K = 16;
+    for (let k = 0; k < n; k++) {
+      let i = Math.floor(Math.random() * mdls.length);
+      let j; do { j = Math.floor(Math.random() * mdls.length); } while (j === i);
+      const a = mdls[i], b = mdls[j];
+      const p = 1 / (1 + Math.exp(-(a.mu - b.mu) / (400 / Math.log(10))));
+      const aW = Math.random() < p;
+      const w = aW ? a : b, l = aW ? b : a;
+      const ex = 1 / (1 + Math.exp(-(w.mu - l.mu) / (400 / Math.log(10))));
+      w.mu += K * (1 - ex); l.mu -= K * ex;
+      w.s = Math.max(w.s * 0.97, 2); l.s = Math.max(l.s * 0.97, 2);
+    }
+  }
+
+  let bCount = 0, bInterval, battleInitialized = false;
+
+  function runBattle() {
+    const i = Math.floor(Math.random() * mdls.length);
+    let j; do { j = Math.floor(Math.random() * mdls.length); } while (j === i);
+    const a = mdls[i], b = mdls[j];
+
+    document.getElementById('nameA').textContent = a.n;
+    document.getElementById('nameB').textContent = b.n;
+    document.getElementById('eloA').textContent = Math.round(a.mu);
+    document.getElementById('eloB').textContent = Math.round(b.mu);
+    document.getElementById('sigmaA').textContent = '\u03C3 = ' + a.s.toFixed(2);
+    document.getElementById('sigmaB').textContent = '\u03C3 = ' + b.s.toFixed(2);
+    drawLeaderboard(a.n, b.n); // highlight current fighters in leaderboard
+
+    const fA = document.getElementById('fighterA'), fB = document.getElementById('fighterB');
+    fA.classList.remove('winner', 'loser'); fB.classList.remove('winner', 'loser');
+    document.getElementById('battleLog').textContent = 'Judging\u2026';
+
+    setTimeout(() => {
+      const p = 1 / (1 + Math.exp(-(a.mu - b.mu) / (400 / Math.log(10))));
+      const aW = Math.random() < p;
+      const w = aW ? a : b, l = aW ? b : a;
+      const K = 16, ex = 1 / (1 + Math.exp(-(w.mu - l.mu) / (400 / Math.log(10))));
+      const prevA = Math.round(a.mu), prevB = Math.round(b.mu);
+      w.mu += K * (1 - ex); l.mu -= K * ex;
+      w.s = Math.max(w.s * 0.97, 2); l.s = Math.max(l.s * 0.97, 2);
+      fA.classList.add(aW ? 'winner' : 'loser'); fB.classList.add(aW ? 'loser' : 'winner');
+      animElo('eloA', prevA, Math.round(a.mu));
+      animElo('eloB', prevB, Math.round(b.mu));
+      document.getElementById('sigmaA').textContent = '\u03C3 = ' + a.s.toFixed(2);
+      document.getElementById('sigmaB').textContent = '\u03C3 = ' + b.s.toFixed(2);
+      drawLeaderboard(a.n, b.n); // update rankings after result
+      bCount++;
+      document.getElementById('battleLog').textContent =
+        'Battle #' + bCount + ': ' + w.n + ' wins! ELO ' +
+        (aW ? '\u2191' : '\u2193') + Math.abs(K * (1 - ex)).toFixed(1);
+    }, 600);
+  }
+
   const bObs = new IntersectionObserver(entries => {
     entries.forEach(e => {
-      if (e.isIntersecting && !bInterval) { runBattle(); bInterval=setInterval(runBattle,2500); }
-      else if (!e.isIntersecting && bInterval) { clearInterval(bInterval); bInterval=null; }
+      if (e.isIntersecting && !bInterval) {
+        if (!battleInitialized) {
+          runSilentBattles(30); // spread distribution before first paint
+          battleInitialized = true;
+          bCount = 0;
+        }
+        drawLeaderboard('', '');
+        runBattle();
+        bInterval = setInterval(runBattle, 1400);
+      } else if (!e.isIntersecting && bInterval) {
+        clearInterval(bInterval); bInterval = null;
+      }
     });
   }, { threshold: 0.3 });
   document.querySelectorAll('.trueskill-box').forEach(s => bObs.observe(s));
+})();
+
+// ═══════════════════════════════════════════════
+// READING PROGRESS BAR fallback (Firefox / no scroll-timeline)
+// ═══════════════════════════════════════════════
+(function() {
+  if (CSS.supports('animation-timeline', 'scroll()')) return;
+  const bar = document.querySelector('.reading-progress');
+  if (!bar) return;
+  window.addEventListener('scroll', function() {
+    const s = document.documentElement;
+    const pct = s.scrollTop / (s.scrollHeight - s.clientHeight);
+    bar.style.transform = 'scaleX(' + Math.min(Math.max(pct, 0), 1) + ')';
+  }, { passive: true });
 })();
 
 // ═══════════════════════════════════════════════
@@ -602,7 +919,7 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   resize();
-  window.addEventListener('resize', resize);
+  window.addEventListener('resize', () => { resize(); draw(); });
 
   // Seeded PRNG
   function createRNG(seed) { let s = seed; return function() { s = (s * 16807) % 2147483647; return s / 2147483647; }; }
@@ -672,8 +989,8 @@
     predictorArcs[4] = [ // ARC-AGI 2: grabs from EQ, Logic, Terminal
       {fromCol:2, strength:0.85}, {fromCol:0, strength:0.70}, {fromCol:8, strength:0.60},
     ];
-    predictorArcs[5] = [ // GPQA: grabs from Logic, AIME, Simple
-      {fromCol:2, strength:0.90}, {fromCol:7, strength:0.75}, {fromCol:9, strength:0.65},
+    predictorArcs[7] = [ // AIME: grabs from Logic, GPQA, ARC-AGI 2
+      {fromCol:2, strength:0.90}, {fromCol:5, strength:0.75}, {fromCol:4, strength:0.65},
     ];
     predictorArcs[9] = [ // Simple: grabs from Writing, Logic, ARC-AGI 2
       {fromCol:2, strength:0.88}, {fromCol:1, strength:0.72}, {fromCol:4, strength:0.60},
@@ -990,7 +1307,7 @@
   // Phase 1: rank predictors arcs
   function animP1() {
     animating = true;
-    const targets = [4, 5, 9]; // ARC-AGI 2, GPQA, Simple
+    const targets = [4, 7, 9]; // ARC-AGI 2, AIME, Simple
     const drawIn=700, hold=1200, fadeOut=500, total=drawIn+hold+fadeOut;
     let start = null;
 
@@ -1208,6 +1525,22 @@
 
   // Init
   document.fonts.ready.then(() => { resetToPhase(0); setPhaseUI(0); draw(); });
+
+  // Auto-play when first scrolled into view (skip if user prefers reduced motion)
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const mbiAutoObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          setTimeout(() => {
+            if (!autoPlaying) document.getElementById('btnAutoPlay').click();
+          }, 1400);
+          mbiAutoObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    const wrap = document.querySelector('.imputer-wrap');
+    if (wrap) mbiAutoObs.observe(wrap);
+  }
 })();
 
 // ═══════════════════════════════════════════════
@@ -1266,6 +1599,47 @@
   resize();
   window.addEventListener('resize', () => { resize(); drawScatter(); });
 
+  // ── Entrance animation state ──────────────────────────────
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Diagonal line draws first (LINE_DUR ms), then points spring outward
+  const LINE_DUR = 650, POINT_START = 520, POINT_SPAN = 750, POINT_DUR = 550;
+  const TOTAL_DUR = POINT_START + POINT_SPAN + POINT_DUR;
+  // Stagger points left→right (by actual ELO) so the fill reads like scrolling data
+  const _sortedOrder = DATA.map((d, i) => ({ i, v: d[1] }))
+    .sort((a, b) => a.v - b.v).map(d => d.i);
+  const DELAYS = new Array(DATA.length);
+  _sortedOrder.forEach((idx, rank) => {
+    DELAYS[idx] = POINT_START + (rank / DATA.length) * POINT_SPAN;
+  });
+  let lineProgress = reducedMotion ? 1 : 0;
+  let ptProg = reducedMotion ? new Array(DATA.length).fill(1) : new Array(DATA.length).fill(0);
+  let entranceDone = reducedMotion;
+  let _t0 = null, _rafId = null;
+
+  function startEntrance() {
+    if (entranceDone) { drawScatter(); return; }
+    if (_rafId) cancelAnimationFrame(_rafId);
+    _t0 = null;
+    _rafId = requestAnimationFrame(_tick);
+  }
+  function _tick(now) {
+    if (!_t0) _t0 = now;
+    const el = now - _t0;
+    lineProgress = Math.min(el / LINE_DUR, 1);
+    for (let i = 0; i < DATA.length; i++) {
+      ptProg[i] = Math.min(Math.max(0, (el - DELAYS[i]) / POINT_DUR), 1);
+    }
+    drawScatter();
+    if (el < TOTAL_DUR) {
+      _rafId = requestAnimationFrame(_tick);
+    } else {
+      entranceDone = true; lineProgress = 1; ptProg.fill(1); _rafId = null;
+      drawScatter();
+    }
+  }
+  function _ease(t) { return 1 - Math.pow(1 - t, 3); } // cubic ease-out
+  // ──────────────────────────────────────────────────────────
+
   let hoverIdx = -1;
 
   function drawScatter() {
@@ -1281,14 +1655,17 @@
       ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, PAD_T + plotH); ctx.stroke();
     }
 
-    // Perfect prediction line
-    ctx.strokeStyle = pal.line;
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([6, 4]);
-    ctx.beginPath();
-    ctx.moveTo(toX(minV), toY(minV));
-    ctx.lineTo(toX(maxV), toY(maxV));
-    ctx.stroke();
+    // Perfect prediction line — animates from bottom-left to top-right
+    if (lineProgress > 0) {
+      const x0 = toX(minV), y0 = toY(minV), x1 = toX(maxV), y1 = toY(maxV);
+      ctx.strokeStyle = pal.line;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.lineTo(x0 + (x1 - x0) * lineProgress, y0 + (y1 - y0) * lineProgress);
+      ctx.stroke();
+    }
     ctx.setLineDash([]);
 
     // Axis labels
@@ -1314,41 +1691,81 @@
     ctx.fillText('Predicted ELO', 0, 0);
     ctx.restore();
 
-    // Dots
+    // Dots — spring from diagonal (where predicted=actual) to final scatter position
     for (let i = 0; i < DATA.length; i++) {
+      const t = ptProg[i];
+      if (t === 0) continue;
+      const ease = _ease(t);
       const d = DATA[i];
-      const x = toX(d[1]), y = toY(d[2]);
+      const x = toX(d[1]);
+      const startY = toY(d[1]); // on diagonal: predicted = actual
+      const endY = toY(d[2]);   // true scatter position
+      const cy = startY + (endY - startY) * ease;
+      const alpha = Math.min(t * 3, 1); // fade in quickly
       const isHover = (i === hoverIdx);
+      // Pulse ring on hovered point
+      if (isHover) {
+        ctx.save();
+        ctx.globalAlpha = alpha * 0.28;
+        ctx.beginPath();
+        ctx.arc(x, cy, 10, 0, Math.PI * 2);
+        ctx.strokeStyle = pal.dotHover;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.globalAlpha = alpha;
       ctx.beginPath();
-      ctx.arc(x, y, isHover ? 5.5 : 3.5, 0, Math.PI * 2);
+      ctx.arc(x, cy, isHover ? 5 : 3.5, 0, Math.PI * 2);
       ctx.fillStyle = isHover ? pal.dotHover : pal.dot;
       ctx.fill();
+      ctx.globalAlpha = 1;
     }
 
-    // Hover label
-    if (hoverIdx >= 0) {
+    // Hover tooltip — richer: model name + actual/predicted/error breakdown
+    if (hoverIdx >= 0 && ptProg[hoverIdx] > 0.5) {
       const d = DATA[hoverIdx];
-      const x = toX(d[1]), y = toY(d[2]);
-      const label = d[0];
-      const err = (d[2] - d[1]).toFixed(1);
-      const errSign = d[2] >= d[1] ? '+' : '';
-      const text = `${label}  (${errSign}${err})`;
-
-      ctx.font = '400 9.5px Inter, sans-serif';
-      const tw = ctx.measureText(text).width;
-      const lx = Math.min(x + 10, W - PAD_R - tw - 12);
-      const ly = Math.max(y - 14, PAD_T + 4);
-
+      const ease = _ease(ptProg[hoverIdx]);
+      const x = toX(d[1]);
+      const cy = toY(d[1]) + (toY(d[2]) - toY(d[1])) * ease;
+      const err = d[2] - d[1];
+      const errStr = (err >= 0 ? '+' : '') + err.toFixed(1);
+      const pctStr = Math.abs(err / d[1] * 100).toFixed(1) + '%';
+      const nameTxt = d[0];
+      const detailTxt = `actual ${Math.round(d[1])} · predicted ${Math.round(d[2])} · error ${errStr} (${pctStr})`;
+      ctx.font = '500 10px Inter, sans-serif';
+      const nw = ctx.measureText(nameTxt).width;
+      ctx.font = '400 8.5px Inter, sans-serif';
+      const dw = ctx.measureText(detailTxt).width;
+      const bw = Math.max(nw, dw) + 20, bh = 34;
+      let lx = x + 14, ly = cy - bh / 2;
+      if (lx + bw > W - PAD_R) lx = x - bw - 14;
+      if (ly < PAD_T + 2) ly = PAD_T + 2;
+      if (ly + bh > H - PAD_B - 2) ly = H - PAD_B - bh - 2;
+      // Box
       ctx.fillStyle = pal.labelBg;
       ctx.strokeStyle = pal.labelBorder;
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.roundRect(lx - 4, ly - 11, tw + 8, 16, 3);
+      if (ctx.roundRect) ctx.roundRect(lx, ly, bw, bh, 3);
+      else ctx.rect(lx, ly, bw, bh);
       ctx.fill(); ctx.stroke();
-
+      // Thin connector line from dot to tooltip
+      ctx.strokeStyle = pal.labelBorder;
+      ctx.lineWidth = 0.75;
+      ctx.beginPath();
+      ctx.moveTo(x, cy);
+      ctx.lineTo(lx > x ? lx : lx + bw, cy);
+      ctx.stroke();
+      // Model name
       ctx.fillStyle = pal.accent;
+      ctx.font = '500 10px Inter, sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(text, lx, ly);
+      ctx.fillText(nameTxt, lx + 8, ly + 13);
+      // Detail line
+      ctx.fillStyle = pal.text;
+      ctx.font = '400 8.5px Inter, sans-serif';
+      ctx.fillText(detailTxt, lx + 8, ly + 27);
     }
 
     // Stats annotation
@@ -1367,19 +1784,26 @@
 
     let closest = -1, closestDist = 15; // px threshold
     for (let i = 0; i < DATA.length; i++) {
-      const dx = toX(DATA[i][1]) - mx, dy = toY(DATA[i][2]) - my;
+      if (ptProg[i] < 0.1) continue; // skip points still appearing
+      const ease = _ease(ptProg[i]);
+      const cx = toX(DATA[i][1]);
+      const cy = toY(DATA[i][1]) + (toY(DATA[i][2]) - toY(DATA[i][1])) * ease;
+      const dx = cx - mx, dy = cy - my;
       const dist = Math.sqrt(dx * dx + dy * dy);
       if (dist < closestDist) { closestDist = dist; closest = i; }
     }
-    if (closest !== hoverIdx) { hoverIdx = closest; drawScatter(); }
+    if (closest !== hoverIdx) {
+      hoverIdx = closest;
+      if (entranceDone) drawScatter(); // during animation, rAF loop redraws
+    }
   });
-  canvas.addEventListener('mouseleave', () => { hoverIdx = -1; drawScatter(); });
+  canvas.addEventListener('mouseleave', () => { hoverIdx = -1; if (entranceDone) drawScatter(); });
   canvas.style.cursor = 'crosshair';
 
-  // Draw on scroll-in
+  // Trigger entrance animation when chart scrolls into view
   const scatterObs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { drawScatter(); scatterObs.unobserve(e.target); } });
-  }, { threshold: 0.1 });
+    entries.forEach(e => { if (e.isIntersecting) { startEntrance(); scatterObs.unobserve(e.target); } });
+  }, { threshold: 0.3 });
   document.fonts.ready.then(() => { scatterObs.observe(canvas); });
 })();
 
@@ -1393,21 +1817,27 @@
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
 
+  // Animation state — drives flowing dashes and ELO glow
+  let animDash = 0, pipeRafId = null, pipeAnimating = false;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
   function getPal(dark) {
     return {
-      bg: dark ? '#141414' : '#fafaf8',
-      cardBg: dark ? '#1a1a1a' : '#ffffff',
-      border: dark ? '#2a2a2a' : '#e8e5de',
-      text: dark ? '#d8d4cf' : '#1a1a1a',
-      textMuted: dark ? '#a09a90' : '#555',
-      textLight: dark ? '#7a756d' : '#777',
-      accent: dark ? '#c46b6b' : '#7a2e2e',
-      arrow: dark ? 'rgba(196,107,107,0.4)' : 'rgba(122,46,46,0.35)',
+      cardBg:      dark ? '#1a1a1a' : '#ffffff',
+      border:      dark ? '#2a2a2a' : '#e8e5de',
+      text:        dark ? '#d8d4cf' : '#1a1a1a',
+      textLight:   dark ? '#7a756d' : '#777',
+      accent:      dark ? '#c46b6b' : '#7a2e2e',
+      arrow:       dark ? 'rgba(196,107,107,0.38)' : 'rgba(122,46,46,0.32)',
+      arrowAccent: dark ? 'rgba(196,107,107,0.72)' : 'rgba(122,46,46,0.68)',
     };
   }
   let pal = getPal(darkMQ.matches);
-  darkMQ.addEventListener('change', e => { pal = getPal(e.matches); drawPipeline(); });
+  darkMQ.addEventListener('change', e => {
+    pal = getPal(e.matches);
+    if (!pipeAnimating) drawPipeline();
+  });
 
   const boxes = [
     { id:'custom', label:'4 Custom Benchmarks', sub:'EQ \u00b7 Writing \u00b7 Logic \u00b7 Style' },
@@ -1429,12 +1859,12 @@
   }
 
   function drawBox(x, y, w, h, label, sub) {
+    ctx.setLineDash([]);
     ctx.fillStyle = pal.cardBg;
     ctx.fillRect(x, y, w, h);
     ctx.strokeStyle = pal.border;
     ctx.lineWidth = 1;
     ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
-    // Label — auto-shrink to fit
     const pad = 10;
     const labelSize = fitText(label, w - pad*2, 13, "500 __SIZE__ 'EB Garamond', Georgia, serif");
     ctx.fillStyle = pal.text;
@@ -1442,26 +1872,28 @@
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(label, x + w/2, y + h/2 - (sub ? 8 : 0));
-    // Sub — auto-shrink to fit
     if (sub) {
       const subSize = fitText(sub, w - pad*2, 9.5, "400 __SIZE__ Inter, sans-serif");
       ctx.fillStyle = pal.textLight;
       ctx.font = `400 ${subSize}px Inter, sans-serif`;
       ctx.fillText(sub, x + w/2, y + h/2 + 10);
     }
+    ctx.textBaseline = 'alphabetic';
   }
 
   function drawArrow(x1, y1, x2, y2, opts) {
-    const curved = opts && opts.curved;
-    const noHead = opts && opts.noHead;
-    const midFrac = (opts && opts.midFrac) || 0.5;
-    ctx.strokeStyle = pal.arrow;
-    ctx.fillStyle = pal.arrow;
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([]);
+    const curved   = opts && opts.curved;
+    const noHead   = opts && opts.noHead;
+    const midFrac  = (opts && opts.midFrac) || 0.5;
+    const isAccent = opts && opts.accent;
+    ctx.strokeStyle = isAccent ? pal.arrowAccent : pal.arrow;
+    ctx.fillStyle   = isAccent ? pal.arrowAccent : pal.arrow;
+    ctx.lineWidth   = isAccent ? 2 : 1.5;
+    // Flowing dashes — animDash drives the march
+    ctx.setLineDash([6, 4]);
+    ctx.lineDashOffset = -animDash;
     ctx.beginPath();
     if (curved) {
-      // Right-angle elbow: down from source, then horizontal, then down to target
       const midY = y1 + (y2 - y1) * midFrac;
       ctx.moveTo(x1, y1);
       ctx.lineTo(x1, midY);
@@ -1472,9 +1904,11 @@
       ctx.lineTo(x2, y2);
     }
     ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.lineDashOffset = 0;
     if (!noHead) {
       const angle = Math.atan2(y2 - y1, x2 - x1);
-      const ax = curved ? Math.PI / 2 : angle; // curved arrows arrive vertically
+      const ax = curved ? Math.PI / 2 : angle;
       ctx.beginPath();
       ctx.moveTo(x2, y2);
       ctx.lineTo(x2 - 6*Math.cos(ax - 0.35), y2 - 6*Math.sin(ax - 0.35));
@@ -1482,6 +1916,20 @@
       ctx.closePath();
       ctx.fill();
     }
+  }
+
+  // Sine-wave glow ring on the Arena ELO output box
+  function drawEloGlow(x, y, w, h) {
+    const pulse = 3 + 2.5 * Math.abs(Math.sin(animDash * 0.022));
+    ctx.save();
+    ctx.shadowColor = pal.accent;
+    ctx.shadowBlur  = pulse;
+    ctx.globalAlpha = 0.55;
+    ctx.strokeStyle = pal.accent;
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([]);
+    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    ctx.restore();
   }
 
   function drawPipeline() {
@@ -1505,6 +1953,7 @@
       let y = 10;
       for (let i = 0; i < boxes.length; i++) {
         drawBox(x, y, boxW, boxH, boxes[i].label, boxes[i].sub);
+        if (i === boxes.length - 1) drawEloGlow(x, y, boxW, boxH); // ELO box pulse
         if (i < boxes.length - 1) {
           drawArrow(x + boxW/2, y + boxH, x + boxW/2, y + boxH + gap);
         }
@@ -1548,7 +1997,10 @@
       drawBox(lowerBoxes[1].x, lowerBoxes[1].y, lowerBoxes[1].w, lowerBoxes[1].h, boxes[3].label, boxes[3].sub);
       drawBox(lowerBoxes[2].x, lowerBoxes[2].y, lowerBoxes[2].w, lowerBoxes[2].h, boxes[4].label, boxes[4].sub);
 
-      // Horizontal arrows between lower boxes
+      // ELO box — pulsing glow
+      drawEloGlow(lowerBoxes[2].x, lowerBoxes[2].y, lowerBoxes[2].w, lowerBoxes[2].h);
+
+      // Horizontal arrows between lower boxes (normal colour)
       for (let i = 0; i < lowerCount - 1; i++) {
         const fromX = lowerBoxes[i].x + lowerBoxes[i].w;
         const toX = lowerBoxes[i+1].x;
@@ -1556,10 +2008,9 @@
         drawArrow(fromX + 4, ay, toX - 4, ay);
       }
 
-      // Upper row: position above the first and third lower boxes
+      // Upper row
       const topBoxW = Math.min(200, (W - 40) / 2.5);
       const combineCenter = lowerBoxes[0].x + lowerBoxes[0].w / 2;
-      // Center the two top boxes symmetrically above the lower row
       const topSpan = lowerBoxes[2].x + lowerBoxes[2].w/2 - (lowerBoxes[0].x + lowerBoxes[0].w/2);
       const topBox1X = combineCenter + topSpan * 0.15 - topBoxW / 2;
       const topBox2X = combineCenter + topSpan * 0.85 - topBoxW / 2;
@@ -1567,18 +2018,39 @@
       drawBox(topBox1X, topY, topBoxW, boxH, boxes[0].label, boxes[0].sub);
       drawBox(topBox2X, topY, topBoxW, boxH, boxes[1].label, boxes[1].sub);
 
-      // Merge arrows: right-angle elbows, different rail heights so lines don't touch
+      // Custom benchmark merge arrows — accent colour, bolder dashes
       const combineTopY = lowerY;
-      drawArrow(topBox1X + topBoxW/2, topY + boxH, combineCenter - 10, combineTopY, {curved:true, midFrac:0.45});
-      drawArrow(topBox2X + topBoxW/2, topY + boxH, combineCenter + 10, combineTopY, {curved:true, midFrac:0.55});
+      drawArrow(topBox1X + topBoxW/2, topY + boxH, combineCenter - 10, combineTopY, {curved:true, midFrac:0.45, accent:true});
+      drawArrow(topBox2X + topBoxW/2, topY + boxH, combineCenter + 10, combineTopY, {curved:true, midFrac:0.55, accent:true});
     }
   }
 
-  function onResize() { drawPipeline(); }
-  window.addEventListener('resize', onResize);
+  function startPipeAnim() {
+    if (pipeAnimating) return;
+    pipeAnimating = true;
+    (function tick() {
+      if (!pipeAnimating) return;
+      animDash += 0.35;
+      drawPipeline();
+      pipeRafId = requestAnimationFrame(tick);
+    })();
+  }
+
+  function stopPipeAnim() {
+    pipeAnimating = false;
+    if (pipeRafId) { cancelAnimationFrame(pipeRafId); pipeRafId = null; }
+  }
+
+  window.addEventListener('resize', () => { if (!pipeAnimating) drawPipeline(); });
 
   const pipeObs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { drawPipeline(); pipeObs.unobserve(e.target); } });
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        reducedMotion ? drawPipeline() : startPipeAnim();
+      } else {
+        stopPipeAnim();
+      }
+    });
   }, { threshold: 0.1 });
   document.fonts.ready.then(() => { pipeObs.observe(canvas); });
 })();

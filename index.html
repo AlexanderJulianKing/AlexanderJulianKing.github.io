@@ -115,6 +115,21 @@
       cursor: default;
     }
 
+    /* Section number: starts at reduced opacity, inks in after the rule draws */
+    .section-heading .section-number {
+      opacity: 0.38;
+      transition: opacity 0.55s ease 0.55s;
+    }
+
+    .section-heading.visible .section-number {
+      opacity: 1;
+    }
+
+    /* Sidenote appears slightly after body text — like a typesetter adding margin notes */
+    .sidenote.fade-in {
+      transition-delay: 380ms;
+    }
+
     @media (max-width: 860px) {
       .with-sidenotes {
         display: block;
@@ -140,7 +155,23 @@
       font-size: 1.55rem;
       margin-bottom: 1.25rem;
       padding-bottom: 0.3rem;
-      border-bottom: 1px solid var(--border-light);
+      position: relative;
+    }
+
+    .section-heading::after {
+      content: '';
+      display: block;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 1px;
+      background: var(--border-light);
+      width: 0;
+      transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.12s;
+    }
+
+    .section-heading.visible::after {
+      width: 100%;
     }
 
     .section-number {
@@ -222,6 +253,32 @@
 
     .abstract {
       margin-bottom: 0;
+      position: relative;
+    }
+
+    /* Vertical rule: draws downward after the hero loads — editorial citation bar */
+    .abstract::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.15em;
+      bottom: 0.15em;
+      width: 2px;
+      background: var(--accent);
+      opacity: 0;
+      transform: scaleY(0);
+      transform-origin: top center;
+      animation: drawAbstractRule 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.15s forwards;
+    }
+
+    @media (max-width: 600px) {
+      .abstract::before { display: none; }
+    }
+
+    @keyframes drawAbstractRule {
+      0%   { opacity: 0;    transform: scaleY(0); }
+      18%  { opacity: 0.45; transform: scaleY(0); }
+      100% { opacity: 0.45; transform: scaleY(1); }
     }
 
     .abstract-label {
@@ -260,6 +317,24 @@
     .project-card:hover {
       transform: translateY(-2px);
       box-shadow: var(--card-hover-shadow);
+    }
+
+    /* Left accent bar — draws downward on hover like a bookmark */
+    .project-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transform-origin: top center;
+      transition: transform 0.22s ease;
+    }
+
+    .project-card:hover::before {
+      transform: scaleY(1);
     }
 
     .project-title {
@@ -482,6 +557,15 @@
     .stagger-3 { transition-delay: 120ms; }
     .stagger-4 { transition-delay: 180ms; }
 
+    /* Project cards enter from the left (horizontal shift) rather than rising from below */
+    .project-card.fade-in {
+      transform: translateX(-14px);
+    }
+
+    .project-card.fade-in.visible {
+      transform: translateX(0);
+    }
+
     /* Hero load animation */
     .hero-anim {
       opacity: 0;
@@ -516,8 +600,56 @@
       .project-card {
         transition: none;
       }
+      .project-card.fade-in {
+        transform: none;
+      }
+      .project-card::before {
+        transition: none;
+      }
       a::after {
         transition: none;
+      }
+      .section-heading::after {
+        transition: none;
+        width: 100%;
+      }
+      .section-heading .section-number {
+        opacity: 1;
+        transition: none;
+      }
+      .abstract::before {
+        animation: none;
+        transform: scaleY(1);
+        opacity: 0.45;
+      }
+      .nav-progress {
+        animation: none;
+      }
+    }
+
+    /* ===== Reading Progress Bar ===== */
+    .nav-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: var(--accent);
+      width: 100%;
+      transform: scaleX(0);
+      transform-origin: left center;
+      opacity: 0.85;
+      pointer-events: none;
+    }
+
+    @supports (animation-timeline: scroll()) {
+      .nav-progress {
+        animation: nav-progress-grow linear both;
+        animation-timeline: scroll(root block);
+      }
+
+      @keyframes nav-progress-grow {
+        from { transform: scaleX(0); }
+        to   { transform: scaleX(1); }
       }
     }
 
@@ -667,6 +799,7 @@
 
   <!-- Navigation -->
   <nav class="site-nav" aria-label="Primary navigation">
+    <div class="nav-progress" aria-hidden="true"></div>
     <div class="nav-inner">
       <a href="#top" class="nav-name">A. King</a>
       <a href="#about" class="nav-link"><span class="nav-number">1. </span>About</a>
@@ -917,6 +1050,21 @@ Bern, M.*, <strong>King, A.</strong>* (co-first), Applewhite, D.A., &amp; Ritz, 
       });
 
       sections.forEach(function(s) { spy.observe(s); });
+    })();
+
+    // Reading progress bar — JS fallback for browsers without CSS scroll-driven animations
+    (function() {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if (CSS && CSS.supports && CSS.supports('animation-timeline: scroll()')) return;
+      var bar = document.querySelector('.nav-progress');
+      if (!bar) return;
+      function updateProgress() {
+        var scrolled = window.scrollY;
+        var total = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.transform = 'scaleX(' + (total > 0 ? (scrolled / total) : 0) + ')';
+      }
+      window.addEventListener('scroll', updateProgress, { passive: true });
+      updateProgress();
     })();
   </script>
 

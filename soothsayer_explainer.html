@@ -358,6 +358,7 @@
       transform-origin: left center; opacity: 0.85;
       pointer-events: none; z-index: 100;
     }
+    @media (max-width: 768px) { .reading-progress { display: none; } }
     @supports (animation-timeline: scroll()) {
       .reading-progress {
         animation: reading-progress-grow linear both;
@@ -914,10 +915,11 @@
   let pal = makePal(darkMQ.matches);
   darkMQ.addEventListener('change', e => { pal = makePal(e.matches); draw(); });
 
-  // Dimensions
-  const ROWS = 14, COLS = 10;
+  // Dimensions — show fewer columns on mobile
+  const _impMobile = window.innerWidth < 640;
+  const ROWS = 14, COLS = _impMobile ? 5 : 10;
   const modelNames = ['Cl. Opus 4.6','Cl. Opus 4.6 Th.','Gemini 3.1 Pro','Gemini 3.0 Pro','Gemini 3.0 Flash','Gemini 2.5 Pro','Gemini 3.0 Flash M..','Kimi K2.5','Qwen3.5 397B Th.','Cl. Opus 4.5 Th.','Cl. Opus 4.5','Cl. Son. 4.6 Th.','GPT-5.1','GLM-5'];
-  const benchNames = ['EQ','Writing','Logic','Style','ARC-AGI 2','GPQA','GDPVal','AIME','Terminal','Simple'];
+  const benchNames = ['EQ','Writing','Logic','Style','ARC-AGI 2','GPQA','GDPVal','AIME','Terminal','Simple'].slice(0, COLS);
 
   const PAD = 12, LABEL_W = 82, HEADER_H = 24, ARC_H = 50, CELL_W = 58, CELL_H = 26, GAP = 3, LEGEND_H = 22;
   const totalW = PAD + LABEL_W + COLS*(CELL_W+GAP) + PAD;
@@ -1001,14 +1003,14 @@
       arcs.sort((a,b) => b.strength - a.strength);
       predictorArcs[tc] = arcs.slice(0, 6);
     }
-    // Override the 3 demo target columns with realistic predictor relationships
-    predictorArcs[4] = [ // ARC-AGI 2: grabs from EQ, Logic, Terminal
-      {fromCol:2, strength:0.85}, {fromCol:0, strength:0.70}, {fromCol:8, strength:0.60},
+    // Override demo target columns with realistic predictor relationships (skip if column doesn't exist)
+    if (COLS > 4) predictorArcs[4] = [ // ARC-AGI 2: grabs from EQ, Logic, Terminal
+      {fromCol:2, strength:0.85}, {fromCol:0, strength:0.70}, ...(COLS > 8 ? [{fromCol:8, strength:0.60}] : [{fromCol:3, strength:0.60}]),
     ];
-    predictorArcs[7] = [ // AIME: grabs from Logic, GPQA, ARC-AGI 2
+    if (COLS > 7) predictorArcs[7] = [ // AIME: grabs from Logic, GPQA, ARC-AGI 2
       {fromCol:2, strength:0.90}, {fromCol:5, strength:0.75}, {fromCol:4, strength:0.65},
     ];
-    predictorArcs[9] = [ // Simple: grabs from Writing, Logic, ARC-AGI 2
+    if (COLS > 9) predictorArcs[9] = [ // Simple: grabs from Writing, Logic, ARC-AGI 2
       {fromCol:2, strength:0.88}, {fromCol:1, strength:0.72}, {fromCol:4, strength:0.60},
     ];
 
@@ -1853,13 +1855,15 @@
   let pal = getPal(darkMQ.matches);
   darkMQ.addEventListener('change', e => { pal = getPal(e.matches); });
 
-  // Layout constants
-  const W = 780, H = 660;
+  // Layout constants — stack vertically on mobile
+  const _knnMobile = window.innerWidth < 640;
+  const W = _knnMobile ? 390 : 780, H = _knnMobile ? 1260 : 660;
+  const PANEL_Y_OFF = _knnMobile ? 600 : 0; // vertical offset for panel 2 on mobile
   const CY_TOP = 180;     // center of radial neighborhood view
   const SC = 80;           // distance → pixel scale
   const MAX_R = 118;       // max radial pixel extent
   const SY_T = 350, SY_B = 545;  // scatter plot y bounds
-  const SX_HALF = 118;    // scatter half-width from panel center
+  const SX_HALF = _knnMobile ? 150 : 118;    // scatter half-width from panel center
 
   let _s = 42;
   function sr() { _s = (_s * 16807) % 2147483647; return _s / 2147483647; }
@@ -1981,7 +1985,8 @@
     p._outside = p.nb.filter(n => !n.inside);
   });
 
-  function drawPanel(p, cx) {
+  function drawPanel(p, cx, yOff) {
+    if (yOff) { ctx.save(); ctx.translate(0, yOff); }
     const t = prog, cr = p.cut * SC;
     const inside = p._inside, outside = p._outside;
     const sx_l = cx - SX_HALF, sx_r = cx + SX_HALF;
@@ -2220,32 +2225,49 @@
     ctx.font = '400 12px Inter, sans-serif'; ctx.fillStyle = pal.muted;
     ctx.fillText(p.nm, cx, 40);
 
+    const panelH = _knnMobile ? PANEL_Y_OFF : H;
     ctx.font = '400 10px JetBrains Mono, monospace'; ctx.fillStyle = pal.light;
     ctx.textAlign = 'center';
-    ctx.fillText('k = ' + p.k, cx, H - 30);
+    ctx.fillText('k = ' + p.k, cx, panelH - 30);
     if (viewState > 0.85) {
       const rt = ease(Math.min((viewState - 0.85) / 0.15, 1));
       ctx.font = '400 10px JetBrains Mono, monospace';
       ctx.fillStyle = arRGB; ctx.globalAlpha = 0.65 * rt;
-      ctx.fillText('top driver: ' + p.feature, cx, H - 14);
+      ctx.fillText('top driver: ' + p.feature, cx, panelH - 14);
       ctx.globalAlpha = 1;
     }
+    if (yOff) ctx.restore();
   }
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
-    ctx.strokeStyle = pal.div; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
-    ctx.beginPath(); ctx.moveTo(W / 2, 48); ctx.lineTo(W / 2, H - 40); ctx.stroke();
-    ctx.setLineDash([]);
-    if (viewState > 0.01) {
-      const st = Math.min(viewState / 0.2, 1);
-      ctx.save(); ctx.globalAlpha = st * 0.35;
-      ctx.strokeStyle = pal.div; ctx.lineWidth = 0.5;
-      ctx.beginPath(); ctx.moveTo(30, 325); ctx.lineTo(W - 30, 325); ctx.stroke();
-      ctx.restore();
+    if (_knnMobile) {
+      // Stacked: horizontal divider between panels
+      if (viewState > 0.01) {
+        const st = Math.min(viewState / 0.2, 1);
+        ctx.save(); ctx.globalAlpha = st * 0.35;
+        ctx.strokeStyle = pal.div; ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(30, 325); ctx.lineTo(W - 30, 325); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(30, PANEL_Y_OFF + 325); ctx.lineTo(W - 30, PANEL_Y_OFF + 325); ctx.stroke();
+        ctx.restore();
+      }
+      drawPanel(panels[0], W * 0.5, 0);
+      drawPanel(panels[1], W * 0.5, PANEL_Y_OFF);
+    } else {
+      // Side-by-side: vertical divider
+      ctx.strokeStyle = pal.div; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(W / 2, 48); ctx.lineTo(W / 2, H - 40); ctx.stroke();
+      ctx.setLineDash([]);
+      if (viewState > 0.01) {
+        const st = Math.min(viewState / 0.2, 1);
+        ctx.save(); ctx.globalAlpha = st * 0.35;
+        ctx.strokeStyle = pal.div; ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(30, 325); ctx.lineTo(W - 30, 325); ctx.stroke();
+        ctx.restore();
+      }
+      drawPanel(panels[0], W * 0.25, 0);
+      drawPanel(panels[1], W * 0.75, 0);
     }
-    drawPanel(panels[0], W * 0.25);
-    drawPanel(panels[1], W * 0.75);
     if (hov && hov.n && prog > 0.25) {
       const txt = hov.n + '  (d=' + hov.d.toFixed(2) + (hov.inside ? '  w=' + hov.w.toFixed(2) : '  excluded') + ')';
       ctx.font = '400 9px Inter, sans-serif';
@@ -2264,10 +2286,13 @@
     const sx = W / rect.width, sy = H / rect.height;
     mx = (e.clientX - rect.left) * sx; my = (e.clientY - rect.top) * sy;
     let found = null, best = 12;
-    [[panels[0], W*0.25], [panels[1], W*0.75]].forEach(([p, cx]) => {
+    const _panelCfgs = _knnMobile
+      ? [[panels[0], W*0.5, 0], [panels[1], W*0.5, PANEL_Y_OFF]]
+      : [[panels[0], W*0.25, 0], [panels[1], W*0.75, 0]];
+    _panelCfgs.forEach(([p, cx, yOff]) => {
       p.nb.forEach(n => {
         if (n._x === undefined) return;
-        const dd = Math.sqrt(Math.pow(mx - n._x, 2) + Math.pow(my - n._y, 2));
+        const dd = Math.sqrt(Math.pow(mx - n._x, 2) + Math.pow(my - (n._y + yOff), 2));
         if (dd < best) { best = dd; found = n; }
       });
     });

@@ -1969,24 +1969,29 @@
     return SY_B - ((elo - p.eloRange[0]) / (p.eloRange[1] - p.eloRange[0])) * (SY_B - SY_T);
   }
 
+  // Cache inside/outside arrays and scatter positions per panel
+  panels.forEach(p => {
+    p._inside = p.nb.filter(n => n.inside);
+    p._outside = p.nb.filter(n => !n.inside);
+  });
+
   function drawPanel(p, cx) {
     const t = prog, cr = p.cut * SC, a = pal.ar;
-    const inside = p.nb.filter(n => n.inside);
+    const inside = p._inside;
     const sx_l = cx - SX_HALF, sx_r = cx + SX_HALF;
 
-    // Pre-compute scatter target positions for inside dots
-    inside.forEach(m => {
-      m._sx = fvToX(m.fv, p, cx);
-      m._sy = eloToY(m.felo, p);
-    });
+    // Pre-compute scatter target positions for inside dots (once)
+    if (!p._scatterCached) {
+      inside.forEach(m => { m._sx = fvToX(m.fv, p, cx); m._sy = eloToY(m.felo, p); });
+      p._scatterCached = true;
+    }
 
     // ═══ TOP HALF: RADIAL NEIGHBORHOOD ═══════════════════════════════════
 
     // Outside dots (ghosted cloud — stays in top half permanently)
     if (t > 0.08) {
       const nt = Math.min((t - 0.08) / 0.22, 1);
-      p.nb.forEach((n, i) => {
-        if (n.inside) return;
+      p._outside.forEach((n, i) => {
         const st = i / p.nb.length;
         const dt = ease(Math.max(0, Math.min((nt - st * 0.3) / 0.7, 1)));
         if (dt <= 0) return;
@@ -2267,31 +2272,41 @@
 
   const toggleBtn = document.getElementById('knnToggle');
 
+  let _animating = false;
   function tick() {
     if (!on) return;
     dash += 0.35;
-    // Radial entrance animation (caps at 0.50 — just shows the neighborhoods)
-    if (prog < 0.50) prog = Math.min(prog + 0.005, 0.50);
+    let active = false;
+    // Radial entrance animation (caps at 0.50)
+    if (prog < 0.50) { prog = Math.min(prog + 0.005, 0.50); active = true; }
     // Smoothly animate viewState toward viewTarget
-    const speed = 0.035;
     if (Math.abs(viewState - viewTarget) > 0.001) {
-      viewState += (viewTarget - viewState) * speed + Math.sign(viewTarget - viewState) * 0.008;
+      viewState += (viewTarget - viewState) * 0.035 + Math.sign(viewTarget - viewState) * 0.008;
       viewState = Math.max(0, Math.min(1, viewState));
-    } else {
+      active = true;
+    } else if (viewState !== viewTarget) {
       viewState = viewTarget;
     }
     draw();
-    requestAnimationFrame(tick);
+    if (active) {
+      requestAnimationFrame(tick);
+    } else {
+      _animating = false; // stop loop when idle
+    }
+  }
+  function ensureAnimating() {
+    if (!_animating && on) { _animating = true; requestAnimationFrame(tick); }
   }
 
   toggleBtn.addEventListener('click', () => {
     viewTarget = viewTarget < 0.5 ? 1 : 0;
-    toggleBtn.textContent = viewTarget > 0.5 ? '← Show Neighborhoods' : 'Show Ridge Regression →';
+    toggleBtn.textContent = viewTarget > 0.5 ? '\u2190 Show Neighborhoods' : 'Show Ridge Regression \u2192';
+    ensureAnimating();
   });
 
   const knnObs = new IntersectionObserver(entries => {
     entries.forEach(e => {
-      if (e.isIntersecting && !on) { on = true; prog = 0; tick(); }
+      if (e.isIntersecting && !on) { on = true; prog = 0; ensureAnimating(); }
     });
   }, { threshold: 0.15 });
   document.fonts.ready.then(() => { knnObs.observe(canvas); });

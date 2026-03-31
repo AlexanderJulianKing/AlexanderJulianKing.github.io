@@ -1830,8 +1830,9 @@
   'use strict';
   const canvas = document.getElementById('knnCanvas');
   if (!canvas) return;
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   const ctx = canvas.getContext('2d');
-  const dpr = Math.min(window.devicePixelRatio || 1, 2); // Clamp DPR for perf
+  const dpr = Math.min(window.devicePixelRatio || 1, isSafari ? 1.5 : 2); // Lower DPR on Safari
 
   const darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
   function getPal(d) {
@@ -2278,8 +2279,16 @@
 
   const toggleBtn = document.getElementById('knnToggle');
 
+  let _skipFrame = false;
   function tick() {
     if (!on) return;
+    // Safari: skip every other frame (target 30fps instead of 60)
+    if (isSafari) {
+      _skipFrame = !_skipFrame;
+      if (_skipFrame) { dash += 0.70; prog = Math.min(prog + 0.010, 0.50); if (Math.abs(viewState - viewTarget) > 0.001) { viewState += (viewTarget - viewState) * 0.068 + Math.sign(viewTarget - viewState) * 0.016; viewState = Math.max(0, Math.min(1, viewState)); } else { viewState = viewTarget; } draw(); }
+      requestAnimationFrame(tick);
+      return;
+    }
     dash += 0.35;
     // Radial entrance animation (caps at 0.50)
     if (prog < 0.50) prog = Math.min(prog + 0.005, 0.50);

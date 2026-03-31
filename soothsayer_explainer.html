@@ -438,7 +438,7 @@
       <p class="hero-subtitle hero-anim hero-anim-2">LLM Evaluation &amp; Arena ELO Prediction</p>
       <hr class="hero-rule hero-anim hero-anim-3" aria-hidden="true">
       <div class="abstract hero-anim hero-anim-4">
-        <p>A multi-benchmark evaluation suite that predicts how well LLMs will perform in the Chatbot Arena&mdash;before anyone votes. Four custom benchmarks join 20+ public leaderboards, feed through a per-cell imputation engine, and emerge as ELO predictions within 1.3% of actual scores.</p>
+        <p>A multi-benchmark evaluation suite that predicts how well LLMs will perform in the Chatbot Arena&mdash;before anyone votes. Four custom benchmarks join 20+ public leaderboards, feed through a per-cell imputation engine, and emerge as ELO predictions within 1.1% of actual scores.</p>
       </div>
     </header>
 
@@ -461,18 +461,18 @@
       <!-- 1. The Big Picture -->
       <section>
         <h2 class="section-heading fade-in"><span class="section-number">1.</span> The Big Picture</h2>
-        <p class="subtitle fade-in stagger-1">Custom and public benchmarks converge into one dataset, then imputation and regression produce Arena ELO estimates.</p>
+        <p class="subtitle fade-in stagger-1">Custom and public benchmarks converge into one dataset, then imputation and adaptive KNN produce Arena ELO estimates.</p>
 
         <div class="pipeline-wrap fade-in stagger-2">
           <canvas id="pipelineCanvas" aria-hidden="true"></canvas>
-          <p class="sr-only">Pipeline diagram: 4 custom benchmarks and 12 public benchmarks feed into a combine step producing 157 models by 65+ columns, then through ModelBankImputer and ARD+Huber regression to predict Arena ELO scores.</p>
+          <p class="sr-only">Pipeline diagram: 4 custom benchmarks and 12 public benchmarks feed into a combine step producing 158 models by 105 features, then through ModelBankImputer and adaptive KNN prediction to predict Arena ELO scores.</p>
         </div>
 
         <div class="stats-row fade-in stagger-3">
-          <div class="stat-card"><div class="stat-num" data-target="157">0</div><div class="stat-label">Models evaluated</div></div>
-          <div class="stat-card"><div class="stat-num" data-target="65">0</div><div class="stat-label">Benchmark features</div></div>
+          <div class="stat-card"><div class="stat-num" data-target="158">0</div><div class="stat-label">Models evaluated</div></div>
+          <div class="stat-card"><div class="stat-num" data-target="105">0</div><div class="stat-label">Benchmark features</div></div>
           <div class="stat-card"><div class="stat-num" data-target="123">0</div><div class="stat-label">Training samples</div></div>
-          <div class="stat-card"><div class="stat-num decimal" data-target="0.93">0</div><div class="stat-label">R&sup2;</div></div>
+          <div class="stat-card"><div class="stat-num decimal" data-target="0.92">0</div><div class="stat-label">R&sup2;</div></div>
         </div>
       </section>
 
@@ -500,7 +500,7 @@
         <div class="flow-row fade-in stagger-3">
           <div class="flow-box"><div class="box-header">scrape.bash</div><div class="box-detail">12 Python scrapers pull latest leaderboard CSVs in parallel. Gemini API handles model name canonicalization.</div></div>
           <div class="flow-box"><div class="box-header">combine.py</div><div class="box-detail">Outer-join on unified model names. Handles aliases, renames, deduplication. Drops low-variance columns.</div></div>
-          <div class="flow-box"><div class="box-header">clean_combined.csv</div><div class="box-detail">157 models &times; 65+ columns. ~40% of cells missing&mdash;not every model tested on every benchmark.</div></div>
+          <div class="flow-box"><div class="box-header">clean_combined.csv</div><div class="box-detail">158 models &times; 105 features. ~40% of cells missing&mdash;not every model tested on every benchmark.</div></div>
         </div>
       </section>
 
@@ -558,7 +558,7 @@
           </div>
           <div class="phase-narration">
             <h4 id="phaseTitle">The Problem: A Sparse Matrix</h4>
-            <p id="phaseDesc">157 models, 65+ benchmarks. Not every model has been tested everywhere. The matrix is ~40% empty.</p>
+            <p id="phaseDesc">158 models, 105 benchmarks. Not every model has been tested everywhere. The matrix is ~40% empty.</p>
           </div>
           <div class="matrix-viewport">
             <canvas id="imputerCanvas" aria-hidden="true"></canvas>
@@ -575,28 +575,44 @@
       <!-- 6. Prediction -->
       <section>
         <h2 class="section-heading fade-in"><span class="section-number">5.</span> From Features to Predictions</h2>
-        <p class="subtitle fade-in stagger-1">Feature selection and regression turn imputed benchmark scores into Arena ELO estimates.</p>
-        <div class="ml-steps fade-in stagger-2">
-          <div class="ml-step"><span class="step-icon">1.</span><div class="step-content"><h4>Tree-Based Feature Selection</h4><p>LightGBM ranks 65+ features by importance gain. The 1-SE rule picks the most parsimonious subset&mdash;typically 10&ndash;15 features.</p></div></div>
-          <div class="ml-step"><span class="step-icon">2.</span><div class="step-content"><h4>50/50 Blend: ARD + Huber</h4><p>With only 123 training samples, nonlinear models overfit. The final model is a 50/50 blend of ARD Regression (which zeros out irrelevant features) and Huber Regression (which is robust to outliers).</p></div></div>
+        <p class="subtitle fade-in stagger-1">An adaptive nearest-neighbor approach that accounts for how human preference works differently at different competency levels.</p>
+
+        <div class="fade-in stagger-2" style="margin-bottom:1.5rem;">
+          <h3 style="font-size:1.05rem;margin-bottom:0.75rem;">The Key Finding</h3>
+          <p style="font-size:0.92rem;">The same benchmark can predict Arena scores in opposite directions depending on LLM quality. For example, <strong>list formatting</strong> positively predicts human preference for mid-tier LLMs (&rho;=+0.16) but <em>negatively</em> predicts it for top-tier LLMs (&rho;=&minus;0.74). A global score prediction model averages these effects to near zero. Instead, we need an approach that adapts to the local regime.</p>
         </div>
 
-        <h3 class="fade-in" style="margin-top:2rem;margin-bottom:1rem;font-size:1.1rem;">Predicted vs. Actual Arena ELO</h3>
-        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">Out-of-fold predictions on 123 models. Every point is a prediction the model never trained on.</p>
+        <div class="ml-steps fade-in stagger-2">
+          <div class="ml-step"><span class="step-icon">1.</span><div class="step-content"><h4>Adaptive KNN with Sublinear Power Cutoff</h4><p>For each model, find its nearest neighbors in the 105-dimensional benchmark space. The neighborhood radius follows a sublinear power law: <code>max_dist&nbsp;=&nbsp;d<sub>nearest</sub><sup>0.7</sup>&nbsp;&times;&nbsp;3</code>. This naturally gives tighter neighborhoods in dense regions (top models, k&asymp;25) while keeping adequate coverage in sparse regions&mdash;ensuring the local regression stays within a consistent feature-preference regime.</p></div></div>
+          <div class="ml-step"><span class="step-icon">2.</span><div class="step-content"><h4>Kernel-Weighted Ridge Regression</h4><p>Within each neighborhood, fit a weighted Ridge regression where closer neighbors have more influence (Gaussian kernel). The regularization strength adapts to the neighborhood&rsquo;s score spread. This learns which benchmarks matter <em>for this specific group of models</em>&mdash;not a global average.</p></div></div>
+          <div class="ml-step"><span class="step-icon">3.</span><div class="step-content"><h4>Jackknife Bias Correction</h4><p>Ridge shrinks predictions toward the neighborhood mean. The jackknife leaves each neighbor out, refits, and measures how much Ridge compresses. This compression slope (typically 1.1&ndash;1.5&times;) is used to inflate the prediction back outward, correcting the centering bias.</p></div></div>
+        </div>
+
+        <h3 class="fade-in" style="margin-top:2rem;margin-bottom:0.5rem;font-size:1.1rem;">Adaptive Neighborhoods</h3>
+        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">The cutoff radius is d<sub>nearest</sub><sup>0.7</sup>&thinsp;&times;&thinsp;3&mdash;sublinear in nearest-neighbor distance. Distinctive LLMs (few close peers in feature space) get a small d<sub>0</sub> and a tight neighborhood; models that cluster together share a small d<sub>0</sub> too, but many peers fall within that tight radius, so k is large. Each neighborhood becomes its own private training set for a kernel-weighted ridge regression&mdash;with completely different dominant features depending on the regime.</p>
+        <div class="fade-in stagger-2" style="border:1px solid var(--card-border);background:var(--card-bg);padding:1rem;">
+          <canvas id="knnCanvas" style="width:100%;display:block;"></canvas>
+          <div style="text-align:center;margin-top:0.75rem;">
+            <button id="knnToggle" style="font-family:'Inter',sans-serif;font-size:0.82rem;font-weight:500;padding:0.4rem 1.2rem;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text-muted);border-radius:4px;cursor:pointer;transition:all 0.2s;">Show Ridge Regression →</button>
+          </div>
+        </div>
+
+        <h3 class="fade-in" style="margin-top:2.5rem;margin-bottom:1rem;font-size:1.1rem;">Predicted vs. Actual Arena ELO</h3>
+        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">Leave-one-out predictions on 123 models. Every point is a prediction the model never trained on.</p>
         <div class="fade-in stagger-2" style="border:1px solid var(--card-border);background:var(--card-bg);padding:1rem;">
           <canvas id="scatterCanvas" style="width:100%;display:block;" aria-hidden="true"></canvas>
-          <p class="sr-only">Scatter plot of predicted versus actual Arena ELO scores for 123 models. Points cluster tightly around the diagonal line, with R-squared of 0.93, Spearman rho of 0.97, and RMSE of 18.2.</p>
+          <p class="sr-only">Scatter plot of predicted versus actual Arena ELO scores for 123 models. Points cluster tightly around the diagonal line, with R-squared of 0.92, Spearman rho of 0.96, and RMSE of 15.6.</p>
         </div>
 
         <h3 class="fade-in" style="margin-top:2.5rem;margin-bottom:1rem;font-size:1.1rem;">Why Not Just Median-Impute?</h3>
-        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">Same 10&times;5 repeated cross-validation. Only the imputation and feature pipeline differ.</p>
+        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">Same leave-one-out cross-validation. Only the imputation and prediction pipeline differ.</p>
         <table class="comparison-table fade-in stagger-2">
           <thead><tr><th>Method</th><th>RMSE</th><th>R&sup2;</th><th>Spearman &rho;</th></tr></thead>
           <tbody>
-            <tr><td>Predict mean (dummy)</td><td>68.3</td><td>0.00</td><td>&mdash;</td></tr>
-            <tr><td>Public benchmarks + median impute</td><td>42.3</td><td>0.62</td><td>0.79</td></tr>
-            <tr><td>All benchmarks + median impute</td><td>27.7</td><td>0.84</td><td>0.91</td></tr>
-            <tr class="highlight"><td>Full Soothsayer pipeline</td><td>18.2</td><td>0.93</td><td>0.97</td></tr>
+            <tr><td>Predict mean (dummy)</td><td>56.6</td><td>0.00</td><td>&mdash;</td></tr>
+            <tr><td>Public benchmarks + median impute</td><td>30.0</td><td>0.72</td><td>0.85</td></tr>
+            <tr><td>All benchmarks + median impute</td><td>26.3</td><td>0.78</td><td>0.90</td></tr>
+            <tr class="highlight"><td>Full Soothsayer pipeline</td><td>15.6</td><td>0.92</td><td>0.96</td></tr>
           </tbody>
         </table>
       </section>
@@ -1264,12 +1280,12 @@
 
   // Phase data
   const phases = [
-    { title:'The Problem: A Sparse Matrix', desc:'157 models, 65+ benchmarks. Not every model has been tested everywhere. The matrix is ~40% empty.' },
+    { title:'The Problem: A Sparse Matrix', desc:'158 models, 105 benchmarks. Not every model has been tested everywhere. The matrix is ~40% empty.' },
     { title:'Step 1: Rank Predictors Per Column', desc:'For each target column, rank every other column by |correlation| \u00d7 \u221an. The stronger the arc, the better the predictor. Three examples shown.' },
     { title:'Step 2: Per-Cell Prediction (Pass 1)', desc:'The core of the ModelBankImputer. For each missing cell, select the best predictors that model actually has observed values for, then pick from a bank of fitted regressors. Each regressor estimates its own leave-one-out error; a fill is \u201cconfident\u201d when that error is under 40% of the column\u2019s natural spread.' },
     { title:'Step 3: Expansion Pass', desc:'Pass 1 filled every cell, but some fits are uncertain. Pass 2 retries them worst-first, now allowing confident pass-1 fills (dashed connector) as additional predictors. The new estimate only replaces the old one if \u03c3\u00b2 improves by at least 5%. Any cells that couldn\u2019t be filled at all fall back to column median.' },
     { title:'Step 4: SVD Coherence Projection', desc:'A low-rank SVD decomposes the filled matrix. Each imputed value blends toward its coherent estimate, weighted by uncertainty.' },
-    { title:'Complete: Ready for Prediction', desc:'Every cell filled. The matrix is dense, coherent, and ready for feature selection and regression. 157 models \u00d7 65+ features \u2192 Arena ELO predictions.' },
+    { title:'Complete: Ready for Prediction', desc:'Every cell filled. The matrix is dense, coherent, and ready for adaptive KNN prediction. 158 models \u00d7 105 features \u2192 Arena ELO predictions.' },
   ];
 
   let currentPhase = 0;
@@ -1553,8 +1569,8 @@
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
 
-  // OOF data: [name, actual, predicted]
-  const DATA = [["Command R", 1188.0, 1218.5], ["Claude 3 Opus", 1263.0, 1264.7], ["Command R Plus", 1230.0, 1236.3], ["GPT-4o Mini", 1287.0, 1249.8], ["Llama 3.1 405B Instruct Turbo", 1284.0, 1287.7], ["Llama 3.1 70B Instruct Turbo", 1262.0, 1227.1], ["Llama 3.1 8B Instruct Turbo", 1187.0, 1171.5], ["GPT-4o (2024-08-06)", 1283.0, 1297.0], ["Mistral Small", 1279.0, 1245.3], ["Qwen2.5 72B Instruct Turbo", 1270.0, 1302.4], ["Gemini 1.5 Flash 8B", 1227.0, 1238.8], ["Claude 3.5 Sonnet", 1298.0, 1296.8], ["Claude 3.5 Haiku", 1257.0, 1228.0], ["Nova Lite", 1229.0, 1271.3], ["Nova Micro", 1209.0, 1242.5], ["Nova Pro", 1259.0, 1285.7], ["Llama 3.3 70B Instruct Turbo", 1276.0, 1268.7], ["Gemini 2.0 Flash", 1355.0, 1341.6], ["DeepSeek V3 (2024-12-26)", 1333.0, 1338.4], ["Phi-4", 1217.0, 1276.7], ["DeepSeek R1", 1373.0, 1392.3], ["Qwen2.5 Max", 1367.0, 1352.2], ["o3-Mini High", 1337.0, 1304.2], ["o3-Mini Medium", 1320.0, 1311.7], ["Gemini 2.0 Flash Lite", 1330.0, 1327.8], ["Grok 3 Beta", 1425.0, 1419.5], ["Grok 3 Mini Beta (High)", 1368.0, 1369.9], ["Claude 3.7 Sonnet", 1300.0, 1335.3], ["Claude 3.7 Sonnet Thinking", 1316.0, 1358.5], ["QwQ 32B", 1330.0, 1353.9], ["Gemma 3 12B", 1335.0, 1358.1], ["Gemma 3 27B", 1358.0, 1347.4], ["Gemma 3 4B", 1291.0, 1285.1], ["Command A", 1331.0, 1332.7], ["DeepSeek V3 (2025-03-24)", 1375.0, 1371.4], ["ChatGPT-4o", 1429.0, 1402.2], ["Llama 4 Maverick 17B 128E Instruct", 1289.0, 1298.0], ["llama-4-scout", 1281.0, 1259.0], ["GPT-4.1", 1382.0, 1395.4], ["GPT-4.1 Mini", 1341.0, 1333.5], ["GPT-4.1 Nano", 1285.0, 1278.7], ["o3 Medium", 1410.0, 1404.9], ["o4-Mini Medium", 1354.0, 1363.6], ["Qwen 3 235B A22B Thinking", 1366.0, 1361.1], ["Qwen 3 30B A3B Thinking", 1319.0, 1311.2], ["Qwen 3 32B Thinking", 1341.0, 1374.9], ["Mistral Medium 3", 1369.0, 1357.4], ["Gemini 2.5 Flash Preview (2025-05-20)", 1418.0, 1413.2], ["Gemma 3n 4B", 1308.0, 1298.4], ["Claude 4 Opus", 1365.0, 1386.7], ["Claude 4 Opus Thinking", 1376.0, 1375.5], ["Claude 4 Sonnet", 1339.0, 1368.2], ["Claude 4 Sonnet Thinking", 1349.0, 1360.1], ["DeepSeek R1 (2025-05-28)", 1426.0, 1418.7], ["Gemini 2.5 Pro Preview (2025-06-05)", 1462.0, 1471.3], ["Gemini 2.5 Flash Lite Preview (2025-06-17)", 1369.0, 1354.2], ["Grok 4", 1410.0, 1401.1], ["Kimi K2", 1371.0, 1387.3], ["Qwen 3 235B A22B Nonthinking (2025-07-21)", 1419.0, 1402.9], ["Qwen 3 235B A22B Thinking (2025-07-21)", 1414.0, 1416.2], ["Qwen 3 Coder 480B A35B Instruct", 1357.0, 1343.4], ["GLM 4.5 Air", 1382.0, 1377.3], ["GLM-4.5", 1429.0, 1407.8], ["Claude Opus 4.1", 1418.0, 1375.1], ["Claude Opus 4.1 Thinking", 1418.0, 1409.2], ["GPT OSS 120B", 1367.0, 1363.9], ["GPT OSS 20B", 1288.0, 1337.0], ["GPT-5 (high)", 1406.0, 1415.1], ["GPT-5 Chat", 1404.0, 1400.0], ["GPT-5 Mini (High)", 1374.0, 1400.3], ["GPT-5 Nano (high)", 1321.0, 1348.7], ["Mistral Medium 3.1 (2025-08-12)", 1427.0, 1415.5], ["DeepSeek V3.1 (Non-Reasoning)", 1420.0, 1426.3], ["DeepSeek V3.1 (Reasoning)", 1417.0, 1407.9], ["Grok 4 Fast", 1398.0, 1393.4], ["Qwen3 Max", 1414.0, 1409.5], ["Kimi K2 0905", 1379.0, 1390.3], ["Qwen3 Next 80B A3B Instruct", 1419.0, 1419.4], ["Qwen3 Next 80B A3B Thinking", 1367.0, 1386.8], ["DeepSeek V3.1 Terminus", 1418.0, 1431.4], ["DeepSeek V3.1 Terminus (Reasoning)", 1417.0, 1417.1], ["Gemini 2.5 Flash Lite Preview 09-2025 Nonthinking", 1379.0, 1381.1], ["Gemini 2.5 Flash Preview 09-2025", 1407.0, 1431.3], ["Claude Sonnet 4.5", 1432.0, 1424.0], ["Claude Sonnet 4.5 Thinking", 1426.0, 1432.9], ["DeepSeek V3.2 Exp", 1424.0, 1424.9], ["DeepSeek V3.2 Exp (Reasoning)", 1423.0, 1412.5], ["GLM-4.6", 1441.0, 1428.0], ["Claude Haiku 4.5", 1386.0, 1382.5], ["MiniMax M2", 1343.0, 1364.4], ["Kimi K2 Thinking", 1413.0, 1408.4], ["GPT-5.1 (high)", 1443.0, 1449.4], ["GPT-5.1 (Non-reasoning)", 1422.0, 1420.7], ["Grok 4.1 Fast", 1408.0, 1410.1], ["Gemini 3.0 Pro Preview (2025-11-18)", 1479.0, 1476.2], ["Olmo 3 32B (Reasoning)", 1300.0, 1331.9], ["Claude Opus 4.5", 1445.0, 1438.4], ["Claude Opus 4.5 Thinking", 1446.0, 1442.6], ["DeepSeek V3.2", 1418.0, 1420.2], ["DeepSeek V3.2 (Non-Reasoning)", 1423.0, 1441.7], ["Mistral Large 3 (2025-12-1)", 1432.0, 1420.1], ["Nova 2 Lite", 1364.0, 1374.1], ["GPT-5.2 (high)", 1421.0, 1449.2], ["GPT-5.2 (Non-reasoning)", 1417.0, 1419.0], ["Nemotron 3 Nano 30B A3B (Reasoning)", 1351.0, 1350.3], ["MiMo-V2-Flash (Reasoning)", 1395.0, 1394.2], ["Gemini 3.0 Flash Preview (2025-12-17)", 1467.0, 1468.6], ["Gemini 3.0 Flash Preview (2025-12-17) (Minimal)", 1449.0, 1462.0], ["GLM-4.7", 1435.0, 1419.8], ["MiniMax M2.1", 1391.0, 1399.8], ["GLM-4.7 Flash", 1353.0, 1338.8], ["Kimi K2.5", 1449.0, 1440.6], ["Step 3.5 Flash", 1400.0, 1399.7], ["Claude Opus 4.6", 1502.0, 1481.3], ["Claude Opus 4.6 Thinking", 1500.0, 1486.9], ["GLM-5", 1443.0, 1452.9], ["MiniMax M2.5", 1380.0, 1392.2], ["Qwen3.5 397B A17B Thinking", 1448.0, 1444.9], ["Claude Sonnet 4.6 Thinking", 1444.0, 1466.9], ["Gemini 3.1 Pro Preview (2026-02-19)", 1488.0, 1476.0], ["Qwen3.5 27B Thinking", 1410.0, 1384.9], ["Gemini 3.1 Flash Lite Preview (2026-03-03)", 1425.0, 1429.2], ["Nemotron 3 Super", 1384.0, 1391.9]];
+  // OOF data: [name, actual, predicted] — LOO predictions from adaptive KNN pipeline (lmarena_Score)
+  const DATA = [["Phi-4", 1256.0, 1304.6], ["Gemini 1.5 Flash 8B", 1258.0, 1305.9], ["Olmo 3 32B (Reasoning)", 1305.0, 1343.1], ["Claude 3.7 Sonnet", 1371.0, 1400.5], ["Nova Micro", 1240.0, 1267.5], ["QwQ 32B", 1336.0, 1362.7], ["Qwen2.5 72B Instruct Turbo", 1302.0, 1326.6], ["Claude 4 Sonnet", 1389.0, 1413.3], ["Nova Lite", 1260.0, 1283.7], ["Nemotron 3 Nano 30B A3B (Reasoning)", 1318.0, 1339.6], ["Claude 4 Opus", 1412.0, 1431.1], ["GPT-5 Mini (High)", 1390.0, 1408.9], ["Claude Sonnet 4.6 Thinking", 1463.0, 1481.5], ["Nova 2 Lite", 1337.0, 1355.3], ["Gemini 2.5 Flash Lite Preview 09-2025 Nonthinking", 1380.0, 1397.6], ["GPT OSS 20B", 1318.0, 1335.3], ["MiMo-V2-Flash (Reasoning)", 1387.0, 1401.9], ["Gemini 2.5 Flash Preview 09-2025", 1405.0, 1419.2], ["Grok 3 Mini Beta (High)", 1363.0, 1375.1], ["Qwen 3 32B Thinking", 1347.0, 1358.7], ["GPT-5.2 (high)", 1442.0, 1453.5], ["Qwen3 Next 80B A3B Instruct", 1402.0, 1412.8], ["Llama 3.1 8B Instruct Turbo", 1211.0, 1221.7], ["Llama 4 Maverick 17B 128E Instruct", 1327.0, 1337.6], ["Claude 3.7 Sonnet Thinking", 1387.0, 1397.4], ["Claude Sonnet 4.5 Thinking", 1453.0, 1463.0], ["DeepSeek V3.1 Terminus", 1416.0, 1425.1], ["MiniMax M2", 1347.0, 1356.0], ["Qwen3 Next 80B A3B Thinking", 1369.0, 1377.7], ["Grok 4", 1410.0, 1418.1], ["DeepSeek V3.2", 1422.0, 1430.1], ["Grok 4 Fast", 1405.0, 1412.7], ["Claude Opus 4.5", 1468.0, 1475.3], ["Claude 3 Opus", 1321.0, 1328.0], ["GPT-4.1", 1413.0, 1419.6], ["o3-Mini Medium", 1348.0, 1354.3], ["Step 3.5 Flash", 1391.0, 1397.1], ["Gemini 3.0 Pro Preview (2025-11-18)", 1486.0, 1490.9], ["MiniMax M2.1", 1386.0, 1390.7], ["Nova Pro", 1290.0, 1294.2], ["Nemotron 3 Super", 1365.0, 1368.9], ["Gemini 3.1 Pro Preview (2026-02-19)", 1493.0, 1496.3], ["Gemini 2.0 Flash", 1360.0, 1363.2], ["DeepSeek V3.2 (Non-Reasoning)", 1424.0, 1426.9], ["Claude Opus 4.5 Thinking", 1474.0, 1476.9], ["Gemma 3 12B", 1341.0, 1343.1], ["Claude 4 Opus Thinking", 1424.0, 1426.0], ["Gemini 3.0 Flash Preview (2025-12-17)", 1474.0, 1475.8], ["Kimi K2 0905", 1418.0, 1419.0], ["GPT-5 (high)", 1434.0, 1434.8], ["GPT-5 Nano (high)", 1337.0, 1337.0], ["DeepSeek V3.1 Terminus (Reasoning)", 1416.0, 1415.9], ["Claude 3.5 Sonnet", 1372.0, 1371.7], ["Claude Haiku 4.5", 1407.0, 1406.5], ["Gemini 3.0 Flash Preview (2025-12-17) (Minimal)", 1463.0, 1462.5], ["DeepSeek V3.2 Exp", 1423.0, 1421.9], ["GLM-5", 1456.0, 1454.6], ["Gemma 3 4B", 1303.0, 1301.4], ["Kimi K2.5", 1454.0, 1452.2], ["Claude Opus 4.1 Thinking", 1449.0, 1447.1], ["Mercury 2", 1348.0, 1345.7], ["DeepSeek R1", 1398.0, 1395.7], ["GPT-4o (2024-08-06)", 1335.0, 1332.6], ["Kimi K2", 1417.0, 1414.0], ["Claude 4 Sonnet Thinking", 1399.0, 1395.7], ["Gemini 2.5 Flash Preview (2025-05-20)", 1411.0, 1407.4], ["Grok 3 Beta", 1412.0, 1408.3], ["DeepSeek V3.2 Exp (Reasoning)", 1425.0, 1421.3], ["DeepSeek V3.1 (Reasoning)", 1417.0, 1413.2], ["Gemini 3.1 Flash Lite Preview (2026-03-03)", 1438.0, 1432.7], ["Gemini 2.5 Pro Preview (2025-06-05)", 1448.0, 1442.4], ["MiniMax M2.5", 1406.0, 1400.2], ["Gemma 3n 4B", 1318.0, 1311.7], ["DeepSeek V3.1 (Non-Reasoning)", 1418.0, 1411.4], ["DeepSeek V3 (2025-03-24)", 1395.0, 1388.3], ["DeepSeek V3 (2024-12-26)", 1358.0, 1351.0], ["Command A", 1353.0, 1345.9], ["Kimi K2 Thinking", 1430.0, 1422.3], ["Qwen2.5 Max", 1374.0, 1366.0], ["Llama 3.3 70B Instruct Turbo", 1318.0, 1309.9], ["o3-Mini High", 1363.0, 1354.7], ["o4-Mini Medium", 1390.0, 1381.6], ["GPT-4.1 Nano", 1322.0, 1313.4], ["Grok 4.1 Fast", 1431.0, 1422.2], ["GLM-4.7", 1443.0, 1434.2], ["GPT-5.2 (Non-reasoning)", 1440.0, 1431.1], ["MiniMax M2.7", 1406.0, 1397.0], ["Qwen 3 235B A22B Nonthinking (2025-07-21)", 1422.0, 1412.6], ["GPT-5 Chat", 1426.0, 1416.6], ["Claude Opus 4.1", 1447.0, 1436.8], ["Qwen 3 Coder 480B A35B Instruct", 1387.0, 1376.5], ["Qwen3.5 397B A17B Thinking", 1450.0, 1438.8], ["Qwen 3 235B A22B Thinking (2025-07-21)", 1400.0, 1388.4], ["GPT OSS 120B", 1354.0, 1340.9], ["Qwen3 Max", 1424.0, 1409.8], ["Gemini 2.5 Flash Lite Preview (2025-06-17)", 1374.0, 1359.7], ["GLM 4.5 Air", 1373.0, 1358.7], ["Claude 3.5 Haiku", 1323.0, 1308.7], ["Mistral Medium 3", 1386.0, 1371.1], ["Qwen 3 30B A3B Thinking", 1328.0, 1311.9], ["Mistral Large 3 (2025-12-1)", 1416.0, 1399.7], ["GPT-5.1 (Non-reasoning)", 1439.0, 1422.2], ["MiMo-V2-Pro", 1446.0, 1429.2], ["o3 Medium", 1431.0, 1413.2], ["GPT-4.1 Mini", 1382.0, 1364.0], ["Qwen 3 235B A22B Thinking", 1374.0, 1355.5], ["GPT-5.1 (high)", 1455.0, 1436.2], ["GLM-4.5", 1411.0, 1392.0], ["Claude Opus 4.6 Thinking", 1504.0, 1483.4], ["GLM-4.6", 1426.0, 1405.3], ["Llama 3.1 405B Instruct Turbo", 1335.0, 1314.0], ["Claude Sonnet 4.5", 1453.0, 1431.6], ["Llama 3.1 70B Instruct Turbo", 1293.0, 1271.1], ["Claude Opus 4.6", 1500.0, 1477.2], ["DeepSeek R1 (2025-05-28)", 1422.0, 1398.7], ["Gemma 3 27B", 1365.0, 1341.5], ["GPT-4o Mini", 1317.0, 1293.4], ["Gemini 2.0 Flash Lite", 1353.0, 1329.3], ["Qwen3.5 27B Thinking", 1405.0, 1380.0], ["llama-4-scout", 1322.0, 1295.2], ["GLM-4.7 Flash", 1369.0, 1339.8], ["Mistral Medium 3.1 (2025-08-12)", 1411.0, 1379.1], ["ChatGPT-4o", 1443.0, 1407.8]];
 
   const darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
   function getPal(dark) {
@@ -1772,7 +1788,7 @@
     ctx.font = '400 10px JetBrains Mono, monospace';
     ctx.fillStyle = pal.text;
     ctx.textAlign = 'left';
-    ctx.fillText('R\u00B2 = 0.93    Spearman \u03C1 = 0.97    RMSE = 18.2', PAD_L + 4, PAD_T + 14);
+    ctx.fillText('R\u00B2 = 0.92    Spearman \u03C1 = 0.96    RMSE = 15.6', PAD_L + 4, PAD_T + 14);
   }
 
   // Hover interaction
@@ -1805,6 +1821,480 @@
     entries.forEach(e => { if (e.isIntersecting) { startEntrance(); scatterObs.unobserve(e.target); } });
   }, { threshold: 0.3 });
   document.fonts.ready.then(() => { scatterObs.observe(canvas); });
+})();
+
+// ═══════════════════════════════════════════════
+// KNN ADAPTIVE NEIGHBORHOODS → RIDGE REGRESSION PIPELINE
+// ═══════════════════════════════════════════════
+(function() {
+  'use strict';
+  const canvas = document.getElementById('knnCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+
+  const darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
+  function getPal(d) {
+    return {
+      bg: d ? '#1a1a1a' : '#ffffff', text: d ? '#d8d4cf' : '#1a1a1a',
+      muted: d ? '#a09a90' : '#555', light: d ? '#7a756d' : '#777',
+      accent: d ? '#c46b6b' : '#7a2e2e', ar: d ? [196,107,107] : [122,46,46],
+      cutoff: d ? 'rgba(196,107,107,0.3)' : 'rgba(122,46,46,0.25)',
+      div: d ? '#2e2e2e' : '#e8e5de',
+      labelBg: d ? '#1c1c1c' : '#fff', labelBrd: d ? '#333' : '#d4d0c8',
+      grid: d ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+      pred: d ? '#e8a84c' : '#b8860b', pr: d ? [232,168,76] : [184,134,11],
+    };
+  }
+  let pal = getPal(darkMQ.matches);
+  darkMQ.addEventListener('change', e => { pal = getPal(e.matches); });
+
+  // Layout constants
+  const W = 780, H = 660;
+  const CY_TOP = 180;     // center of radial neighborhood view
+  const SC = 80;           // distance → pixel scale
+  const MAX_R = 118;       // max radial pixel extent
+  const SY_T = 350, SY_B = 545;  // scatter plot y bounds
+  const SX_HALF = 118;    // scatter half-width from panel center
+
+  let _s = 42;
+  function sr() { _s = (_s * 16807) % 2147483647; return _s / 2147483647; }
+
+  function mkPanel(cfg) {
+    const models = [], maxD = MAX_R / SC;
+    // Generate k inside models with distances up to cutoff
+    for (let i = 0; i < cfg.k; i++) {
+      const t = (i + 0.5) / cfg.k;
+      const d = 0.06 + (cfg.cut - 0.10) * t + (sr() - 0.5) * 0.04;
+      models.push({ d: Math.max(0.06, Math.min(d, cfg.cut - 0.01)), inside: true });
+    }
+    // Name a few inside models
+    if (cfg.names) cfg.names.forEach((nm, i) => { if (i < models.length) models[i].n = nm; });
+    // Generate (100-k) outside models beyond cutoff
+    const nOut = 100 - cfg.k;
+    for (let i = 0; i < nOut; i++) {
+      const t = (i + 0.5) / nOut;
+      const d = cfg.cut + 0.04 + (maxD - cfg.cut - 0.06) * t + (sr() - 0.5) * 0.03;
+      models.push({ d: Math.max(cfg.cut + 0.02, Math.min(d, maxD)), inside: false });
+    }
+    models.sort((a, b) => a.d - b.d);
+    // Angles: named models evenly spaced, rest random
+    const labeled = models.filter(m => m.n);
+    labeled.forEach((m, i) => { m.a = (i / labeled.length) * Math.PI * 2 + 0.4; });
+    models.forEach(m => { if (!m.a) m.a = sr() * Math.PI * 2; });
+    // Bandwidth + Gaussian kernel weights
+    const inside = models.filter(m => m.inside);
+    const bwI = Math.min(Math.floor(inside.length * 0.15), inside.length - 1);
+    const bw = inside[bwI].d;
+    models.forEach(m => { m.w = m.inside ? Math.exp(-0.5 * Math.pow(m.d / bw, 2)) : 0; });
+    // Scatter data: feature value + ELO for each inside model
+    // Close models cluster at fvCluster target; far models spread across full range
+    const target = cfg.fvMin + (cfg.fvMax - cfg.fvMin) * (cfg.fvCluster || 0.5);
+    inside.forEach((m, i) => {
+      const distNorm = m.d / cfg.cut; // 0 (closest) to 1 (at cutoff edge)
+      const t = Math.pow(distNorm, 0.6); // sharper separation: close→0, far→1
+      const randomFv = cfg.fvMin + (cfg.fvMax - cfg.fvMin) * sr();
+      const jitter = (sr() - 0.5) * (cfg.fvMax - cfg.fvMin) * 0.08;
+      m.fv = target * (1 - t) + randomFv * t + jitter;
+      m.fv = Math.max(cfg.fvMin, Math.min(cfg.fvMax, m.fv));
+      m.felo = cfg.eloBase + cfg.eloSlope * m.fv + (sr() - 0.5) * cfg.eloNoise;
+    });
+    // OLS regression
+    let sx = 0, sy = 0, sxx = 0, sxy = 0;
+    const n = inside.length;
+    inside.forEach(m => { sx += m.fv; sy += m.felo; sxx += m.fv * m.fv; sxy += m.fv * m.felo; });
+    cfg.regSlope = (n * sxy - sx * sy) / (n * sxx - sx * sx);
+    cfg.regIntercept = (sy - cfg.regSlope * sx) / n;
+    cfg.testFv = (cfg.predElo - cfg.regIntercept) / cfg.regSlope;
+    // Axis ranges (with padding)
+    let minElo = cfg.predElo, maxElo = cfg.predElo, minFv = cfg.testFv, maxFv = cfg.testFv;
+    inside.forEach(m => {
+      if (m.felo < minElo) minElo = m.felo;
+      if (m.felo > maxElo) maxElo = m.felo;
+      if (m.fv < minFv) minFv = m.fv;
+      if (m.fv > maxFv) maxFv = m.fv;
+    });
+    minElo = Math.min(minElo, cfg.meanElo); maxElo = Math.max(maxElo, cfg.meanElo);
+    const eloPad = (maxElo - minElo) * 0.10;
+    cfg.eloRange = [minElo - eloPad, maxElo + eloPad];
+    const fvPad = (maxFv - minFv) * 0.08;
+    cfg.fvRange = [minFv - fvPad, maxFv + fvPad];
+    cfg.nb = models;
+    return cfg;
+  }
+
+  const panels = [
+    mkPanel({
+      tl: 'Dense Neighborhood', nm: 'Cl. Opus 4.6 Thinking',
+      elo: 1595, cut: 0.55, k: 20,
+      meanElo: 1448.4, predElo: 1490,
+      feature: 'CritPtScore',
+      fvMin: 0.003, fvMax: 0.20, fvCluster: 0.80,
+      eloBase: 1180, eloSlope: 2100, eloNoise: 55,
+      names: ['Gemini 3.1 Pro', 'GPT-5.2', 'Kimi K2.5', 'Qwen3.5', 'Cl. Opus 4.5'],
+    }),
+    mkPanel({
+      tl: 'Sparse Neighborhood', nm: 'Cl. Sonnet 3.7 Thinking',
+      elo: 1404, cut: 1.10, k: 72,
+      meanElo: 1403.3, predElo: 1404,
+      feature: 'ugileaderboard_Writing',
+      fvMin: 11, fvMax: 72, fvCluster: 0.55,
+      eloBase: 620, eloSlope: 12, eloNoise: 75,
+      names: ['Llama 3.3 70B', 'Cl. 3.5 Haiku', 'Nova Pro', 'Qwen2.5 72B', 'GPT-4o'],
+    }),
+  ];
+
+  let dash = 0, prog = 0, on = false, hov = null, mx = 0, my = 0;
+  // Toggle state: 0 = radial view, 1 = scatter view. Animates smoothly.
+  let viewState = 0, viewTarget = 0;
+
+  function resize() {
+    const cw = canvas.parentElement.getBoundingClientRect().width - 32;
+    const s = Math.min(cw / W, 1);
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = (W * s) + 'px'; canvas.style.height = (H * s) + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function ease(t) { return t < 0.5 ? 2*t*t : -1 + (4 - 2*t)*t; }
+
+  // Map feature value → scatter x pixel
+  function fvToX(fv, p, cx) {
+    return (cx - SX_HALF) + ((fv - p.fvRange[0]) / (p.fvRange[1] - p.fvRange[0])) * (SX_HALF * 2);
+  }
+  // Map ELO → scatter y pixel (high ELO = top)
+  function eloToY(elo, p) {
+    return SY_B - ((elo - p.eloRange[0]) / (p.eloRange[1] - p.eloRange[0])) * (SY_B - SY_T);
+  }
+
+  function drawPanel(p, cx) {
+    const t = prog, cr = p.cut * SC, a = pal.ar;
+    const inside = p.nb.filter(n => n.inside);
+    const sx_l = cx - SX_HALF, sx_r = cx + SX_HALF;
+
+    // Pre-compute scatter target positions for inside dots
+    inside.forEach(m => {
+      m._sx = fvToX(m.fv, p, cx);
+      m._sy = eloToY(m.felo, p);
+    });
+
+    // ═══ TOP HALF: RADIAL NEIGHBORHOOD ═══════════════════════════════════
+
+    // Outside dots (ghosted cloud — stays in top half permanently)
+    if (t > 0.08) {
+      const nt = Math.min((t - 0.08) / 0.22, 1);
+      p.nb.forEach((n, i) => {
+        if (n.inside) return;
+        const st = i / p.nb.length;
+        const dt = ease(Math.max(0, Math.min((nt - st * 0.3) / 0.7, 1)));
+        if (dt <= 0) return;
+        // Fade during selection phase (but keep visible)
+        const fadeOut = t > 0.32 ? Math.max(0.35, 1 - ease(Math.min((t - 0.32) / 0.13, 1)) * 0.65) : 1;
+        const x = cx + Math.cos(n.a) * n.d * SC * dt;
+        const y = CY_TOP + Math.sin(n.a) * n.d * SC * dt;
+        ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba('+a[0]+','+a[1]+','+a[2]+','+(0.35 * dt * fadeOut)+')';
+        ctx.fill();
+        n._x = x; n._y = y;
+      });
+    }
+
+    // Cutoff circle
+    if (t > 0.28) {
+      const ct = ease(Math.min((t - 0.28) / 0.12, 1));
+      const g = ctx.createRadialGradient(cx, CY_TOP, 0, cx, CY_TOP, cr * ct);
+      g.addColorStop(0, 'rgba('+a[0]+','+a[1]+','+a[2]+',0.06)');
+      g.addColorStop(0.7, 'rgba('+a[0]+','+a[1]+','+a[2]+',0.025)');
+      g.addColorStop(1, 'transparent');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(cx, CY_TOP, cr * ct, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = pal.cutoff; ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 4]); ctx.lineDashOffset = -dash;
+      ctx.beginPath(); ctx.arc(cx, CY_TOP, cr * ct, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]); ctx.lineDashOffset = 0;
+    }
+
+    // Inside dots — SINGLE PASS that handles entrance, radial hold, AND falling transition
+    if (t > 0.08) {
+      const nt = Math.min((t - 0.08) / 0.22, 1);
+      inside.forEach((n, i) => {
+        // Phase 1: Entrance animation (fly out from center)
+        const entSt = i / p.nb.length;
+        const enterT = ease(Math.max(0, Math.min((nt - entSt * 0.3) / 0.7, 1)));
+        if (enterT <= 0) return;
+
+        // Full radial position
+        const rx = cx + Math.cos(n.a) * n.d * SC;
+        const ry = CY_TOP + Math.sin(n.a) * n.d * SC;
+
+        // Phase 2: Falling transition driven by viewState (staggered, nearest dots first)
+        const stagger = 0.10 * (i / inside.length);
+        const rawVS = Math.max(0, Math.min(1, (viewState - stagger) / (1 - stagger)));
+        const transT = ease(rawVS);
+
+        // Current position: entrance → hold → fall
+        let x, y;
+        if (enterT < 1) {
+          x = cx + (rx - cx) * enterT;
+          y = CY_TOP + (ry - CY_TOP) * enterT;
+        } else if (transT > 0) {
+          x = rx + (n._sx - rx) * transT;
+          y = ry + (n._sy - ry) * transT;
+        } else {
+          x = rx; y = ry;
+        }
+
+        // Connecting line from center (fades during transition)
+        const lineAlpha = n.w * 0.18 * enterT * (1 - transT);
+        if (lineAlpha > 0.005) {
+          ctx.strokeStyle = 'rgba('+a[0]+','+a[1]+','+a[2]+','+lineAlpha+')';
+          ctx.lineWidth = 0.5 + n.w * 0.5;
+          ctx.beginPath(); ctx.moveTo(cx, CY_TOP); ctx.lineTo(x, y); ctx.stroke();
+        }
+
+        // Dot — bigger near center (weight-driven), size range 1.0–6.0
+        const sz = (2.0 + n.w * 5.0) * Math.min(enterT, 1);
+        ctx.beginPath(); ctx.arc(x, y, sz, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba('+a[0]+','+a[1]+','+a[2]+','+(0.25 + n.w * 0.65)+')';
+        ctx.fill();
+        if (hov === n) { ctx.strokeStyle = pal.accent; ctx.lineWidth = 1.5; ctx.stroke(); }
+
+        // Ghost echo at radial position (appears as dot leaves)
+        if (transT > 0.1 && transT < 1) {
+          ctx.beginPath(); ctx.arc(rx, ry, sz * 0.5, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba('+a[0]+','+a[1]+','+a[2]+','+(0.10 * (1 - transT))+')';
+          ctx.fill();
+        }
+
+        // Name labels removed — too cluttered at this scale
+        n._x = x; n._y = y;
+      });
+    }
+
+    // Center glow (test model — stays in top half)
+    if (t > 0) {
+      const tt = ease(Math.min(t / 0.08, 1));
+      const pu = 1 + Math.sin(dash * 0.04) * 0.08;
+      const gr = 12 * tt * pu;
+      const pr = pal.pr;
+      const gg = ctx.createRadialGradient(cx, CY_TOP, 0, cx, CY_TOP, gr);
+      gg.addColorStop(0, 'rgba('+pr[0]+','+pr[1]+','+pr[2]+',0.40)');
+      gg.addColorStop(1, 'transparent');
+      ctx.fillStyle = gg;
+      ctx.beginPath(); ctx.arc(cx, CY_TOP, gr, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, CY_TOP, 5 * tt, 0, Math.PI * 2);
+      ctx.fillStyle = pal.pred; ctx.fill();
+      ctx.strokeStyle = pal.bg; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+
+    // "training set" watermark
+    if (t > 0.36 && t < 0.55) {
+      const wt = ease(Math.min((t - 0.36) / 0.08, 1)) * (1 - ease(Math.max(0, (t - 0.50) / 0.05)));
+      ctx.font = "italic 600 13px 'EB Garamond', Georgia, serif";
+      ctx.fillStyle = 'rgba('+a[0]+','+a[1]+','+a[2]+','+(0.35 * wt)+')';
+      ctx.textAlign = 'center';
+      ctx.fillText('training set', cx, CY_TOP + cr * 0.65);
+    }
+
+    // Formula above cutoff circle
+    if (t > 0.34) {
+      const ft = ease(Math.min((t - 0.34) / 0.10, 1));
+      ctx.font = '400 10px JetBrains Mono, monospace';
+      ctx.fillStyle = 'rgba('+a[0]+','+a[1]+','+a[2]+','+(0.55 * ft)+')';
+      ctx.textAlign = 'center';
+      const ay = CY_TOP - cr - 12;
+      if (ay > 48) ctx.fillText('max_dist = d\u2080\u2070\u00b7\u2077 \u00d7 3 = ' + p.cut.toFixed(2), cx, ay);
+    }
+
+    // ═══ BOTTOM HALF: SCATTER AXES + REGRESSION ═════════════════════════
+
+    // Scatter axes fade in just before dots start falling
+    const scatterFade = viewState > 0.01 ? Math.min(viewState / 0.3, 1) : 0;
+    if (scatterFade > 0) {
+      ctx.save(); ctx.globalAlpha = scatterFade;
+      ctx.strokeStyle = pal.div; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sx_l, SY_T); ctx.lineTo(sx_l, SY_B); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sx_l, SY_B); ctx.lineTo(sx_r, SY_B); ctx.stroke();
+
+      // Y-axis ticks
+      const eloStep = (p.eloRange[1] - p.eloRange[0]) > 100 ? 50 : 25;
+      const eloStart = Math.ceil(p.eloRange[0] / eloStep) * eloStep;
+      ctx.font = '400 8.5px JetBrains Mono, monospace';
+      for (let e = eloStart; e <= p.eloRange[1]; e += eloStep) {
+        const y = eloToY(e, p);
+        if (y < SY_T + 5 || y > SY_B - 5) continue;
+        ctx.fillStyle = pal.light; ctx.textAlign = 'right';
+        ctx.beginPath(); ctx.moveTo(sx_l - 3, y); ctx.lineTo(sx_l, y); ctx.stroke();
+        ctx.fillText(e.toString(), sx_l - 5, y + 3);
+        ctx.save(); ctx.strokeStyle = pal.grid; ctx.setLineDash([2, 3]);
+        ctx.beginPath(); ctx.moveTo(sx_l, y); ctx.lineTo(sx_r, y); ctx.stroke();
+        ctx.setLineDash([]); ctx.restore();
+      }
+      // X-axis ticks
+      const fvStep = p.feature === 'CritPtScore' ? 0.05 : 10;
+      const fvStart = Math.ceil(p.fvRange[0] / fvStep) * fvStep;
+      ctx.textAlign = 'center'; ctx.fillStyle = pal.light;
+      for (let f = fvStart; f <= p.fvRange[1]; f += fvStep) {
+        const x = fvToX(f, p, cx);
+        if (x < sx_l + 5 || x > sx_r - 5) continue;
+        ctx.beginPath(); ctx.moveTo(x, SY_B); ctx.lineTo(x, SY_B + 3); ctx.stroke();
+        ctx.fillText(p.feature === 'CritPtScore' ? f.toFixed(2) : Math.round(f).toString(), x, SY_B + 14);
+      }
+      // Axis labels
+      ctx.font = '500 10px Inter, sans-serif'; ctx.fillStyle = pal.muted; ctx.textAlign = 'center';
+      ctx.fillText(p.feature, cx, SY_B + 26);
+      ctx.save();
+      ctx.translate(sx_l - 28, (SY_T + SY_B) / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText('Arena ELO', 0, 0);
+      ctx.restore();
+      ctx.restore();
+    }
+
+    // Regression line (draws left to right after dots land)
+    if (viewState > 0.5) {
+      const rt = ease(Math.min((viewState - 0.5) / 0.3, 1));
+      const f1 = p.fvRange[0], f2 = p.fvRange[1];
+      const x1 = fvToX(f1, p, cx), x2 = fvToX(f2, p, cx);
+      const y1 = eloToY(p.regIntercept + p.regSlope * f1, p);
+      const y2 = eloToY(p.regIntercept + p.regSlope * f2, p);
+      ctx.save(); ctx.globalAlpha = 0.7;
+      ctx.strokeStyle = pal.accent; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(x1, y1);
+      ctx.lineTo(x1 + (x2 - x1) * rt, y1 + (y2 - y1) * rt); ctx.stroke();
+      ctx.restore();
+    }
+
+    // Prediction point
+    if (viewState > 0.7) {
+      const pt = ease(Math.min((viewState - 0.7) / 0.3, 1));
+      const px = fvToX(p.testFv, p, cx);
+      const py = eloToY(p.predElo, p);
+      const pr = pal.pr;
+      // Crosshair lines
+      ctx.save(); ctx.globalAlpha = pt * 0.25;
+      ctx.strokeStyle = pal.pred; ctx.lineWidth = 0.8; ctx.setLineDash([3, 2]);
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, SY_B); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(sx_l, py); ctx.stroke();
+      ctx.setLineDash([]); ctx.restore();
+      // Outer glow
+      const pu = 1 + Math.sin(dash * 0.06) * 0.10;
+      const ps = 6 * pt * pu;
+      const pg = ctx.createRadialGradient(px, py, 0, px, py, ps * 2.5);
+      pg.addColorStop(0, 'rgba('+pr[0]+','+pr[1]+','+pr[2]+',0.30)');
+      pg.addColorStop(1, 'transparent');
+      ctx.fillStyle = pg;
+      ctx.beginPath(); ctx.arc(px, py, ps * 2.5, 0, Math.PI * 2); ctx.fill();
+      // Gold dot
+      ctx.beginPath(); ctx.arc(px, py, ps, 0, Math.PI * 2);
+      ctx.fillStyle = pal.pred; ctx.fill();
+      // White ring
+      ctx.strokeStyle = pal.bg; ctx.lineWidth = 1.5;
+      ctx.stroke();
+      // Label
+      if (pt > 0.5) {
+        ctx.save(); ctx.globalAlpha = ease(Math.min((pt - 0.5) / 0.5, 1));
+        ctx.font = '600 10px Inter, sans-serif'; ctx.fillStyle = pal.pred;
+        ctx.textAlign = 'left';
+        ctx.fillText(p.nm, px + ps + 6, py + 4);
+        ctx.restore();
+      }
+    }
+
+    // ═══ STATIC LABELS ══════════════════════════════════════════════════
+
+    ctx.font = "500 15px 'EB Garamond', Georgia, serif"; ctx.fillStyle = pal.text;
+    ctx.textAlign = 'center'; ctx.fillText(p.tl, cx, 22);
+    ctx.font = '400 12px Inter, sans-serif'; ctx.fillStyle = pal.muted;
+    ctx.fillText(p.nm, cx, 40);
+
+    ctx.font = '400 10px JetBrains Mono, monospace'; ctx.fillStyle = pal.light;
+    ctx.textAlign = 'center';
+    ctx.fillText('k = ' + p.k, cx, H - 30);
+    if (viewState > 0.85) {
+      const rt = ease(Math.min((viewState - 0.85) / 0.15, 1));
+      ctx.font = '400 10px JetBrains Mono, monospace';
+      ctx.fillStyle = 'rgba('+a[0]+','+a[1]+','+a[2]+','+(0.65 * rt)+')';
+      ctx.fillText('top driver: ' + p.feature, cx, H - 14);
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = pal.div; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(W / 2, 48); ctx.lineTo(W / 2, H - 40); ctx.stroke();
+    ctx.setLineDash([]);
+    if (viewState > 0.01) {
+      const st = Math.min(viewState / 0.2, 1);
+      ctx.save(); ctx.globalAlpha = st * 0.35;
+      ctx.strokeStyle = pal.div; ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(30, 325); ctx.lineTo(W - 30, 325); ctx.stroke();
+      ctx.restore();
+    }
+    drawPanel(panels[0], W * 0.25);
+    drawPanel(panels[1], W * 0.75);
+    if (hov && hov.n && prog > 0.25) {
+      const txt = hov.n + '  (d=' + hov.d.toFixed(2) + (hov.inside ? '  w=' + hov.w.toFixed(2) : '  excluded') + ')';
+      ctx.font = '400 9px Inter, sans-serif';
+      const tw = ctx.measureText(txt).width;
+      const tx = Math.min(mx + 12, W - tw - 16);
+      const ty = Math.max(my - 16, 14);
+      ctx.fillStyle = pal.labelBg; ctx.strokeStyle = pal.labelBrd; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(tx - 5, ty - 11, tw + 10, 16, 3); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = hov.inside ? pal.accent : pal.light;
+      ctx.textAlign = 'left'; ctx.fillText(txt, tx, ty);
+    }
+  }
+
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const sx = W / rect.width, sy = H / rect.height;
+    mx = (e.clientX - rect.left) * sx; my = (e.clientY - rect.top) * sy;
+    let found = null, best = 12;
+    [[panels[0], W*0.25], [panels[1], W*0.75]].forEach(([p, cx]) => {
+      p.nb.forEach(n => {
+        if (n._x === undefined) return;
+        const dd = Math.sqrt(Math.pow(mx - n._x, 2) + Math.pow(my - n._y, 2));
+        if (dd < best) { best = dd; found = n; }
+      });
+    });
+    hov = found;
+  });
+  canvas.addEventListener('mouseleave', () => { hov = null; });
+  canvas.style.cursor = 'crosshair';
+
+  const toggleBtn = document.getElementById('knnToggle');
+
+  function tick() {
+    if (!on) return;
+    dash += 0.35;
+    // Radial entrance animation (caps at 0.50 — just shows the neighborhoods)
+    if (prog < 0.50) prog = Math.min(prog + 0.005, 0.50);
+    // Smoothly animate viewState toward viewTarget
+    const speed = 0.035;
+    if (Math.abs(viewState - viewTarget) > 0.001) {
+      viewState += (viewTarget - viewState) * speed + Math.sign(viewTarget - viewState) * 0.008;
+      viewState = Math.max(0, Math.min(1, viewState));
+    } else {
+      viewState = viewTarget;
+    }
+    draw();
+    requestAnimationFrame(tick);
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    viewTarget = viewTarget < 0.5 ? 1 : 0;
+    toggleBtn.textContent = viewTarget > 0.5 ? '← Show Neighborhoods' : 'Show Ridge Regression →';
+  });
+
+  const knnObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !on) { on = true; prog = 0; tick(); }
+    });
+  }, { threshold: 0.15 });
+  document.fonts.ready.then(() => { knnObs.observe(canvas); });
 })();
 
 // ═══════════════════════════════════════════════
@@ -1842,9 +2332,9 @@
   const boxes = [
     { id:'custom', label:'4 Custom Benchmarks', sub:'EQ \u00b7 Writing \u00b7 Logic \u00b7 Style' },
     { id:'public', label:'12 Public Benchmarks', sub:'LiveBench \u00b7 Aider \u00b7 ARC-AGI \u00b7 \u2026' },
-    { id:'combine', label:'Combine', sub:'157 models \u00d7 65+ columns' },
-    { id:'impute', label:'Impute & Predict', sub:'ModelBankImputer \u2192 ARD + Huber' },
-    { id:'elo', label:'Arena ELO', sub:'Spearman \u03c1 = 0.97 \u00b7 RMSE 18.2' },
+    { id:'combine', label:'Combine', sub:'158 models \u00d7 105 features' },
+    { id:'impute', label:'Impute & Predict', sub:'ModelBankImputer \u2192 Adaptive KNN' },
+    { id:'elo', label:'Arena ELO', sub:'Spearman \u03c1 = 0.96 \u00b7 RMSE 15.6' },
   ];
 
   function fitText(text, maxW, baseSize, font) {

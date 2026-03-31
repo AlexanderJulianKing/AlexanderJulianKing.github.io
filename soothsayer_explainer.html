@@ -967,6 +967,13 @@
       [0.79,0.75,0.65,0.22,0.06,0.82,0.82,null,0.75,null],
     ];
 
+    // On mobile (5 cols), add more missing cells so the demo is meaningful
+    if (_impMobile) {
+      rawScores[0][3] = null; rawScores[2][1] = null; rawScores[3][2] = null;
+      rawScores[5][0] = null; rawScores[6][1] = null; rawScores[7][3] = null;
+      rawScores[9][2] = null; rawScores[11][0] = null; rawScores[12][3] = null;
+      rawScores[13][1] = null;
+    }
     const trueVals = [], tier = [];
     for (let r = 0; r < ROWS; r++) {
       trueVals[r] = [];
@@ -1592,9 +1599,10 @@
   let pal = getPal(darkMQ.matches);
   darkMQ.addEventListener('change', e => { pal = getPal(e.matches); drawScatter(); });
 
-  // Layout
-  const PAD_L = 52, PAD_R = 20, PAD_T = 20, PAD_B = 46;
-  const W = 780, H = 420;
+  // Layout — boost sizes on mobile where canvas is heavily scaled down
+  const _scatMobile = window.innerWidth < 640;
+  const PAD_L = _scatMobile ? 72 : 52, PAD_R = 20, PAD_T = _scatMobile ? 28 : 20, PAD_B = _scatMobile ? 64 : 46;
+  const W = 780, H = _scatMobile ? 460 : 420;
   const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
 
   // Data range
@@ -1687,24 +1695,26 @@
     ctx.setLineDash([]);
 
     // Axis labels
-    ctx.font = '400 9px Inter, sans-serif';
+    const _tickFont = _scatMobile ? '400 16px Inter, sans-serif' : '400 9px Inter, sans-serif';
+    const _titleFont = _scatMobile ? '500 18px Inter, sans-serif' : '400 10px Inter, sans-serif';
+    ctx.font = _tickFont;
     ctx.fillStyle = pal.text;
     ctx.textAlign = 'center';
     for (let v = minV; v <= maxV; v += 50) {
-      ctx.fillText(v, toX(v), PAD_T + plotH + 16);
+      ctx.fillText(v, toX(v), PAD_T + plotH + (_scatMobile ? 22 : 16));
     }
     ctx.textAlign = 'right';
     for (let v = minV; v <= maxV; v += 50) {
-      ctx.fillText(v, PAD_L - 6, toY(v) + 3);
+      ctx.fillText(v, PAD_L - 6, toY(v) + (_scatMobile ? 5 : 3));
     }
 
     // Axis titles
-    ctx.font = '400 10px Inter, sans-serif';
+    ctx.font = _titleFont;
     ctx.fillStyle = pal.text;
     ctx.textAlign = 'center';
     ctx.fillText('Actual Arena ELO', PAD_L + plotW / 2, H - 4);
     ctx.save();
-    ctx.translate(13, PAD_T + plotH / 2);
+    ctx.translate(_scatMobile ? 16 : 13, PAD_T + plotH / 2);
     ctx.rotate(-Math.PI / 2);
     ctx.fillText('Predicted ELO', 0, 0);
     ctx.restore();
@@ -1734,7 +1744,7 @@
       }
       ctx.globalAlpha = alpha;
       ctx.beginPath();
-      ctx.arc(x, cy, isHover ? 5 : 3.5, 0, Math.PI * 2);
+      ctx.arc(x, cy, isHover ? (_scatMobile ? 7 : 5) : (_scatMobile ? 5 : 3.5), 0, Math.PI * 2);
       ctx.fillStyle = isHover ? pal.dotHover : pal.dot;
       ctx.fill();
       ctx.globalAlpha = 1;
@@ -1787,10 +1797,10 @@
     }
 
     // Stats annotation
-    ctx.font = '400 10px JetBrains Mono, monospace';
+    ctx.font = _scatMobile ? '400 17px JetBrains Mono, monospace' : '400 10px JetBrains Mono, monospace';
     ctx.fillStyle = pal.text;
     ctx.textAlign = 'left';
-    ctx.fillText('R\u00B2 = 0.92    Spearman \u03C1 = 0.96    RMSE = 15.6', PAD_L + 4, PAD_T + 14);
+    ctx.fillText('R\u00B2 = 0.92    Spearman \u03C1 = 0.96    RMSE = 15.6', PAD_L + 4, PAD_T + (_scatMobile ? 20 : 14));
   }
 
   // Hover interaction
@@ -1857,8 +1867,8 @@
 
   // Layout constants — stack vertically on mobile
   const _knnMobile = window.innerWidth < 640;
-  const W = _knnMobile ? 390 : 780, H = _knnMobile ? 1260 : 660;
-  const PANEL_Y_OFF = _knnMobile ? 600 : 0; // vertical offset for panel 2 on mobile
+  const W = _knnMobile ? 390 : 780, H = _knnMobile ? 1320 : 660;
+  const PANEL_Y_OFF = _knnMobile ? 660 : 0; // vertical offset for panel 2 on mobile
   const CY_TOP = 180;     // center of radial neighborhood view
   const SC = 80;           // distance → pixel scale
   const MAX_R = 118;       // max radial pixel extent
@@ -2463,8 +2473,8 @@
 
     let W, H;
     if (narrow) {
-      // Vertical layout
-      W = Math.min(cw, 320);
+      // Vertical layout — use full container width
+      W = cw;
       const boxW = W - 20, boxH = 48, gap = 36;
       H = 10 + boxes.length * (boxH + gap) - gap + 10;
       canvas.width = W * dpr;
@@ -2474,7 +2484,7 @@
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, W, H);
 
-      const x = 10;
+      const x = (W - boxW) / 2;
       let y = 10;
       for (let i = 0; i < boxes.length; i++) {
         drawBox(x, y, boxW, boxH, boxes[i].label, boxes[i].sub);

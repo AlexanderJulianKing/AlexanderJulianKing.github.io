@@ -2272,41 +2272,30 @@
 
   const toggleBtn = document.getElementById('knnToggle');
 
-  let _animating = false;
   function tick() {
     if (!on) return;
     dash += 0.35;
-    let active = false;
     // Radial entrance animation (caps at 0.50)
-    if (prog < 0.50) { prog = Math.min(prog + 0.005, 0.50); active = true; }
+    if (prog < 0.50) prog = Math.min(prog + 0.005, 0.50);
     // Smoothly animate viewState toward viewTarget
     if (Math.abs(viewState - viewTarget) > 0.001) {
       viewState += (viewTarget - viewState) * 0.035 + Math.sign(viewTarget - viewState) * 0.008;
       viewState = Math.max(0, Math.min(1, viewState));
-      active = true;
-    } else if (viewState !== viewTarget) {
+    } else {
       viewState = viewTarget;
     }
     draw();
-    if (active) {
-      requestAnimationFrame(tick);
-    } else {
-      _animating = false; // stop loop when idle
-    }
-  }
-  function ensureAnimating() {
-    if (!_animating && on) { _animating = true; requestAnimationFrame(tick); }
+    requestAnimationFrame(tick);
   }
 
   toggleBtn.addEventListener('click', () => {
     viewTarget = viewTarget < 0.5 ? 1 : 0;
     toggleBtn.textContent = viewTarget > 0.5 ? '\u2190 Show Neighborhoods' : 'Show Ridge Regression \u2192';
-    ensureAnimating();
   });
 
   const knnObs = new IntersectionObserver(entries => {
     entries.forEach(e => {
-      if (e.isIntersecting && !on) { on = true; prog = 0; ensureAnimating(); }
+      if (e.isIntersecting && !on) { on = true; prog = 0; tick(); }
     });
   }, { threshold: 0.15 });
   document.fonts.ready.then(() => { knnObs.observe(canvas); });

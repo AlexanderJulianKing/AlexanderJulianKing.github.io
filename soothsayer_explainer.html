@@ -466,7 +466,7 @@
 
         <div class="pipeline-wrap fade-in stagger-2">
           <canvas id="pipelineCanvas" aria-hidden="true"></canvas>
-          <p class="sr-only">Pipeline diagram: 4 custom benchmarks and 12 public benchmarks feed into a combine step producing 158 models by 105 features, then through ModelBankImputer and adaptive KNN prediction to predict Arena ELO scores.</p>
+          <p class="sr-only">Pipeline diagram: 4 custom benchmarks and 11 public benchmarks feed into a combine step producing 158 models by 105 features, then through ModelBankImputer and adaptive KNN prediction to predict Arena ELO scores.</p>
         </div>
 
         <div class="stats-row fade-in stagger-3">
@@ -2377,7 +2377,7 @@
 
   const boxes = [
     { id:'custom', label:'4 Custom Benchmarks', sub:'EQ \u00b7 Writing \u00b7 Logic \u00b7 Style' },
-    { id:'public', label:'12 Public Benchmarks', sub:'LiveBench \u00b7 Aider \u00b7 ARC-AGI \u00b7 \u2026' },
+    { id:'public', label:'11 Public Benchmarks', sub:'LiveBench \u00b7 Aider \u00b7 ARC-AGI \u00b7 \u2026' },
     { id:'combine', label:'Combine', sub:'158 models \u00d7 105 features' },
     { id:'impute', label:'Impute & Predict', sub:'ModelBankImputer \u2192 Adaptive KNN' },
     { id:'elo', label:'Arena ELO', sub:'Spearman \u03c1 = 0.96 \u00b7 RMSE 15.6' },

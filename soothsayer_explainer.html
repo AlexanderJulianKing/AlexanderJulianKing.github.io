@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Project Soothsayer — How It Works</title>
-  <meta name="description" content="How Project Soothsayer predicts Chatbot Arena ELO scores from benchmark data alone.">
+  <meta name="description" content="How Project Soothsayer predicts Arena (arena.ai) ELO scores from benchmark data alone.">
   <meta property="og:title" content="Project Soothsayer — How It Works">
-  <meta property="og:description" content="How Project Soothsayer predicts Chatbot Arena ELO scores from benchmark data alone.">
+  <meta property="og:description" content="How Project Soothsayer predicts Arena (arena.ai) ELO scores from benchmark data alone.">
   <meta property="og:type" content="article">
   <meta property="og:image" content="og-image.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -466,14 +466,14 @@
 
         <div class="pipeline-wrap fade-in stagger-2">
           <canvas id="pipelineCanvas" aria-hidden="true"></canvas>
-          <p class="sr-only">Pipeline diagram: 4 custom benchmarks and 11 public benchmarks feed into a combine step producing 158 models by 105 features, then through ModelBankImputer and adaptive KNN prediction to predict Arena ELO scores.</p>
+          <p class="sr-only">Pipeline diagram: 4 custom benchmarks and 11 public benchmarks feed into a combine step producing 162 models by 122 features, then through ModelBankImputer and adaptive KNN prediction to predict Arena ELO scores.</p>
         </div>
 
         <div class="stats-row fade-in stagger-3">
-          <div class="stat-card"><div class="stat-num" data-target="158">0</div><div class="stat-label">Models evaluated</div></div>
-          <div class="stat-card"><div class="stat-num" data-target="105">0</div><div class="stat-label">Benchmark features</div></div>
-          <div class="stat-card"><div class="stat-num" data-target="123">0</div><div class="stat-label">Training samples</div></div>
-          <div class="stat-card"><div class="stat-num decimal" data-target="0.92">0</div><div class="stat-label">R&sup2;</div></div>
+          <div class="stat-card"><div class="stat-num" data-target="162">0</div><div class="stat-label">Models evaluated</div></div>
+          <div class="stat-card"><div class="stat-num" data-target="122">0</div><div class="stat-label">Benchmark features</div></div>
+          <div class="stat-card"><div class="stat-num" data-target="127">0</div><div class="stat-label">Training samples</div></div>
+          <div class="stat-card"><div class="stat-num decimal" data-target="0.941">0</div><div class="stat-label">R&sup2;</div></div>
         </div>
       </section>
 
@@ -501,7 +501,7 @@
         <div class="flow-row fade-in stagger-3">
           <div class="flow-box"><div class="box-header">scrape.bash</div><div class="box-detail">11 Python scrapers pull latest leaderboard CSVs in parallel. Gemini API handles model name canonicalization.</div></div>
           <div class="flow-box"><div class="box-header">combine.py</div><div class="box-detail">Outer-join on unified model names. Handles aliases, renames, deduplication. Drops low-variance columns.</div></div>
-          <div class="flow-box"><div class="box-header">clean_combined.csv</div><div class="box-detail">158 models &times; 105 features. ~40% of cells missing&mdash;not every model tested on every benchmark.</div></div>
+          <div class="flow-box"><div class="box-header">clean_combined.csv</div><div class="box-detail">162 models &times; 122 features. ~40% of cells missing&mdash;not every model tested on every benchmark.</div></div>
         </div>
       </section>
 
@@ -513,7 +513,7 @@
           <div class="card fade-in stagger-1"><h3>Soothsayer EQ</h3><span class="method-tag">TrueSkill Arena</span><p>Tests emotional intelligence: empathy, social nuance, conflict resolution. Models compete head-to-head, judged by an LLM referee.</p></div>
           <div class="card fade-in stagger-2"><h3>Soothsayer Writing</h3><span class="method-tag">TrueSkill Arena</span><p>Pairwise creative-writing tournament judged on character authenticity, originality, coherence, atmosphere&mdash;and penalizing clich&eacute;s, flowery verbosity, and gratuitous metaphor.</p></div>
           <div class="card fade-in stagger-3"><h3>Soothsayer Logic</h3><span class="method-tag">LLM Grading</span><p>12 physics and lateral-thinking puzzles that test commonsense reasoning. Graded by an LLM judge.</p></div>
-          <div class="card fade-in stagger-4"><h3>Soothsayer Style</h3><span class="method-tag">Style Analysis</span><p>Profiles each model&rsquo;s writing fingerprint&mdash;vocabulary richness, sentence patterns, tone. Captures stylistic qualities humans instinctively prefer.</p></div>
+          <div class="card fade-in stagger-4"><h3>Soothsayer Style</h3><span class="method-tag">Style Analysis</span><p>Profiles each model&rsquo;s writing fingerprint&mdash;vocabulary richness, sentence patterns, tone, plus a 32-dimensional semantic embedding of its raw responses (bge-small &rarr; PCA). Captures stylistic qualities humans instinctively prefer but benchmark scores don&rsquo;t see.</p></div>
         </div>
       </section>
 
@@ -551,19 +551,19 @@
         <div class="imputer-wrap fade-in stagger-2">
           <div class="phase-bar" id="phaseBar">
             <div class="phase-pip active" data-phase="0">The Problem</div>
-            <div class="phase-pip" data-phase="1">Rank Predictors</div>
+            <div class="phase-pip" data-phase="1">Rank &amp; Select</div>
             <div class="phase-pip" data-phase="2">Pass 1: Per-Cell</div>
-            <div class="phase-pip" data-phase="3">Expansion Pass</div>
+            <div class="phase-pip" data-phase="3">Pass 2: Expansion Pass</div>
             <div class="phase-pip" data-phase="4">Coherence</div>
             <div class="phase-pip" data-phase="5">Complete</div>
           </div>
           <div class="phase-narration">
             <h4 id="phaseTitle">The Problem: A Sparse Matrix</h4>
-            <p id="phaseDesc">158 models, 105 benchmarks. Not every model has been tested everywhere. The matrix is ~40% empty.</p>
+            <p id="phaseDesc">162 models, 122 benchmarks. Not every model has been tested everywhere. The matrix is ~40% empty.</p>
           </div>
           <div class="matrix-viewport">
             <canvas id="imputerCanvas" aria-hidden="true"></canvas>
-            <p class="sr-only">Interactive matrix visualization showing how the ModelBankImputer fills missing benchmark scores through 5 phases: identifying sparse cells, ranking predictors, per-cell imputation, expansion pass, and SVD coherence projection.</p>
+            <p class="sr-only">Interactive matrix visualization showing how the ModelBankImputer fills missing benchmark scores through 5 phases: identifying sparse cells, ranking predictors and forward-selecting by leave-one-out MSE, per-cell imputation, expansion pass, and SVD coherence projection.</p>
           </div>
           <div class="imputer-controls">
             <button class="imp-btn" id="btnPrev" disabled>&larr; Prev</button>
@@ -573,7 +573,7 @@
         </div>
       </section>
 
-      <!-- 6. Prediction -->
+      <!-- 5. Prediction -->
       <section>
         <h2 class="section-heading fade-in"><span class="section-number">5.</span> From Features to Predictions</h2>
         <p class="subtitle fade-in stagger-1">An adaptive nearest-neighbor approach that accounts for how human preference works differently at different competency levels.</p>
@@ -584,9 +584,10 @@
         </div>
 
         <div class="ml-steps fade-in stagger-2">
-          <div class="ml-step"><span class="step-icon">1.</span><div class="step-content"><h4>Adaptive KNN with Sublinear Power Cutoff</h4><p>For each model, find its nearest neighbors in the 105-dimensional benchmark space. The neighborhood radius follows a sublinear power law: <code>max_dist&nbsp;=&nbsp;d<sub>nearest</sub><sup>0.7</sup>&nbsp;&times;&nbsp;3</code>. This naturally gives tighter neighborhoods in dense regions (top models, k&asymp;25) while keeping adequate coverage in sparse regions&mdash;ensuring the local regression stays within a consistent feature-preference regime.</p></div></div>
-          <div class="ml-step"><span class="step-icon">2.</span><div class="step-content"><h4>Kernel-Weighted Ridge Regression</h4><p>Within each neighborhood, fit a weighted Ridge regression where closer neighbors have more influence (Gaussian kernel). The regularization strength adapts to the neighborhood&rsquo;s score spread. This learns which benchmarks matter <em>for this specific group of models</em>&mdash;not a global average.</p></div></div>
-          <div class="ml-step"><span class="step-icon">3.</span><div class="step-content"><h4>Jackknife Bias Correction</h4><p>Ridge shrinks predictions toward the neighborhood mean. The jackknife leaves each neighbor out, refits, and measures how much Ridge compresses. This compression slope (typically 1.1&ndash;1.5&times;) is used to inflate the prediction back outward, correcting the centering bias.</p></div></div>
+          <div class="ml-step"><span class="step-icon">1.</span><div class="step-content"><h4>Fold-Internal PLS-3 Hybrid</h4><p>Euclidean distance across ~119 benchmark columns treats every column as equally load-bearing, so models can look like neighbors just by agreeing on features that don&rsquo;t move ELO. Before KNN runs, three supervised summary axes are fit inside the current CV fold and appended to the feature matrix. Each axis is a weighted combination of raw columns chosen to track ELO globally. KNN&rsquo;s distance now has three dimensions that encode &ldquo;things that broadly track the target.&rdquo; The local Ridge in Step 3 still sees the raw columns, so the tier-specific sign flips from the Key Finding above still get handled neighborhood by neighborhood. Fitting PLS inside each fold (on training data only) keeps the target from leaking into held-out rows.</p></div></div>
+          <div class="ml-step"><span class="step-icon">2.</span><div class="step-content"><h4>Adaptive KNN with Sublinear Power Cutoff</h4><p>For each model, find its nearest neighbors in the augmented feature space (~119 raw columns plus the 3 PLS axes, after dropping style/tone columns that hurt once the supervised axes are on). The neighborhood radius follows a sublinear power law: <code>max_dist&nbsp;=&nbsp;d<sub>nearest</sub><sup>0.7</sup>&nbsp;&times;&nbsp;3</code>. This naturally gives tighter neighborhoods in dense regions (top models, k&asymp;25) while keeping adequate coverage in sparse regions, ensuring the local regression stays within a consistent feature-preference regime.</p></div></div>
+          <div class="ml-step"><span class="step-icon">3.</span><div class="step-content"><h4>Kernel-Weighted Ridge Regression</h4><p>Within each neighborhood, fit a weighted Ridge regression where closer neighbors have more influence (Gaussian kernel). The regularization strength adapts to the neighborhood&rsquo;s score spread.</p></div></div>
+          <div class="ml-step"><span class="step-icon">4.</span><div class="step-content"><h4>Jackknife Bias Correction</h4><p>Ridge shrinks predictions toward the neighborhood mean. The jackknife leaves each neighbor out, refits, and measures how much Ridge compresses. This compression slope (typically 1.1&ndash;1.5&times;) is used to inflate the prediction back outward, correcting the centering bias.</p></div></div>
         </div>
 
         <h3 class="fade-in" style="margin-top:2rem;margin-bottom:0.5rem;font-size:1.1rem;">Adaptive Neighborhoods</h3>
@@ -599,10 +600,10 @@
         </div>
 
         <h3 class="fade-in" style="margin-top:2.5rem;margin-bottom:1rem;font-size:1.1rem;">Predicted vs. Actual Arena ELO</h3>
-        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">Leave-one-out predictions on 123 models. Every point is a prediction the model never trained on.</p>
+        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">Out-of-fold predictions on 127 models (5-fold CV). Every point is a prediction the model never trained on.</p>
         <div class="fade-in stagger-2" style="border:1px solid var(--card-border);background:var(--card-bg);padding:1rem;">
           <canvas id="scatterCanvas" style="width:100%;display:block;" aria-hidden="true"></canvas>
-          <p class="sr-only">Scatter plot of predicted versus actual Arena ELO scores for 123 models. Points cluster tightly around the diagonal line, with R-squared of 0.92, Spearman rho of 0.96, and RMSE of 15.6.</p>
+          <p class="sr-only">Scatter plot of predicted versus actual Arena ELO scores for 127 models. Points cluster tightly around the diagonal line, with R-squared of 0.941, Spearman rho of 0.971, and RMSE of 13.61.</p>
         </div>
 
         <h3 class="fade-in" style="margin-top:2.5rem;margin-bottom:1rem;font-size:1.1rem;">Why Not Just Median-Impute?</h3>
@@ -610,10 +611,22 @@
         <table class="comparison-table fade-in stagger-2">
           <thead><tr><th>Method</th><th>RMSE</th><th>R&sup2;</th><th>Spearman &rho;</th></tr></thead>
           <tbody>
-            <tr><td>Predict mean (dummy)</td><td>56.6</td><td>0.00</td><td>&mdash;</td></tr>
-            <tr><td>Public benchmarks + median impute</td><td>30.0</td><td>0.72</td><td>0.85</td></tr>
-            <tr><td>All benchmarks + median impute</td><td>26.3</td><td>0.78</td><td>0.90</td></tr>
-            <tr class="highlight"><td>Full Soothsayer pipeline</td><td>15.6</td><td>0.92</td><td>0.96</td></tr>
+            <tr><td>Predict mean (dummy)</td><td>56.3</td><td>0.00</td><td>&mdash;</td></tr>
+            <tr><td>Public benchmarks + median impute</td><td>35.6</td><td>0.66</td><td>0.81</td></tr>
+            <tr><td>All benchmarks + median impute</td><td>25.7</td><td>0.82</td><td>0.90</td></tr>
+            <tr class="highlight"><td>Full Soothsayer pipeline</td><td>13.61</td><td>0.941</td><td>0.971</td></tr>
+          </tbody>
+        </table>
+
+        <h3 class="fade-in" style="margin-top:2.5rem;margin-bottom:1rem;font-size:1.1rem;">Chronological Holdout</h3>
+        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">The stricter test: train on the oldest 80% of models, then predict the newest 20% (n=23) one model at a time, re-fitting imputation, PCA, and PLS at every step. No information from the future ever leaks backward. Baselines collapse here because they can't extrapolate past their training distribution.</p>
+        <table class="comparison-table fade-in stagger-2">
+          <thead><tr><th>Method</th><th>RMSE</th><th>R&sup2;</th><th>Spearman &rho;</th></tr></thead>
+          <tbody>
+            <tr><td>Predict mean (dummy)</td><td>62.2</td><td>0.06</td><td>0.25</td></tr>
+            <tr><td>Public benchmarks + median impute</td><td>55.2</td><td>0.38</td><td>0.66</td></tr>
+            <tr><td>All benchmarks + median impute</td><td>54.3</td><td>0.36</td><td>0.54</td></tr>
+            <tr class="highlight"><td>Full Soothsayer pipeline</td><td>14.69</td><td>0.900</td><td>0.940</td></tr>
           </tbody>
         </table>
       </section>
@@ -663,8 +676,7 @@
   document.querySelectorAll('.stats-row').forEach(s => statsObs.observe(s));
 
   // Comparison table row stagger reveal
-  const tableEl = document.querySelector('.comparison-table');
-  if (tableEl) {
+  document.querySelectorAll('.comparison-table').forEach(tableEl => {
     const rows = [...tableEl.querySelectorAll('tbody tr')];
     const tableRevealObs = new IntersectionObserver(entries => {
       entries.forEach(e => {
@@ -678,7 +690,7 @@
       });
     }, { threshold: 0.4 });
     tableRevealObs.observe(tableEl);
-  }
+  });
 
   // (pipeline merge lines removed — now canvas-based)
 
@@ -1290,12 +1302,12 @@
 
   // Phase data
   const phases = [
-    { title:'The Problem: A Sparse Matrix', desc:'158 models, 105 benchmarks. Not every model has been tested everywhere. The matrix is ~40% empty.' },
-    { title:'Step 1: Rank Predictors Per Column', desc:'For each target column, rank every other column by |correlation| \u00d7 \u221an. The stronger the arc, the better the predictor. Three examples shown.' },
+    { title:'The Problem: A Sparse Matrix', desc:'162 models, 122 benchmarks. Not every model has been tested everywhere. The matrix is ~40% empty.' },
+    { title:'Step 1: Rank Predictors, Then Forward-Select by LOO', desc:'For each target column, rank every other column by |correlation| \u00d7 \u221an to build a candidate pool (arcs shown). Then greedy forward selection walks down that pool, adding the candidate whose BayesianRidge leave-one-out MSE drops the column\u2019s error the most. Stops when no candidate improves LOO MSE by more than 0.1%, or when 8 predictors are locked in. Three target columns shown.' },
     { title:'Step 2: Per-Cell Prediction (Pass 1)', desc:'The core of the ModelBankImputer. For each missing cell, select the best predictors that model actually has observed values for, then pick from a bank of fitted regressors. Each regressor estimates its own leave-one-out error; a fill is \u201cconfident\u201d when that error is under 40% of the column\u2019s natural spread.' },
-    { title:'Step 3: Expansion Pass', desc:'Pass 1 filled every cell, but some fits are uncertain. Pass 2 retries them worst-first, now allowing confident pass-1 fills (dashed connector) as additional predictors. The new estimate only replaces the old one if \u03c3\u00b2 improves by at least 5%. Any cells that couldn\u2019t be filled at all fall back to column median.' },
+    { title:'Step 3: Pass 2 — Expansion Pass', desc:'Pass 1 filled every cell, but some fits are uncertain. Pass 2 retries them worst-first, now allowing confident pass-1 fills (dashed connector) as additional predictors. The new estimate only replaces the old one if \u03c3\u00b2 improves by at least 5%. Any cells that couldn\u2019t be filled at all fall back to column median.' },
     { title:'Step 4: SVD Coherence Projection', desc:'A low-rank SVD decomposes the filled matrix. Each imputed value blends toward its coherent estimate, weighted by uncertainty.' },
-    { title:'Complete: Ready for Prediction', desc:'Every cell filled. The matrix is dense, coherent, and ready for adaptive KNN prediction. 158 models \u00d7 105 features \u2192 Arena ELO predictions.' },
+    { title:'Complete: Ready for Prediction', desc:'Every cell filled. The matrix is dense, coherent, and ready for adaptive KNN prediction. 162 models \u00d7 122 features \u2192 Arena ELO predictions.' },
   ];
 
   let currentPhase = 0;
@@ -1579,8 +1591,8 @@
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
 
-  // OOF data: [name, actual, predicted] — LOO predictions from adaptive KNN pipeline (lmarena_Score)
-  const DATA = [["Phi-4", 1256.0, 1304.6], ["Gemini 1.5 Flash 8B", 1258.0, 1305.9], ["Olmo 3 32B (Reasoning)", 1305.0, 1343.1], ["Claude 3.7 Sonnet", 1371.0, 1400.5], ["Nova Micro", 1240.0, 1267.5], ["QwQ 32B", 1336.0, 1362.7], ["Qwen2.5 72B Instruct Turbo", 1302.0, 1326.6], ["Claude 4 Sonnet", 1389.0, 1413.3], ["Nova Lite", 1260.0, 1283.7], ["Nemotron 3 Nano 30B A3B (Reasoning)", 1318.0, 1339.6], ["Claude 4 Opus", 1412.0, 1431.1], ["GPT-5 Mini (High)", 1390.0, 1408.9], ["Claude Sonnet 4.6 Thinking", 1463.0, 1481.5], ["Nova 2 Lite", 1337.0, 1355.3], ["Gemini 2.5 Flash Lite Preview 09-2025 Nonthinking", 1380.0, 1397.6], ["GPT OSS 20B", 1318.0, 1335.3], ["MiMo-V2-Flash (Reasoning)", 1387.0, 1401.9], ["Gemini 2.5 Flash Preview 09-2025", 1405.0, 1419.2], ["Grok 3 Mini Beta (High)", 1363.0, 1375.1], ["Qwen 3 32B Thinking", 1347.0, 1358.7], ["GPT-5.2 (high)", 1442.0, 1453.5], ["Qwen3 Next 80B A3B Instruct", 1402.0, 1412.8], ["Llama 3.1 8B Instruct Turbo", 1211.0, 1221.7], ["Llama 4 Maverick 17B 128E Instruct", 1327.0, 1337.6], ["Claude 3.7 Sonnet Thinking", 1387.0, 1397.4], ["Claude Sonnet 4.5 Thinking", 1453.0, 1463.0], ["DeepSeek V3.1 Terminus", 1416.0, 1425.1], ["MiniMax M2", 1347.0, 1356.0], ["Qwen3 Next 80B A3B Thinking", 1369.0, 1377.7], ["Grok 4", 1410.0, 1418.1], ["DeepSeek V3.2", 1422.0, 1430.1], ["Grok 4 Fast", 1405.0, 1412.7], ["Claude Opus 4.5", 1468.0, 1475.3], ["Claude 3 Opus", 1321.0, 1328.0], ["GPT-4.1", 1413.0, 1419.6], ["o3-Mini Medium", 1348.0, 1354.3], ["Step 3.5 Flash", 1391.0, 1397.1], ["Gemini 3.0 Pro Preview (2025-11-18)", 1486.0, 1490.9], ["MiniMax M2.1", 1386.0, 1390.7], ["Nova Pro", 1290.0, 1294.2], ["Nemotron 3 Super", 1365.0, 1368.9], ["Gemini 3.1 Pro Preview (2026-02-19)", 1493.0, 1496.3], ["Gemini 2.0 Flash", 1360.0, 1363.2], ["DeepSeek V3.2 (Non-Reasoning)", 1424.0, 1426.9], ["Claude Opus 4.5 Thinking", 1474.0, 1476.9], ["Gemma 3 12B", 1341.0, 1343.1], ["Claude 4 Opus Thinking", 1424.0, 1426.0], ["Gemini 3.0 Flash Preview (2025-12-17)", 1474.0, 1475.8], ["Kimi K2 0905", 1418.0, 1419.0], ["GPT-5 (high)", 1434.0, 1434.8], ["GPT-5 Nano (high)", 1337.0, 1337.0], ["DeepSeek V3.1 Terminus (Reasoning)", 1416.0, 1415.9], ["Claude 3.5 Sonnet", 1372.0, 1371.7], ["Claude Haiku 4.5", 1407.0, 1406.5], ["Gemini 3.0 Flash Preview (2025-12-17) (Minimal)", 1463.0, 1462.5], ["DeepSeek V3.2 Exp", 1423.0, 1421.9], ["GLM-5", 1456.0, 1454.6], ["Gemma 3 4B", 1303.0, 1301.4], ["Kimi K2.5", 1454.0, 1452.2], ["Claude Opus 4.1 Thinking", 1449.0, 1447.1], ["Mercury 2", 1348.0, 1345.7], ["DeepSeek R1", 1398.0, 1395.7], ["GPT-4o (2024-08-06)", 1335.0, 1332.6], ["Kimi K2", 1417.0, 1414.0], ["Claude 4 Sonnet Thinking", 1399.0, 1395.7], ["Gemini 2.5 Flash Preview (2025-05-20)", 1411.0, 1407.4], ["Grok 3 Beta", 1412.0, 1408.3], ["DeepSeek V3.2 Exp (Reasoning)", 1425.0, 1421.3], ["DeepSeek V3.1 (Reasoning)", 1417.0, 1413.2], ["Gemini 3.1 Flash Lite Preview (2026-03-03)", 1438.0, 1432.7], ["Gemini 2.5 Pro Preview (2025-06-05)", 1448.0, 1442.4], ["MiniMax M2.5", 1406.0, 1400.2], ["Gemma 3n 4B", 1318.0, 1311.7], ["DeepSeek V3.1 (Non-Reasoning)", 1418.0, 1411.4], ["DeepSeek V3 (2025-03-24)", 1395.0, 1388.3], ["DeepSeek V3 (2024-12-26)", 1358.0, 1351.0], ["Command A", 1353.0, 1345.9], ["Kimi K2 Thinking", 1430.0, 1422.3], ["Qwen2.5 Max", 1374.0, 1366.0], ["Llama 3.3 70B Instruct Turbo", 1318.0, 1309.9], ["o3-Mini High", 1363.0, 1354.7], ["o4-Mini Medium", 1390.0, 1381.6], ["GPT-4.1 Nano", 1322.0, 1313.4], ["Grok 4.1 Fast", 1431.0, 1422.2], ["GLM-4.7", 1443.0, 1434.2], ["GPT-5.2 (Non-reasoning)", 1440.0, 1431.1], ["MiniMax M2.7", 1406.0, 1397.0], ["Qwen 3 235B A22B Nonthinking (2025-07-21)", 1422.0, 1412.6], ["GPT-5 Chat", 1426.0, 1416.6], ["Claude Opus 4.1", 1447.0, 1436.8], ["Qwen 3 Coder 480B A35B Instruct", 1387.0, 1376.5], ["Qwen3.5 397B A17B Thinking", 1450.0, 1438.8], ["Qwen 3 235B A22B Thinking (2025-07-21)", 1400.0, 1388.4], ["GPT OSS 120B", 1354.0, 1340.9], ["Qwen3 Max", 1424.0, 1409.8], ["Gemini 2.5 Flash Lite Preview (2025-06-17)", 1374.0, 1359.7], ["GLM 4.5 Air", 1373.0, 1358.7], ["Claude 3.5 Haiku", 1323.0, 1308.7], ["Mistral Medium 3", 1386.0, 1371.1], ["Qwen 3 30B A3B Thinking", 1328.0, 1311.9], ["Mistral Large 3 (2025-12-1)", 1416.0, 1399.7], ["GPT-5.1 (Non-reasoning)", 1439.0, 1422.2], ["MiMo-V2-Pro", 1446.0, 1429.2], ["o3 Medium", 1431.0, 1413.2], ["GPT-4.1 Mini", 1382.0, 1364.0], ["Qwen 3 235B A22B Thinking", 1374.0, 1355.5], ["GPT-5.1 (high)", 1455.0, 1436.2], ["GLM-4.5", 1411.0, 1392.0], ["Claude Opus 4.6 Thinking", 1504.0, 1483.4], ["GLM-4.6", 1426.0, 1405.3], ["Llama 3.1 405B Instruct Turbo", 1335.0, 1314.0], ["Claude Sonnet 4.5", 1453.0, 1431.6], ["Llama 3.1 70B Instruct Turbo", 1293.0, 1271.1], ["Claude Opus 4.6", 1500.0, 1477.2], ["DeepSeek R1 (2025-05-28)", 1422.0, 1398.7], ["Gemma 3 27B", 1365.0, 1341.5], ["GPT-4o Mini", 1317.0, 1293.4], ["Gemini 2.0 Flash Lite", 1353.0, 1329.3], ["Qwen3.5 27B Thinking", 1405.0, 1380.0], ["llama-4-scout", 1322.0, 1295.2], ["GLM-4.7 Flash", 1369.0, 1339.8], ["Mistral Medium 3.1 (2025-08-12)", 1411.0, 1379.1], ["ChatGPT-4o", 1443.0, 1407.8]];
+  // OOF data: [name, actual, predicted] — 5-fold out-of-fold predictions from adaptive KNN pipeline (lmarena_Score)
+  const DATA = [["Claude 3 Opus", 1321.0, 1323.3], ["GPT-4o Mini", 1318.0, 1297.2], ["Llama 3.1 405B Instruct Turbo", 1335.0, 1321.7], ["Llama 3.1 70B Instruct Turbo", 1293.0, 1267.4], ["Llama 3.1 8B Instruct Turbo", 1211.0, 1233.7], ["GPT-4o (2024-08-06)", 1335.0, 1326.6], ["Qwen2.5 72B Instruct Turbo", 1303.0, 1304.2], ["Claude 3.5 Sonnet", 1372.0, 1373.6], ["Claude 3.5 Haiku", 1323.0, 1328.6], ["Nova Lite", 1260.0, 1271.1], ["Nova Micro", 1241.0, 1228.5], ["Nova Pro", 1290.0, 1287.7], ["Llama 3.3 70B Instruct Turbo", 1318.0, 1299.6], ["Gemini 2.0 Flash", 1360.0, 1368.1], ["DeepSeek V3 (2024-12-26)", 1358.0, 1355.2], ["Phi-4", 1256.0, 1302.1], ["DeepSeek R1", 1398.0, 1385.3], ["Qwen2.5 Max", 1374.0, 1370.0], ["o3-Mini High", 1363.0, 1347.0], ["o3-Mini Medium", 1348.0, 1350.0], ["Gemini 2.0 Flash Lite", 1353.0, 1338.6], ["Grok 3 Beta", 1412.0, 1395.0], ["Grok 3 Mini Beta (High)", 1362.0, 1372.0], ["Claude 3.7 Sonnet", 1371.0, 1394.0], ["Claude 3.7 Sonnet Thinking", 1387.0, 1383.1], ["QwQ 32B", 1336.0, 1351.3], ["Gemma 3 12B", 1342.0, 1335.0], ["Gemma 3 27B", 1366.0, 1352.4], ["Gemma 3 4B", 1303.0, 1311.2], ["Command A", 1354.0, 1353.7], ["DeepSeek V3 (2025-03-24)", 1395.0, 1393.6], ["ChatGPT-4o", 1443.0, 1416.3], ["Llama 4 Maverick 17B 128E Instruct", 1327.0, 1346.7], ["llama-4-scout", 1322.0, 1305.1], ["GPT-4.1", 1413.0, 1409.5], ["GPT-4.1 Mini", 1382.0, 1370.7], ["GPT-4.1 Nano", 1322.0, 1324.2], ["o3 Medium", 1431.0, 1421.0], ["o4-Mini Medium", 1390.0, 1376.8], ["Qwen 3 235B A22B Thinking", 1375.0, 1372.5], ["Qwen 3 30B A3B Thinking", 1328.0, 1326.6], ["Qwen 3 32B Thinking", 1347.0, 1350.6], ["Mistral Medium 3", 1387.0, 1370.4], ["Gemini 2.5 Flash Preview (2025-05-20)", 1411.0, 1404.1], ["Gemma 3n 4B", 1318.0, 1311.6], ["Claude 4 Opus", 1412.0, 1429.6], ["Claude 4 Opus Thinking", 1424.0, 1429.7], ["Claude 4 Sonnet", 1389.0, 1405.4], ["Claude 4 Sonnet Thinking", 1399.0, 1405.8], ["DeepSeek R1 (2025-05-28)", 1422.0, 1416.5], ["Gemini 2.5 Pro Preview (2025-06-05)", 1449.0, 1452.3], ["Gemini 2.5 Flash Lite Preview (2025-06-17)", 1374.0, 1359.2], ["Grok 4", 1410.0, 1407.2], ["Kimi K2", 1417.0, 1412.1], ["Qwen 3 235B A22B Nonthinking (2025-07-21)", 1424.0, 1412.8], ["Qwen 3 235B A22B Thinking (2025-07-21)", 1400.0, 1394.0], ["Qwen 3 Coder 480B A35B Instruct", 1387.0, 1377.3], ["GLM 4.5 Air", 1373.0, 1355.3], ["GLM-4.5", 1411.0, 1387.5], ["Claude Opus 4.1", 1447.0, 1439.2], ["Claude Opus 4.1 Thinking", 1449.0, 1436.0], ["GPT OSS 120B", 1353.0, 1351.6], ["GPT OSS 20B", 1318.0, 1314.7], ["GPT-5 (high)", 1433.0, 1442.0], ["GPT-5 Chat", 1427.0, 1420.5], ["GPT-5 Mini (High)", 1390.0, 1418.5], ["GPT-5 Nano (high)", 1337.0, 1340.9], ["Mistral Medium 3.1 (2025-08-12)", 1410.0, 1373.7], ["DeepSeek V3.1 (Non-Reasoning)", 1418.0, 1416.5], ["DeepSeek V3.1 (Reasoning)", 1417.0, 1424.5], ["Grok 4 Fast", 1404.0, 1420.7], ["Qwen3 Max", 1424.0, 1412.1], ["Kimi K2 0905", 1418.0, 1420.0], ["Qwen3 Next 80B A3B Instruct", 1402.0, 1411.6], ["Qwen3 Next 80B A3B Thinking", 1369.0, 1383.1], ["DeepSeek V3.1 Terminus", 1416.0, 1424.2], ["DeepSeek V3.1 Terminus (Reasoning)", 1417.0, 1418.8], ["Gemini 2.5 Flash Lite Preview 09-2025 Nonthinking", 1380.0, 1389.5], ["Gemini 2.5 Flash Preview 09-2025", 1405.0, 1409.7], ["Claude Sonnet 4.5", 1452.0, 1435.9], ["Claude Sonnet 4.5 Thinking", 1452.0, 1461.6], ["DeepSeek V3.2 Exp", 1423.0, 1419.5], ["DeepSeek V3.2 Exp (Reasoning)", 1425.0, 1417.0], ["GLM-4.6", 1426.0, 1409.5], ["Claude Haiku 4.5", 1408.0, 1412.6], ["MiniMax M2", 1346.0, 1352.6], ["Kimi K2 Thinking", 1430.0, 1420.8], ["GPT-5.1 (high)", 1455.0, 1449.8], ["GPT-5.1 (Non-reasoning)", 1439.0, 1423.8], ["Grok 4.1 Fast", 1432.0, 1415.1], ["Gemini 3.0 Pro Preview (2025-11-18)", 1486.0, 1481.3], ["Olmo 3 32B (Reasoning)", 1305.0, 1335.3], ["Claude Opus 4.5", 1469.0, 1474.3], ["Claude Opus 4.5 Thinking", 1473.0, 1474.9], ["DeepSeek V3.2", 1423.0, 1426.2], ["DeepSeek V3.2 (Non-Reasoning)", 1424.0, 1422.7], ["Mistral Large 3 (2025-12-1)", 1415.0, 1412.3], ["Nova 2 Lite", 1338.0, 1364.1], ["GPT-5.2 (high)", 1442.0, 1462.3], ["GPT-5.2 (Non-reasoning)", 1439.0, 1430.4], ["Nemotron 3 Nano 30B A3B (Reasoning)", 1317.0, 1326.6], ["MiMo-V2-Flash (Reasoning)", 1387.0, 1386.8], ["Gemini 3.0 Flash Preview (2025-12-17)", 1474.0, 1471.6], ["Gemini 3.0 Flash Preview (2025-12-17) (Minimal)", 1463.0, 1445.9], ["GLM-4.7", 1443.0, 1430.8], ["MiniMax M2.1", 1385.0, 1402.1], ["GLM-4.7 Flash", 1368.0, 1371.2], ["Kimi K2.5", 1451.0, 1449.8], ["Step 3.5 Flash", 1392.0, 1400.4], ["Claude Opus 4.6", 1497.0, 1473.6], ["Claude Opus 4.6 Thinking", 1503.0, 1490.0], ["GLM-5", 1456.0, 1458.9], ["GLM 5.1", 1472.0, 1460.7], ["MiniMax M2.5", 1403.0, 1406.1], ["Qwen3.5 397B A17B Thinking", 1446.0, 1437.4], ["Claude Sonnet 4.6 Thinking", 1463.0, 1496.7], ["Gemini 3.1 Pro Preview (2026-02-19)", 1492.0, 1496.0], ["Qwen3.5 35B A3B Thinking", 1396.0, 1402.1], ["Qwen3.5 27B Thinking", 1403.0, 1385.6], ["Mercury 2", 1347.0, 1346.7], ["Gemini 3.1 Flash Lite Preview (2026-03-03)", 1438.0, 1448.1], ["Nemotron 3 Super", 1361.0, 1337.2], ["MiMo-V2-Pro", 1446.0, 1427.6], ["MiniMax M2.7", 1403.0, 1382.9], ["Gemma 4 31B", 1451.0, 1447.7], ["Gemma 4 26B A4B", 1439.0, 1421.4], ["Claude Opus 4.7 Thinking", 1505.0, 1487.2]];
 
   const darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
   function getPal(dark) {
@@ -1801,7 +1813,7 @@
     ctx.font = _scatMobile ? '400 17px JetBrains Mono, monospace' : '400 10px JetBrains Mono, monospace';
     ctx.fillStyle = pal.text;
     ctx.textAlign = 'left';
-    ctx.fillText('R\u00B2 = 0.92    Spearman \u03C1 = 0.96    RMSE = 15.6', PAD_L + 4, PAD_T + (_scatMobile ? 20 : 14));
+    ctx.fillText('R\u00B2 = 0.941    Spearman \u03C1 = 0.971    RMSE = 13.61', PAD_L + 4, PAD_T + (_scatMobile ? 20 : 14));
   }
 
   // Hover interaction
@@ -2378,9 +2390,9 @@
   const boxes = [
     { id:'custom', label:'4 Custom Benchmarks', sub:'EQ \u00b7 Writing \u00b7 Logic \u00b7 Style' },
     { id:'public', label:'11 Public Benchmarks', sub:'LiveBench \u00b7 Aider \u00b7 ARC-AGI \u00b7 \u2026' },
-    { id:'combine', label:'Combine', sub:'158 models \u00d7 105 features' },
+    { id:'combine', label:'Combine', sub:'162 models \u00d7 122 features' },
     { id:'impute', label:'Impute & Predict', sub:'ModelBankImputer \u2192 Adaptive KNN' },
-    { id:'elo', label:'Arena ELO', sub:'Spearman \u03c1 = 0.96 \u00b7 RMSE 15.6' },
+    { id:'elo', label:'Arena ELO', sub:'Spearman \u03c1 = 0.971 \u00b7 RMSE 13.61' },
   ];
 
   function fitText(text, maxW, baseSize, font) {

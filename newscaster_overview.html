@@ -297,7 +297,7 @@
     <p class="hero-subtitle hero-anim hero-anim-2">Daily News-Podcast Pipeline</p>
     <hr class="hero-rule hero-anim hero-anim-3" aria-hidden="true">
     <div class="abstract hero-anim hero-anim-4">
-      <p>An automated news program that <strong>agentically researches</strong> the day's news, writes an anchor-and-reporter script, <strong>rigorously fact-checks</strong> every piece of information, then ships an audio and video episode to YouTube.</p>
+      <p>An automated news program that <strong>agentically researches</strong> the day's news, writes an anchor-and-reporter script, <strong>fact-checks the script against the sources it gathered</strong> and auto-corrects source-grounded errors, then ships an audio and video episode to YouTube.</p>
     </div>
   </header>
 
@@ -546,7 +546,7 @@
     <g><rect class="box" x="80" y="368" width="210" height="46" rx="9"/><text class="t" x="185" y="388" text-anchor="middle">3 Stable facts</text><text class="s ai" x="185" y="404" text-anchor="middle">AI · Gemma → web · advisory</text></g>
     <g><rect class="term" x="55" y="438" width="260" height="50" rx="22"/><text class="t" x="185" y="456" text-anchor="middle">Grounded flags → editor (workflow <tspan font-size="12" font-weight="700">7</tspan>)</text><text class="s" x="185" y="474" text-anchor="middle">stable-fact stays a logged flag</text></g>
   </svg>
-  <p class="fine">Pass&nbsp;2 runs on the strong model (<b>GLM</b>) against <em>only that segment's</em> sources: the tight context is what lets it catch a subtle contradiction a long, noisy corpus would drown. In the 2026-06-21 episode it flags the script's “Vance <b>arrived</b> in Switzerland” when the sources say he <b>left for</b> it. It was Iran's negotiators who arrived (a conflation, pass 2). Only the source-grounded flags (from passes 1 and 2) go to the editor (workflow 7). The stable-fact pass stays <b>advisory</b>: its web check is unreliable on facts newer than the model's training. It wrongly “corrected” the real “Field Marshal Asim Munir”, so it's logged but never auto-edited. Every flag is logged; it never blocks the run.</p>
+  <p class="fine">Pass&nbsp;2 runs on the strong model (<b>GLM</b>) against <em>only that segment's</em> sources: the tight context is what lets it catch a subtle contradiction a long, noisy corpus would drown. In the 2026-06-23 episode it flags the script's “a crushing <b>defeat</b> in the Makerfield by-election” when the sources say Andy Burnham <b>won</b> it with 55%, a victory, not a defeat (a reversal, pass 2). Only the source-grounded flags (from passes 1 and 2) go to the editor (workflow 7). The stable-fact pass stays <b>advisory</b>: its web check is unreliable on facts newer than the model's training. In the same episode it wrongly insisted the Fed chair was still Powell, dismissing the 2026 dates as “simulated”, so it's logged but never auto-edited. Every flag is logged; it never blocks the run.</p>
 
   <h3 class="fch fade-in"><span class="n">7.</span> The fact-finder editor <span class="em">· fix the confirmed errors before voicing</span></h3>
   <p class="fcap">Runs only on scripts with a <b>source-grounded</b> flag (quote or faithfulness). Opus proposes verbatim find/replace fixes for the confirmed factual errors; a GPT-5.5 adversary signs off on each; then plain code applies it, but only where the exact phrase occurs once. Up to 3 rounds.</p>
@@ -571,16 +571,16 @@
 
   <hr class="rule">
   <h2 class="section-heading fade-in"><span class="section-number">3.</span> A story through the machine</h2>
-  <p class="secnote">Following one real segment from the June 21, 2026 episode, the U.S.–Iran talks in Switzerland. A subtle <b>reversal</b> rides into the script: it says Vance <mark>arrived</mark> in Switzerland when the sources have him only <em>leaving for</em> it. The faithfulness pass catches it, and the editor fixes it before voicing.</p>
+  <p class="secnote">Following one real story from the June 23, 2026 episode, the U.K. leadership shake-up. The source hunter pulls it cleanly, then the cheap rewrite model <b>inverts the outcome</b>, calling Andy Burnham's by-election <mark>landslide</mark> a <mark>crushing defeat</mark>. The faithfulness pass catches the flip, and the editor restores the win before voicing.</p>
 
   <div class="ex-flow">
 
     <div class="page fade-in">
-      <div class="page-bar"><span class="dot"></span> Scraped source <span class="meta">stage 1 · gather</span></div>
+      <div class="page-bar"><span class="dot"></span> Scraped source <span class="meta">stage 1 · scrape</span></div>
       <div class="page-body">
-        <div class="src">bbc.com · npr.org · pbs.org, coverage of the U.S.–Iran Switzerland talks · Jun 20 2026</div>
-        <p class="quoteblock">Vice President JD Vance <b>left for Switzerland</b> on Saturday evening to join U.S. envoys for the talks… <b>U.S. Central Command</b> said traffic through the Strait of Hormuz continues to flow.</p>
-        <p class="src" style="margin-top:.5rem">↳ the source is precise: Vance is <em>departing</em> (he has not arrived), and it's Central Command, not Vance, speaking about the strait.</p>
+        <div class="src">npr.org · bbc.com · al jazeera, U.K. politics coverage · Jun 22 2026</div>
+        <p class="quoteblock">Keir Starmer announced his resignation as Labour leader, following <b>Andy Burnham's decisive victory</b> last week in the Makerfield by-election. Burnham, then mayor of Greater Manchester, <b>won</b> the Makerfield parliamentary by-election on June 19 with 55% of the vote.</p>
+        <p class="src" style="margin-top:.5rem">↳ the source is unambiguous: Burnham <em>won</em> the by-election in a landslide, one of the blows that pushed Starmer out.</p>
       </div>
     </div>
     <div class="down">↓<small>fetched + validated, only relevant excerpts kept</small></div>
@@ -588,19 +588,18 @@
     <div class="page fade-in">
       <div class="page-bar"><span class="dot"></span> Source-hunter findings <span class="meta">stage 1 · grounded research</span></div>
       <div class="page-body">
-        <p><b>FINDINGS</b>: U.S. and Iranian negotiators are to meet in Switzerland. VP JD Vance left for the talks Saturday evening to join U.S. envoys Jared Kushner and Steve Witkoff; Pakistan's PM Shehbaz Sharif and Field Marshal Asim Munir also departed for Switzerland. Iran's military command announced a closure of the Strait of Hormuz; U.S. Central Command said traffic continues to flow.</p>
-        <p class="src"><b>GAPS</b>: the verbatim wording of Iran's statement on the strait.</p>
-        <p class="src" style="margin-top:.45rem">↳ the research keeps every actor and direction straight: Vance <em>leaves for</em> the talks, Iran's team <em>arrives</em>. The error appears later, when the dialogue compresses who did what.</p>
+        <p><b>FINDINGS</b>: Keir Starmer announced his resignation as Labour leader on June 22, 2026. After heavy May losses, <b>Andy Burnham's 55% win</b> in the June 19 Makerfield by-election, and the Mandelson controversy, Starmer stays on as caretaker until a successor is chosen; nominations run July 9–16. Burnham is the frontrunner; Wes Streeting is backing him rather than running.</p>
+        <p class="src"><b>GAPS</b>: the final field of leadership candidates.</p>
+        <p class="src" style="margin-top:.45rem">↳ every actor and outcome is straight here, including that Burnham <em>won</em>. The error appears next, when a cheaper model compresses the findings into the anchor's read.</p>
       </div>
     </div>
-    <div class="down">↓<small>summary → dialogue</small></div>
+    <div class="down">↓<small>findings → anchor read</small></div>
 
     <div class="page fade-in">
-      <div class="page-bar"><span class="dot"></span> Script, segment dialogue <span class="meta">stage 2 · scripting</span></div>
+      <div class="page-bar"><span class="dot"></span> Overview script · the anchor's read <span class="meta">stage 2 · scripting</span></div>
       <div class="page-body">
-        <p class="quoteblock"><b>Anchor:</b> Where do things stand on the ground?<br>
-        <b>Reporter:</b> Well, Vice President JD Vance <mark>arrived in Switzerland</mark> on Saturday evening, joining top negotiators Jared Kushner and Steve Witkoff…</p>
-        <p class="src" style="margin-top:.5rem">↳ Opus writes engaging dialogue, but it has Vance <em>arriving</em> when the sources have him <em>leaving for</em> the talks (like Sharif and Munir, who departed Saturday). Every word is real; only the direction is flipped, the kind of subtle error a whole-day corpus check would miss but the per-segment faithfulness pass catches.</p>
+        <p class="quoteblock"><b>Anchor:</b> …After devastating losses in May and rival Andy Burnham's <mark>crushing defeat</mark> in the Makerfield by-election on June nineteenth, Starmer decided it was time to step down…</p>
+        <p class="src" style="margin-top:.5rem">↳ Gemma compresses the verified findings into a brisk anchor read, but it <em>inverts the outcome</em>, calling Burnham's landslide a defeat. Every name and date is real; only the result is flipped, the kind of subtle reversal a whole-day corpus check would miss but the per-segment faithfulness pass catches.</p>
       </div>
     </div>
     <div class="down">↓<small>last check before voicing</small></div>
@@ -608,14 +607,14 @@
     <div class="page fade-in" style="border-color:var(--acc);">
       <div class="page-bar" style="background:var(--acc-soft);"><span class="dot" style="background:var(--acc);"></span> Fact-finder report <span class="meta">stage 3 · fact-finder + editor</span></div>
       <div class="page-body ff-report">
-        <div class="line"><span class="badge b-flag">PASS 1</span><span class="d"><b>Quote check</b>, one marked quote isn't verbatim: <b>"clear breach of commitments"</b> → the source has "…of <b>its</b> commitments"</span></div>
-        <div class="line"><span class="badge b-flag">PASS 2</span><span class="d"><b>Faithfulness</b> <span class="mono">GLM · vs this segment's sources</span>: <b>"Vance arrived in Switzerland"</b>. The sources say he <b>left for</b> it Saturday evening; he hadn't arrived.</span></div>
-        <div class="line"><span class="badge b-flag">PASS 3</span><span class="d"><b>Stable-fact</b> (advisory), memory flags a suspect title: <b>"Field Marshal Asim Munir"</b></span></div>
-        <div class="line"><span class="badge b-srch">SEARCH</span><span class="d">…but Munir <em>was</em> promoted to Field Marshal in 2025, newer than the model's training, so the check is unreliable here. <b style="color:var(--warn)">advisory: logged, never edited</b></span></div>
-        <div class="verdict"><b>FLAG</b> · FAITHFULNESS (segment 1): <span class="mono">"Vance arrived in Switzerland" → the source says Vance left for Switzerland; it was Iran's negotiators who arrived.</span></div>
-        <div class="line" style="margin-top:.6rem"><span class="badge b-srch">EDITOR</span><span class="d"><b>Opus</b> proposes verbatim fixes for the <b>grounded</b> flags: <span class="mono">"arrived in Switzerland" → "left for Switzerland"</span> · <span class="mono">"commitments" → "its commitments"</span></span></div>
-        <div class="line"><span class="badge b-srch">ADVERSARY</span><span class="d"><b>GPT-5.5</b> checks each fix against the sources → <b style="color:var(--ok)">approved</b> · it never sees the Munir flag</span></div>
-        <div class="line"><span class="badge b-ok">APPLIED</span><span class="d">each phrase occurs exactly once, so plain code swaps it in. <b style="color:var(--ok)">Corrected before voicing</b></span></div>
+        <div class="line"><span class="badge b-ok">PASS 1</span><span class="d"><b>Quote check</b> · clean: no marked quotes to verify in this read.</span></div>
+        <div class="line"><span class="badge b-flag">PASS 2</span><span class="d"><b>Faithfulness</b> <span class="mono">GLM · vs this segment's sources</span>: <b>"a crushing defeat in the Makerfield by-election"</b>. The sources say Andy Burnham <b>won</b> it with 55%, a victory, not a defeat.</span></div>
+        <div class="line"><span class="badge b-flag">PASS 3</span><span class="d"><b>Stable-fact</b> (advisory), elsewhere in the same read it flags <b>"Current Chair Kevin Warsh"</b></span></div>
+        <div class="line"><span class="badge b-srch">SEARCH</span><span class="d">…but it insists Jerome Powell is Chair and dismisses the 2026 dates as "simulated"; Warsh's appointment is newer than the model's training, so the check is unreliable here. <b style="color:var(--warn)">advisory: logged, never edited</b></span></div>
+        <div class="verdict"><b>FLAG</b> · FAITHFULNESS (overview): <span class="mono">"a crushing defeat in the Makerfield by-election" → the source says Andy Burnham (Labour) won it with 55%; it was a victory, not a defeat.</span></div>
+        <div class="line" style="margin-top:.6rem"><span class="badge b-srch">EDITOR</span><span class="d"><b>Opus</b> proposes a verbatim fix for the <b>grounded</b> flag: <span class="mono">"a crushing defeat in the Makerfield by-election" → "rival Andy Burnham's crushing victory in the Makerfield by-election"</span></span></div>
+        <div class="line"><span class="badge b-srch">ADVERSARY</span><span class="d"><b>GPT-5.5</b> checks the fix against the sources → <b style="color:var(--ok)">approved</b> · it never sees the Warsh flag</span></div>
+        <div class="line"><span class="badge b-ok">APPLIED</span><span class="d">the phrase occurs exactly once, so plain code swaps it in. <b style="color:var(--ok)">Corrected before voicing</b></span></div>
       </div>
     </div>
     <div class="down">↓<small>fix applied · corrected script → voicing</small></div>
@@ -623,10 +622,9 @@
     <div class="page fade-in">
       <div class="page-bar"><span class="dot"></span> Episode <span class="meta">stages 4–6 · audio → video → upload</span></div>
       <div class="page-body">
-        <p><b>Title:</b> "What to expect as U.S. and Iranian negotiators meet in Switzerland · Why California takes so long to count election results"</p>
-        <p class="quoteblock"><b>Reporter:</b> …Vice President JD Vance <b style="color:var(--ok)">left for Switzerland</b> on Saturday evening, joining top negotiators Jared Kushner and Steve Witkoff…</p>
-        <p class="src">The corrected script is voiced (anchor + two reporters) → video → uploaded to YouTube, published public.</p>
-        <p class="src" style="margin-top:.45rem">Each grounded fix, and the source behind it, lands in the edit log. The Munir flag stays logged but untouched: advisory only.</p>
+        <p class="quoteblock"><b>Anchor:</b> …After devastating losses in May and rival Andy Burnham's <b style="color:var(--ok)">crushing victory</b> in the Makerfield by-election on June nineteenth, Starmer decided it was time to step down…</p>
+        <p class="src" style="margin-top:.5rem">The corrected read is voiced (anchor + two reporters) → video → uploaded to YouTube, published public, alongside the day's deep-dives ("Why a judge quashed DOJ subpoenas targeting Minnesota leaders," "Why the Supreme Court reinstated Pedro Hernandez's convictions").</p>
+        <p class="src" style="margin-top:.45rem">Each grounded fix, and the source behind it, lands in the edit log. The Warsh flag stays logged but untouched: advisory only.</p>
       </div>
     </div>
 
@@ -635,7 +633,7 @@
   <footer class="fade-in">
     <span class="pill">● deployed &amp; live</span>
     &nbsp; Running on a Raspberry Pi (a credit-card-sized computer): a three-pass fact-finder feeds an <b>Opus editor</b> (GPT-5.5-vetted) that fixes the source-grounded factual errors in place before voicing; the stable-fact pass stays advisory. Saved source excerpts ground passes 1–2 and the editor. The scheduler sleeps until 4 AM.
-    <div style="margin-top:.6rem;font-size:.78rem;">Every label, model, source, and the worked example are drawn from the actual codebase and the June 21 2026 run, not placeholders.</div>
+    <div style="margin-top:.6rem;font-size:.78rem;">Every label, model, source, and the worked example are drawn from the actual codebase and the June 23 2026 run, not placeholders.</div>
     <div class="foot-credit">
       <span>&copy; 2026 Alexander King</span>
       <span class="footer-note">Newscaster</span>

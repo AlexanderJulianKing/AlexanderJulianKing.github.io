@@ -470,10 +470,10 @@
         </div>
 
         <div class="stats-row fade-in stagger-3">
-          <div class="stat-card"><div class="stat-num" data-target="176">0</div><div class="stat-label">Models evaluated</div></div>
-          <div class="stat-card"><div class="stat-num" data-target="122">0</div><div class="stat-label">Benchmark features</div></div>
+          <div class="stat-card"><div class="stat-num" data-target="172">0</div><div class="stat-label">Models evaluated</div></div>
+          <div class="stat-card"><div class="stat-num" data-target="133">0</div><div class="stat-label">Benchmark features</div></div>
           <div class="stat-card"><div class="stat-num" data-target="138">0</div><div class="stat-label">Training samples</div></div>
-          <div class="stat-card"><div class="stat-num decimal" data-target="0.943">0</div><div class="stat-label">R&sup2;</div></div>
+          <div class="stat-card"><div class="stat-num decimal" data-target="0.942">0</div><div class="stat-label">R&sup2;</div></div>
         </div>
       </section>
 
@@ -603,7 +603,7 @@
         <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">Out-of-fold predictions on 138 models (5-fold CV). Every point is a prediction the model never trained on.</p>
         <div class="fade-in stagger-2" style="border:1px solid var(--card-border);background:var(--card-bg);padding:1rem;">
           <canvas id="scatterCanvas" style="width:100%;display:block;" aria-hidden="true"></canvas>
-          <p class="sr-only">Scatter plot of predicted versus actual Arena ELO scores for 138 models. Points cluster tightly around the diagonal line, with R-squared of 0.943, Spearman rho of 0.968, and RMSE of 13.68.</p>
+          <p class="sr-only">Scatter plot of predicted versus actual Arena ELO scores for 138 models. Points cluster tightly around the diagonal line, with R-squared of 0.942, Spearman rho of 0.966, and RMSE of 13.90.</p>
         </div>
 
         <h3 class="fade-in" style="margin-top:2.5rem;margin-bottom:1rem;font-size:1.1rem;">Why Not Just Median-Impute?</h3>
@@ -611,22 +611,24 @@
         <table class="comparison-table fade-in stagger-2">
           <thead><tr><th>Method</th><th>RMSE</th><th>R&sup2;</th><th>Spearman &rho;</th></tr></thead>
           <tbody>
-            <tr><td>Predict mean (dummy)</td><td>57.5</td><td>&minus;0.016</td><td>0.43</td></tr>
-            <tr><td>Public benchmarks + median impute</td><td>27.2</td><td>0.77</td><td>0.88</td></tr>
-            <tr><td>All benchmarks + median impute</td><td>19.2</td><td>0.89</td><td>0.94</td></tr>
-            <tr class="highlight"><td>Full Soothsayer pipeline</td><td>13.68</td><td>0.943</td><td>0.968</td></tr>
+            <tr><td>Predict mean (dummy)</td><td>58.1</td><td>&minus;0.016</td><td>&mdash;</td></tr>
+            <tr><td>Public benchmarks + median impute</td><td>26.5</td><td>0.79</td><td>0.88</td></tr>
+            <tr><td>Private benchmarks + median impute</td><td>23.2</td><td>0.84</td><td>0.92</td></tr>
+            <tr><td>All benchmarks + median impute</td><td>19.6</td><td>0.88</td><td>0.93</td></tr>
+            <tr class="highlight"><td>Full Soothsayer pipeline</td><td>13.90</td><td>0.942</td><td>0.966</td></tr>
           </tbody>
         </table>
 
         <h3 class="fade-in" style="margin-top:2.5rem;margin-bottom:1rem;font-size:1.1rem;">Chronological Holdout</h3>
-        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">The stricter test: train on the oldest 80% of models, then predict the newest 20% (n=23) one model at a time, re-fitting imputation, PCA, and PLS at every step. No information from the future ever leaks backward. The naive baselines degrade sharply when forced to extrapolate past their training distribution &mdash; the dummy even falls below chance &mdash; while the full pipeline barely moves (+0.5 RMSE).</p>
+        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">The stricter test: train on the oldest 80% of models, then predict the newest 20% (n=22) one model at a time, re-fitting imputation, PCA, and PLS at every step. No information from the future ever leaks backward. The naive baselines degrade sharply when forced to extrapolate past their training distribution &mdash; public-only nearly doubles its error (26.5 &rarr; 33.5 RMSE, R&sup2; 0.79 &rarr; 0.53). The full pipeline holds at 12.2 RMSE: it doesn&rsquo;t just survive the newest frontier models, it predicts them about as accurately as anything.</p>
         <table class="comparison-table fade-in stagger-2">
           <thead><tr><th>Method</th><th>RMSE</th><th>R&sup2;</th><th>Spearman &rho;</th></tr></thead>
           <tbody>
-            <tr><td>Predict mean (dummy)</td><td>64.5</td><td>&minus;0.84</td><td>0.38</td></tr>
-            <tr><td>Public benchmarks + median impute</td><td>33.3</td><td>0.51</td><td>0.79</td></tr>
-            <tr><td>All benchmarks + median impute</td><td>23.1</td><td>0.76</td><td>0.91</td></tr>
-            <tr class="highlight"><td>Full Soothsayer pipeline</td><td>14.16</td><td>0.911</td><td>0.954</td></tr>
+            <tr><td>Predict mean (dummy)</td><td>64.2</td><td>&minus;0.73</td><td>&mdash;</td></tr>
+            <tr><td>Public benchmarks + median impute</td><td>33.5</td><td>0.53</td><td>0.80</td></tr>
+            <tr><td>Private benchmarks + median impute</td><td>27.2</td><td>0.69</td><td>0.84</td></tr>
+            <tr><td>All benchmarks + median impute</td><td>25.2</td><td>0.73</td><td>0.86</td></tr>
+            <tr class="highlight"><td>Full Soothsayer pipeline</td><td>12.22</td><td>0.937</td><td>0.958</td></tr>
           </tbody>
         </table>
 
@@ -634,7 +636,7 @@
         <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">A point estimate isn&rsquo;t enough, so every prediction ships with a conformal 95% interval. Out-of-fold, those intervals capture the true score <strong>92.8%</strong> of the time &mdash; close to the nominal 95%. The model knows what it doesn&rsquo;t know, which matters more than a single number when the prediction is meant to inform a real decision.</p>
 
         <h3 class="fade-in" style="margin-top:2.5rem;margin-bottom:1rem;font-size:1.1rem;">Reproducible &amp; Tested</h3>
-        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">Every number on this page regenerates from a clean clone in one command &mdash; <code style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;">git clone &amp;&amp; ./predict.sh</code> &rarr; RMSE 13.68 &mdash; with the data snapshot committed alongside the code, so the result isn&rsquo;t just claimed, it&rsquo;s runnable. A 130-test suite guards the imputation, scoring, and arena logic against regressions.</p>
+        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">Every number on this page regenerates from a clean clone in one command &mdash; <code style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;">git clone &amp;&amp; ./predict.sh</code> &rarr; RMSE 13.90 &mdash; with the data snapshot committed alongside the code, so the result isn&rsquo;t just claimed, it&rsquo;s runnable. A 130-test suite guards the imputation, scoring, and arena logic against regressions.</p>
       </section>
 
     </main>
@@ -949,11 +951,12 @@
 
   function resize() {
     const w = canvas.parentElement.getBoundingClientRect().width;
-    const scale = w / totalW;
+    const scale = Math.min(w / totalW, 1);
     canvas.width = totalW * dpr;
     canvas.height = totalH * dpr;
-    canvas.style.height = (totalH * scale) + 'px';
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    canvas.style.width = (totalW * scale) + 'px';   // set BOTH dims explicitly so the
+    canvas.style.height = (totalH * scale) + 'px';  // canvas can't overflow/clip when CSS
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);          // max-width doesn't kick in (was: height only)
   }
   resize();
   window.addEventListener('resize', () => { resize(); draw(); });
@@ -1819,7 +1822,7 @@
     ctx.font = _scatMobile ? '400 17px JetBrains Mono, monospace' : '400 10px JetBrains Mono, monospace';
     ctx.fillStyle = pal.text;
     ctx.textAlign = 'left';
-    ctx.fillText('R\u00B2 = 0.943    Spearman \u03C1 = 0.968    RMSE = 13.68', PAD_L + 4, PAD_T + (_scatMobile ? 20 : 14));
+    ctx.fillText('R\u00B2 = 0.942    Spearman \u03C1 = 0.966    RMSE = 13.90', PAD_L + 4, PAD_T + (_scatMobile ? 20 : 14));
   }
 
   // Hover interaction
@@ -2398,7 +2401,7 @@
     { id:'public', label:'11 Public Benchmarks', sub:'LiveBench \u00b7 Aider \u00b7 ARC-AGI \u00b7 \u2026' },
     { id:'combine', label:'Combine', sub:'176 models \u00d7 122 features' },
     { id:'impute', label:'Impute & Predict', sub:'ModelBankImputer \u2192 Adaptive KNN' },
-    { id:'elo', label:'Arena ELO', sub:'Spearman \u03c1 = 0.968 \u00b7 RMSE 13.68' },
+    { id:'elo', label:'Arena ELO', sub:'Spearman \u03c1 = 0.966 \u00b7 RMSE 13.90' },
   ];
 
   function fitText(text, maxW, baseSize, font) {

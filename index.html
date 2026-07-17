@@ -12,7 +12,8 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Alexander King — Data Science & Computational Biology">
   <meta name="twitter:description" content="Neuroscience PhD building systems that extract signal from messy, high-dimensional data.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>A</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='Georgia, serif' fill='%237a2e2e'>A</text></svg>">
+  <script>document.documentElement.classList.add('js');</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
@@ -65,9 +66,16 @@
 
     html {
       font-size: 18px;
-      scroll-behavior: smooth;
       -webkit-text-size-adjust: 100%;
     }
+
+    /* Smooth anchor scrolling is motion — gate it accordingly */
+    @media (prefers-reduced-motion: no-preference) {
+      html { scroll-behavior: smooth; }
+    }
+
+    /* Keep anchor targets clear of the sticky nav */
+    [id] { scroll-margin-top: 3.4rem; }
 
     body {
       font-family: var(--font-serif);
@@ -76,6 +84,11 @@
       line-height: 1.68;
       text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
+    }
+
+    /* Selected text gets the house burgundy, not browser blue */
+    ::selection {
+      background: color-mix(in srgb, var(--accent) 22%, transparent);
     }
 
     /* ===== Layout ===== */
@@ -112,7 +125,36 @@
       color: var(--accent);
       vertical-align: super;
       margin-left: 1px;
-      cursor: default;
+    }
+
+    .sidenote-number::after { display: none; }
+
+    .sidenote p {
+      margin-bottom: 0.9rem;
+      text-align: left;
+      padding: 2px 4px;
+      margin-left: -4px;
+      border-radius: 2px;
+      transition: background-color 0.2s ease;
+    }
+
+    .sidenote p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Reference and margin note illuminate each other — a nod to the curious reader.
+       :has() is progressive enhancement; older browsers simply skip it */
+    .with-sidenotes:has(#fnref-1:hover) #fn-1,
+    .with-sidenotes:has(#fn-1:hover) #fn-1,
+    .with-sidenotes:has(#fnref-2:hover) #fn-2,
+    .with-sidenotes:has(#fn-2:hover) #fn-2,
+    .sidenote p:target {
+      background-color: color-mix(in srgb, var(--accent) 9%, transparent);
+    }
+
+    .with-sidenotes:has(#fn-1:hover) #fnref-1,
+    .with-sidenotes:has(#fn-2:hover) #fnref-2 {
+      color: var(--accent-hover);
     }
 
     /* Section number: starts at reduced opacity, inks in after the rule draws */
@@ -239,7 +281,6 @@
       font-size: 0.9rem;
       letter-spacing: 0.06em;
       color: var(--text-muted);
-      font-variant-caps: all-small-caps;
       font-variant: small-caps;
       margin-bottom: 1.8rem;
     }
@@ -299,6 +340,26 @@
       margin-right: 1.5rem;
     }
 
+    /* Availability line — the one thing a 45-second reader must not miss */
+    .hero-status {
+      font-size: 0.95rem;
+      font-style: italic;
+      color: var(--text-muted);
+      margin: 1.5rem 1.5rem 0;
+      text-align: left;
+      /* Metadata, not prose: never hyphenate */
+      hyphens: none;
+      -webkit-hyphens: none;
+    }
+
+    .hero-status a {
+      white-space: nowrap;
+    }
+
+    .hero-status .contact-dot {
+      margin: 0 0.35rem;
+    }
+
     /* ===== Sections ===== */
     section {
       padding: 2.5rem 0 1.5rem;
@@ -350,6 +411,9 @@
       color: var(--text-muted);
       margin-bottom: 0.75rem;
       text-align: left;
+      /* Sits above the card's stretched-link overlay so the text stays selectable */
+      position: relative;
+      z-index: 1;
     }
 
     .project-meta {
@@ -469,6 +533,8 @@
       font-size: 0.92rem;
       line-height: 1.6;
       text-align: left;
+      /* Citation years in oldstyle figures, like a proper journal */
+      font-variant-numeric: oldstyle-nums;
     }
 
     .bib-number {
@@ -541,13 +607,15 @@
     .hero { position: relative; z-index: 1; }
 
     /* ===== Scroll Animations ===== */
-    .fade-in {
+    /* Hidden start state only applies when JS is running (.js set in <head>),
+       so a blocked or failed script never leaves the page blank */
+    .js .fade-in {
       opacity: 0;
       transform: translateY(20px);
       transition: opacity 0.6s ease-out, transform 0.6s ease-out;
     }
 
-    .fade-in.visible {
+    .js .fade-in.visible {
       opacity: 1;
       transform: translateY(0);
     }
@@ -558,11 +626,11 @@
     .stagger-4 { transition-delay: 180ms; }
 
     /* Project cards enter from the left (horizontal shift) rather than rising from below */
-    .project-card.fade-in {
+    .js .project-card.fade-in {
       transform: translateX(-14px);
     }
 
-    .project-card.fade-in.visible {
+    .js .project-card.fade-in.visible {
       transform: translateX(0);
     }
 
@@ -577,6 +645,7 @@
     .hero-anim-2 { animation-delay: 120ms; }
     .hero-anim-3 { animation-delay: 240ms; }
     .hero-anim-4 { animation-delay: 400ms; }
+    .hero-anim-5 { animation-delay: 520ms; }
 
     @keyframes heroFadeIn {
       to {
@@ -587,7 +656,7 @@
 
     /* Respect reduced motion */
     @media (prefers-reduced-motion: reduce) {
-      .fade-in {
+      .js .fade-in {
         opacity: 1;
         transform: none;
         transition: none;
@@ -600,7 +669,7 @@
       .project-card {
         transition: none;
       }
-      .project-card.fade-in {
+      .js .project-card.fade-in {
         transform: none;
       }
       .project-card::before {
@@ -725,9 +794,28 @@
       color: var(--accent);
     }
 
+    /* Résumé link reads as the nav's one quiet call to action.
+       The underline marks it as an action, so accent can't be mistaken
+       for the scroll-spy's accent-means-active signal */
+    .nav-resume {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.2em;
+      text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    }
+
+    .nav-resume:hover {
+      color: var(--accent-hover);
+      text-decoration-color: var(--accent-hover);
+    }
+
     /* ===== Responsive ===== */
     @media (max-width: 600px) {
       html { font-size: 16px; }
+
+      /* Justification is a desktop signature; at ~40ch it opens rivers */
+      p { text-align: left; }
 
       .hero { padding: 3.5rem 0 2rem; }
 
@@ -738,23 +826,65 @@
       .abstract p {
         margin-left: 0.5rem;
         margin-right: 0.5rem;
-        text-align: left;
+      }
+
+      .hero-status {
+        margin-left: 0.5rem;
+        margin-right: 0.5rem;
       }
 
       .section-heading { font-size: 1.35rem; }
 
       .project-card { padding: 1.2rem; }
 
-      .skills-table th,
-      .skills-table td { padding: 0.4rem 0.4rem; }
+      /* Skills table stacks: domain becomes a small label above its list */
+      .skills-table,
+      .skills-table tbody,
+      .skills-table tr,
+      .skills-table tbody th,
+      .skills-table td {
+        display: block;
+        width: 100%;
+      }
+
+      .skills-table thead,
+      .skills-table caption {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+
+      .skills-table tbody th {
+        white-space: normal;
+        border-bottom: none;
+        padding: 0.9rem 0 0.15rem;
+        font-family: var(--font-sans);
+        font-weight: 500;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+
+      .skills-table td {
+        padding: 0 0 0.9rem;
+        border-bottom: 1px solid var(--border-light);
+      }
+
+      .skills-table tbody tr:last-child th { border-bottom: none; }
 
       footer { flex-direction: column; gap: 0.5rem; text-align: center; }
 
-      .nav-inner { gap: 1rem; }
+      .nav-inner { gap: 1rem; padding: 0 1rem; }
 
       .nav-link { padding: 0.5rem 0; }
 
       .nav-link .nav-number { display: none; }
+
+      /* Six links don't fit at 375px; mobile gets the résumé in the hero and contact instead */
+      .nav-resume { display: none; }
     }
 
     /* ===== Print ===== */
@@ -821,6 +951,7 @@
 
         <p>I build systems that extract signal from messy, high-dimensional data&mdash;from single-cell genomics to LLM evaluation to automated news production. Neuroscience PhD earned June 2026.</p>
       </div>
+      <p class="hero-status hero-anim hero-anim-5">Seeking roles in computational biology, data science, and applied AI<span class="contact-dot" aria-hidden="true">&middot;</span>available summer 2026</p>
     </header>
 
     <main id="main">
@@ -833,13 +964,12 @@
               <span class="section-number">1.</span> About
             </h2>
             <p class="fade-in stagger-1">My PhD work is a first-author paper in the Journal of Neuroscience. I discovered that a single gene (Adgrl2) uses alternative splicing to play completely different roles in neurons versus blood vessels. I found the pattern computationally in single-cell RNA-seq across 100K+ cells, then validated it myself at the bench through mouse models, BBB permeability assays, and confocal imaging. Both sides of the paper are mine: the computational pipeline and the wet lab validation.</p>
-            <p class="fade-in stagger-2">Outside the lab, I've built two production data systems from scratch: a system that predicts how humans will rank LLMs using only benchmark scores<span class="sidenote-number" aria-hidden="true">1</span>, and a fully automated daily news podcast that has published 525+ episodes to YouTube.<span class="sidenote-number" aria-hidden="true">2</span></p>
+            <p class="fade-in stagger-2">Outside the lab, I've built two production data systems from scratch: a system that predicts how humans will rank LLMs using only benchmark scores<a class="sidenote-number" id="fnref-1" href="#fn-1" role="doc-noteref" aria-label="Sidenote 1">1</a>, and a fully automated daily news podcast that has published 525+ episodes to YouTube.<a class="sidenote-number" id="fnref-2" href="#fn-2" role="doc-noteref" aria-label="Sidenote 2">2</a></p>
             <p class="fade-in stagger-3">I design end-to-end pipelines, from data collection through statistical modeling through deliverable output. I earned my PhD in June 2026 and am looking for roles in computational biology, data science, or applied AI where rigorous analysis drives real decisions.</p>
           </div>
-          <aside class="sidenote fade-in">
-            <sup aria-hidden="true">1</sup> R&sup2; = 0.942, Spearman &rho; = 0.966, predictions within ~0.8% of actual scores.
-            <br><br>
-            <sup aria-hidden="true">2</sup> 525+ episodes and counting.
+          <aside class="sidenote fade-in" aria-label="Sidenotes">
+            <p id="fn-1" role="doc-footnote"><sup>1</sup> R&sup2; = 0.942, Spearman &rho; = 0.966, predictions within ~0.8% of actual scores.</p>
+            <p id="fn-2" role="doc-footnote"><sup>2</sup> 525+ episodes and counting.</p>
           </aside>
         </div>
       </section>
@@ -929,7 +1059,7 @@
         </h2>
         <div class="fade-in stagger-1">
           <table class="skills-table">
-
+            <caption>Tools in regular use, grouped by domain.</caption>
             <thead>
               <tr>
                 <th scope="col">Domain</th>
@@ -1072,6 +1202,10 @@ Bern, M.*, <strong>King, A.</strong>* (co-first), Applewhite, D.A., &amp; Ritz, 
       window.addEventListener('scroll', updateProgress, { passive: true });
       updateProgress();
     })();
+
+    // A note for the reader who opens the console
+    console.log('%cTypeset with care.', "font-family: Georgia, serif; font-style: italic; font-size: 14px; color: #7a2e2e;");
+    console.log('No frameworks, no build step, one HTML file. View source is the documentation.');
   </script>
 
 </body>

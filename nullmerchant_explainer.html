@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to trick an AI agent: an evaluation of AI reliability</title>
+  <meta name="description" content="Why frontier coding agents report confident wrong answers on data they inspected: three operable traps, 1,000 scored runs, and what helps.">
+  <meta property="og:title" content="How to trick an AI agent: an evaluation of AI reliability">
+  <meta property="og:description" content="Ten agent configurations, twenty planted traps, 1,000 scored runs. Flip a pandas default yourself and watch the busiest merchant vanish.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://alexanderjulianking.github.io/og-image.png">
+  <meta name="twitter:image" content="https://alexanderjulianking.github.io/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='Georgia, serif' fill='%237a2e2e'>A</text></svg>">
+  <script>document.documentElement.classList.add('js');</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #fafaf8;
+      --bg-alt: #f3f2ef;
+      --text: #1a1a1a;
+      --text-muted: #555;
+      --text-light: #6a6a6a;
+      --accent: #7a2e2e;
+      --accent-hover: #5c1e1e;
+      --border: #d4d0c8;
+      --border-light: #e8e5de;
+      --card-bg: #ffffff;
+      --card-border: #e8e5de;
+      --rule: #c4c0b8;
+      --font-serif: 'EB Garamond', 'Georgia', serif;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Menlo', monospace;
+      /* chart palette: validated against #fafaf8 (lightness band, chroma floor, CVD ΔE, contrast) */
+      --fam-openai: #9c3a3a;
+      --fam-anthropic: #35659e;
+      --cell-max: #832f2f;
+      --ok: #3d6b47;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141414;
+        --bg-alt: #1c1c1c;
+        --text: #d8d4cf;
+        --text-muted: #a09a90;
+        --text-light: #8a8580;
+        --accent: #c46b6b;
+        --accent-hover: #d98e8e;
+        --border: #2e2e2e;
+        --border-light: #252525;
+        --card-bg: #1a1a1a;
+        --card-border: #2a2a2a;
+        --rule: #333;
+        /* validated against #141414 */
+        --fam-openai: #c46b6b;
+        --fam-anthropic: #5b8fd4;
+        --cell-max: #b25454;
+        --ok: #6da375;
+      }
+    }
+
+    html { font-size: 18px; -webkit-text-size-adjust: 100%; }
+    @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+    body {
+      font-family: var(--font-serif);
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.68;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+
+    .page-wrapper { max-width: 900px; margin: 0 auto; padding: 0 1.5rem; }
+
+    .back-link {
+      display: inline-block; font-family: var(--font-sans); font-size: 0.78rem;
+      color: var(--text-muted); text-decoration: none; padding: 1.2rem 0 0;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    /* ---- Hero ---- */
+    .hero { padding: 4rem 0 2rem; }
+    .hero-kicker {
+      font-family: var(--font-sans); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.9rem;
+    }
+    .hero-name { font-size: 2.4rem; font-weight: 500; line-height: 1.15; letter-spacing: -0.02em; }
+    .hero-sub-line { display: block; font-family: var(--font-serif); font-size: 0.9rem; font-weight: 400; letter-spacing: 0.06em; font-variant: small-caps; text-transform: lowercase; color: var(--text-muted); margin-top: 0.5rem; }
+    .hero-name .null-mark { font-family: var(--font-mono); font-size: 0.82em; color: var(--accent); }
+    .hero-subtitle { font-size: 1.05rem; font-style: italic; color: var(--text-muted); margin-top: 0.8rem; max-width: 62ch; }
+    .hero-rule { border: none; height: 1px; background: var(--rule); margin: 1.5rem 0; }
+    .hero-meta { font-family: var(--font-sans); font-size: 0.78rem; color: var(--text-light); display: flex; gap: 1.4rem; flex-wrap: wrap; }
+    .hero-meta a { color: var(--text-muted); text-decoration-color: var(--border); }
+    .hero-meta a:hover { color: var(--accent); }
+
+    /* staggered entrance */
+    .js .hero-anim { opacity: 0; transform: translateY(10px); }
+    @media (prefers-reduced-motion: no-preference) {
+      .js .hero-anim { animation: rise 0.7s cubic-bezier(0.16,1,0.3,1) forwards; }
+      .js .hero-anim-1 { animation-delay: 0.05s; } .js .hero-anim-2 { animation-delay: 0.16s; }
+      .js .hero-anim-3 { animation-delay: 0.27s; } .js .hero-anim-4 { animation-delay: 0.38s; }
+    }
+    @media (prefers-reduced-motion: reduce) { .js .hero-anim { opacity: 1; transform: none; } }
+    @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+
+    /* ---- Prose ---- */
+    h1, h2, h3 { font-family: var(--font-serif); font-weight: 500; letter-spacing: -0.01em; }
+    article { max-width: none; }
+    article > :not(figure) { max-width: 65ch; }
+    article > p { margin: 0 0 1rem; }
+    article a { color: var(--accent); text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent); text-underline-offset: 2px; }
+    article a:hover { color: var(--accent-hover); }
+    h2.section-heading {
+      font-size: 1.55rem; margin: 2.6rem 0 1.25rem; padding-bottom: 0.3rem; line-height: 1.25; position: relative;
+    }
+    .section-heading::after {
+      content: ''; display: block; position: absolute;
+      bottom: 0; left: 0; height: 1px; background: var(--border-light);
+      width: 0;
+      transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.12s;
+    }
+    .section-heading.visible::after { width: 100%; }
+    .section-number {
+      color: var(--accent); font-variant-numeric: oldstyle-nums;
+      margin-right: 0.4em; font-weight: 400;
+      opacity: 0.38; transition: opacity 0.55s ease 0.55s;
+    }
+    .section-heading.visible .section-number { opacity: 1; }
+    .lede { font-size: 1.12rem; }
+    code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+    p code { background: var(--bg-alt); padding: 0.08em 0.32em; border-radius: 3px; }
+
+    .js .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+    .js .fade-in.visible { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .js .fade-in { opacity: 1; transform: none; transition: none; } .section-heading::after { transition: none; width: 100% !important; } .section-number { transition: none; opacity: 1; } }
+
+    /* ---- Figures ---- */
+    figure.interactive {
+      margin: 1.8rem 0 2.2rem; border: 1px solid var(--card-border); background: var(--card-bg);
+      overflow: hidden;
+    }
+    .fig-head {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+      padding: 0.8rem 1.1rem; border-bottom: 1px solid var(--border-light); flex-wrap: wrap;
+    }
+    .fig-label { font-family: var(--font-sans); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+    .fig-hint { font-family: var(--font-sans); font-size: 0.72rem; color: var(--text-light); }
+    figcaption { padding: 0.75rem 1.1rem; font-size: 0.88rem; color: var(--text-muted); border-top: 1px solid var(--border-light); line-height: 1.5; }
+    .fig-body { padding: 1.1rem; }
+
+    /* Fig 1: the operable trap */
+    .csv-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.74rem; }
+    .csv-table th {
+      font-family: var(--font-sans); font-weight: 500; font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--text-light); text-align: left; padding: 0.3rem 0.55rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .csv-table td { padding: 0.17rem 0.55rem; border-bottom: 1px solid var(--border-light); transition: opacity 0.45s ease, color 0.45s ease; }
+    .csv-table td.num { text-align: right; }
+    tr.null-row td:nth-child(2) { color: var(--accent); font-weight: 600; }
+    .pandas-mode tr.null-row td { opacity: 0.28; text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+    .pandas-mode tr.null-row td:nth-child(2)::after { content: " → NaN"; font-size: 0.9em; opacity: 0.9; text-decoration: none; display: inline-block; }
+    .trap-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.9rem; font-family: var(--font-sans); }
+    .trap-btn {
+      font-family: var(--font-sans); font-size: 0.76rem; font-weight: 500; padding: 0.45rem 0.95rem; cursor: pointer;
+      border: 1px solid var(--border); background: var(--bg-alt); color: var(--text-muted);
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .trap-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .trap-btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 7%, var(--card-bg)); }
+    .trap-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .trap-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .trap-tab[aria-selected="true"] { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 7%, var(--card-bg)); }
+    .trap-panel[hidden] { display: none; }
+    @media (min-width: 861px) {
+      .trap-panel { display: grid; grid-template-columns: minmax(0, 1fr) 252px; align-items: start; }
+      .trap-panel .panel-note { border-top: none; border-left: 1px solid var(--border-light); margin: 1.1rem 1.1rem 1.1rem 0; padding: 0.15rem 0 0.15rem 1.1rem; font-size: 0.79rem; line-height: 1.5; }
+    }
+    .panel-note { padding: 0.75rem 1.1rem; font-size: 0.88rem; color: var(--text-muted); border-top: 1px solid var(--border-light); line-height: 1.5; }
+
+    /* warned ablation */
+    .wa-row { margin-bottom: 1.5rem; }
+    .wa-name { font-family: var(--font-sans); font-size: 0.76rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+    .wa-sub { color: var(--text-light); font-size: 0.71rem; }
+    .wa-track { position: relative; height: 42px; }
+    .wa-scale { position: absolute; left: 0; top: 0; width: 58%; height: 100%; }
+    .wa-bar { position: absolute; left: 0; height: 17px; border-radius: 0 2px 2px 0; transition: width 0.7s cubic-bezier(0.16,1,0.3,1); }
+    .wa-bar.unwarned { top: 0; opacity: 0.34; }
+    .wa-bar.warned { top: 23px; }
+    .wa-band { position: absolute; top: 23px; height: 17px; background: var(--text-light); opacity: 0.16; border-radius: 2px; }
+    .wa-lab { position: absolute; left: 61%; transform: translateY(-50%); font-family: var(--font-sans); font-size: 0.68rem; color: var(--text-muted); white-space: nowrap; }
+    .wa-residue { font-family: var(--font-sans); font-size: 0.71rem; color: var(--text-light); margin-top: 0.35rem; }
+    .wa-residue b { color: var(--accent); font-weight: 500; }
+    .wa-cost { border-top: 1px solid var(--border-light); margin-top: 1.6rem; padding-top: 1.1rem; }
+    .wa-cost-track { position: relative; height: 42px; margin-top: 0.5rem; }
+    .trap-readout { display: flex; gap: 1.6rem; align-items: baseline; flex-wrap: wrap; margin-top: 0.7rem; }
+    .trap-total-label { font-family: var(--font-sans); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); }
+    .trap-total { font-family: var(--font-mono); font-size: 1.5rem; transition: color 0.3s; }
+    .trap-total.wrong { color: var(--accent); }
+    .trap-total.right { color: var(--ok); }
+    .trap-flag { font-family: var(--font-sans); font-size: 0.73rem; color: var(--text-light); }
+    .trap-flag .chip { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 2px; border: 1px solid var(--border); }
+    .trap-code { font-family: var(--font-mono); background: var(--bg-alt); padding: 0.5rem 0.8rem; font-size: 0.74rem; margin-bottom: 0.7rem; overflow-x: auto; white-space: pre; }
+
+    /* Canary figure */
+    .log-strip { font-family: var(--font-mono); font-size: 0.68rem; line-height: 1.7; background: var(--bg-alt); border-radius: 4px; padding: 0.6rem 0.8rem; margin-bottom: 1rem; overflow-x: auto; white-space: pre; }
+    .log-strip .l { display: block; transition: opacity 0.4s; }
+    .log-strip .hit { background: color-mix(in srgb, var(--accent) 16%, transparent); border-radius: 2px; }
+    .log-strip .miss { opacity: 0.35; }
+    .log-strip .verdict { font-family: var(--font-sans); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; }
+    .cn-chart { position: relative; height: 148px; display: flex; align-items: flex-end; gap: 2px; margin-top: 1.1rem; }
+    .cn-window { position: absolute; top: -1.3rem; bottom: 0; background: color-mix(in srgb, var(--accent) 6%, transparent); border-left: 1px dashed var(--border); border-right: 1px dashed var(--border); pointer-events: none; }
+    .cn-window::before { content: "canary rollout 09:30–14:00"; position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-family: var(--font-sans); font-size: 0.6rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-light); white-space: nowrap; }
+    .cn-bar { flex: 1; min-height: 1px; border-radius: 2px 2px 0 0; background: var(--fam-openai); transition: height 0.55s cubic-bezier(0.16,1,0.3,1), background 0.4s; }
+    .cn-bar.hidden-spike { background: var(--text); }
+    .cn-ytick { position: absolute; left: 2px; font-family: var(--font-sans); font-size: 0.6rem; color: var(--text-light); pointer-events: none; transform: translateY(50%); }
+    .cn-axis { display: flex; gap: 2px; font-family: var(--font-sans); font-size: 0.58rem; color: var(--text-light); margin-top: 3px; }
+    .cn-axis span { flex: 1; text-align: center; }
+    .cn-readout { display: flex; gap: 2rem; margin-top: 0.7rem; flex-wrap: wrap; }
+    .cn-readout .mono-line { font-family: var(--font-mono); font-size: 0.82rem; }
+    @media (prefers-reduced-motion: reduce) { .cn-bar { transition: none; } }
+
+    /* Partial figure */
+    .pd-chart { position: relative; height: 132px; display: flex; align-items: flex-end; gap: 2px; margin-top: 0.4rem; }
+    .pd-bar { flex: 1; min-height: 2px; border-radius: 2px 2px 0 0; background: var(--fam-anthropic); position: relative; transition: background 0.4s; cursor: default; }
+    .pd-bar.min-flag { background: var(--accent); }
+    .pd-bar .ghost { position: absolute; left: 0; right: 0; bottom: 100%; border: 1px dashed var(--border); border-bottom: none; border-radius: 2px 2px 0 0; opacity: 0; transition: opacity 0.5s; display: flex; align-items: center; justify-content: center; font-family: var(--font-sans); font-size: 0.72rem; color: var(--text-light); }
+    .pd-bar.partial-revealed { background: repeating-linear-gradient(45deg, var(--accent), var(--accent) 3px, color-mix(in srgb, var(--accent) 35%, var(--bg-alt)) 3px, color-mix(in srgb, var(--accent) 35%, var(--bg-alt)) 6px); }
+    .pd-bar.partial-revealed .ghost { opacity: 1; }
+    .pd-min-stamp { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); font-family: var(--font-sans); font-size: 0.58rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); white-space: nowrap; transition: opacity 0.3s; }
+    .pd-axis { display: flex; gap: 2px; font-family: var(--font-sans); font-size: 0.56rem; color: var(--text-light); margin-top: 3px; }
+    .pd-axis span { flex: 1; text-align: center; }
+    .pd-story { font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-muted); margin-top: 0.9rem; min-height: 2.4em; }
+    .pd-story .chip { display: inline-block; padding: 0.12rem 0.55rem; border-radius: 2px; border: 1px solid var(--border); margin-right: 0.4rem; }
+
+    /* Fig 2: heatmap */
+    .hm-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.9rem; }
+    .hm-wrap { overflow-x: auto; }
+    .hm-grid { border-collapse: separate; border-spacing: 2px; }
+    .hm-grid th { font-family: var(--font-sans); font-weight: 400; font-size: 0.62rem; color: var(--text-light); }
+    .hm-grid thead th { vertical-align: bottom; padding: 0 2px 4px; }
+    .hm-grid thead th span { writing-mode: vertical-rl; transform: rotate(180deg); display: inline-block; max-height: 7.2rem; overflow: hidden; text-overflow: ellipsis; }
+    .hm-grid tbody th { text-align: right; padding-right: 8px; white-space: nowrap; font-size: 0.68rem; color: var(--text-muted); }
+    .fam-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+    .fam-dot.openai { background: var(--fam-openai); } .fam-dot.anthropic { background: var(--fam-anthropic); }
+    .hm-cell { width: 23px; height: 21px; border-radius: 3px; cursor: default; }
+    .hm-total { font-family: var(--font-mono); font-size: 0.66rem; padding-left: 8px; color: var(--text-muted); white-space: nowrap; }
+    .hm-legend { display: flex; gap: 1.2rem; align-items: center; margin-top: 0.8rem; font-family: var(--font-sans); font-size: 0.7rem; color: var(--text-light); flex-wrap: wrap; }
+    .hm-scale { display: flex; align-items: center; gap: 3px; }
+    .hm-scale i { width: 16px; height: 12px; border-radius: 2px; display: inline-block; }
+    details.data-table { margin-top: 0.9rem; font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-muted); }
+    details.data-table table { border-collapse: collapse; margin-top: 0.5rem; font-family: var(--font-mono); font-size: 0.68rem; }
+    details.data-table td, details.data-table th { border: 1px solid var(--border-light); padding: 0.15rem 0.4rem; text-align: right; }
+
+    #tooltip {
+      position: fixed; pointer-events: none; z-index: 50; font-family: var(--font-sans); font-size: 0.72rem;
+      background: var(--text); color: var(--bg); padding: 0.35rem 0.6rem; border-radius: 4px; opacity: 0;
+      transition: opacity 0.12s; max-width: 240px;
+    }
+
+    /* Fig 3: specificity field */
+    .spec-field { display: grid; grid-template-columns: repeat(auto-fill, minmax(9px, 1fr)); gap: 3px; }
+    .spec-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); transition: background 0.25s ease; }
+    .spec-dot.planted { background: var(--cell-max); }
+    .spec-dot.other { background: transparent; border: 2px solid var(--text-light); }
+    .spec-counters { display: flex; gap: 2rem; margin-top: 1rem; font-family: var(--font-sans); flex-wrap: wrap; }
+    .spec-counters .n { font-family: var(--font-mono); font-size: 1.35rem; display: block; }
+    .spec-counters .lbl { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-light); }
+
+    /* Fig 4: effort dumbbells */
+    .db-legend { display: flex; gap: 1.6rem; font-family: var(--font-sans); font-size: 0.7rem; color: var(--text-light); margin-bottom: 1rem; align-items: center; }
+    .db-key { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+    .db-key.filled { background: var(--text-muted); }
+    .db-key.hollow { background: transparent; border: 2.5px solid var(--text-muted); }
+    .db-row { margin: 1rem 0 1.3rem; }
+    .db-name { font-family: var(--font-sans); font-size: 0.74rem; color: var(--text-muted); margin-bottom: 0.35rem; }
+    .db-track { position: relative; height: 26px; background: var(--bg-alt); border-radius: 13px; margin-top: 1.3rem; }
+    .db-seg { position: absolute; top: 50%; height: 4px; transform: translateY(-50%); border-radius: 2px; opacity: 0.45; }
+    .db-pt { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%,-50%); border: 2px solid var(--bg); }
+    .db-pt.hollow { background: var(--card-bg) !important; border: 2.5px solid currentColor; }
+    .db-lab { position: absolute; top: -1.15rem; transform: translateX(-50%); font-family: var(--font-mono); font-size: 0.64rem; color: var(--text-muted); white-space: nowrap; }
+    .db-axis { display: flex; justify-content: space-between; font-family: var(--font-sans); font-size: 0.64rem; color: var(--text-light); margin-top: 1.4rem; }
+
+    /* transcripts */
+    .tr-card { background: var(--bg-alt); border-left: 3px solid var(--accent); padding: 0.85rem 1rem; margin: 1rem 0; font-family: var(--font-mono); font-size: 0.76rem; line-height: 1.6; color: var(--text-muted); }
+    .tr-card .who { font-family: var(--font-sans); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); display: block; margin-bottom: 0.4rem; }
+    .tr-card mark { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--text); padding: 0 0.15em; border-radius: 2px; }
+
+    /* preamble block */
+    .preamble-box { position: relative; background: var(--bg-alt); border: 1px solid var(--border-light); padding: 1rem 1.1rem; font-family: var(--font-mono); font-size: 0.76rem; line-height: 1.65; color: var(--text-muted); white-space: pre-wrap; }
+    .copy-btn { position: absolute; top: 0.6rem; right: 0.6rem; }
+
+    .note { font-size: 0.9rem; color: var(--text-muted); border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); padding: 0.8rem 0; margin: 1.4rem 0; font-style: italic; }
+
+    footer { margin-top: 2rem; padding: 2.5rem 0 2rem; border-top: 1px solid var(--border-light); font-family: var(--font-sans); font-size: 0.78rem; color: var(--text-light); line-height: 1.8; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .footer-note { font-style: italic; font-family: var(--font-serif); }
+    footer a { color: var(--text-muted); }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      html { font-size: 16px; }
+      .hero-name { font-size: 1.8rem; }
+      .hm-cell { width: 20px; height: 18px; }
+    }
+    @media print {
+      .back-link, .trap-controls, .hm-controls, .copy-btn { display: none; }
+      body { background: #fff; color: #000; }
+      figure.interactive { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <a class="back-link" href="index.html">← Alexander King</a>
+
+    <header class="hero">
+      <p class="hero-kicker hero-anim hero-anim-1">Interactive explainer · 20 tasks · 10 configurations · 1,000 runs</p>
+      <h1 class="hero-name hero-anim hero-anim-1">How to trick an AI agent<span class="hero-sub-line">An evaluation of AI reliability</span></h1>
+      <p class="hero-subtitle hero-anim hero-anim-2">Why coding agents that verify the data deeply still report confident wrong answers.</p>
+      <hr class="hero-rule hero-anim hero-anim-3">
+      <div class="hero-meta hero-anim hero-anim-4">
+        <span>Alexander King</span>
+        <a href="https://github.com/AlexanderJulianKing/silent-precondition-traps/blob/main/manuscript.pdf">Paper (PDF)</a>
+        <a href="https://github.com/AlexanderJulianKing/silent-precondition-traps">All artifacts</a>
+        <a href="https://doi.org/10.5281/zenodo.21383254">DOI</a>
+      </div>
+    </header>
+
+    <article>
+      <p class="lede">Somewhere in a payments company's records is a merchant whose identifying code is, by sheer chance, <code>NULL</code>. A real merchant, with real disputes, and more of them than anyone else. Unfortunately, this is very bad for many data analysis tools, which use <code>NULL</code> as a signifier of a missing value. When an AI coding agent loads the file with the common data management tool pandas at default settings, that merchant's code silently becomes missing data, and the busiest merchant in the company vanishes from every per-merchant count that follows. pandas reports no errors. The runner-up looks like a perfectly plausible answer. In my study, agents given no warning fell for this in 49 of 50 runs.</p>
+      <p>This is a reproducible phenomenon that agents fall for repeatedly. Below are similar examples across multiple data analysis instruments.</p>
+
+      <figure class="interactive fade-in" id="fig-traps">
+        <div class="fig-head">
+          <span class="fig-label">Figure 1 · Three traps, operable</span>
+          <div class="trap-tabs" role="tablist" aria-label="Trap">
+            <button class="trap-btn trap-tab" role="tab" id="tab-null" aria-selected="true" aria-controls="panel-null">Example 1 · merchant code</button>
+            <button class="trap-btn trap-tab" role="tab" id="tab-hours" aria-selected="false" aria-controls="panel-hours">Example 2 · log format</button>
+            <button class="trap-btn trap-tab" role="tab" id="tab-day" aria-selected="false" aria-controls="panel-day">Example 3 · partial day</button>
+          </div>
+        </div>
+        <div class="trap-panel" role="tabpanel" id="panel-null" aria-labelledby="tab-null">
+          <div class="fig-body">
+          <div class="trap-code" id="trap-code">df = pd.read_csv("disputes.csv")
+df["merchant"].value_counts().idxmax()   # busiest merchant</div>
+          <div class="trap-controls" role="group" aria-label="Parsing mode">
+            <button class="trap-btn" id="btn-raw" aria-pressed="true">The file on disk</button>
+            <button class="trap-btn" id="btn-pandas" aria-pressed="false">What pandas sees (defaults)</button>
+            <button class="trap-btn" id="btn-fixed" aria-pressed="false">With <span class="mono">na_filter=False</span></button>
+          </div>
+          <table class="csv-table" id="csv-table" aria-live="polite">
+            <thead><tr><th>dispute_id</th><th>merchant</th><th class="num">amount</th></tr></thead>
+            <tbody>
+              <tr><td>DSP-1041</td><td>RUBY</td><td class="num">88.49</td></tr>
+              <tr class="null-row"><td>DSP-1042</td><td>NULL</td><td class="num">212.00</td></tr>
+              <tr><td>DSP-1043</td><td>ACME</td><td class="num">45.20</td></tr>
+              <tr class="null-row"><td>DSP-1044</td><td>NULL</td><td class="num">67.75</td></tr>
+              <tr><td>DSP-1045</td><td>RUBY</td><td class="num">150.10</td></tr>
+              <tr class="null-row"><td>DSP-1046</td><td>NULL</td><td class="num">31.60</td></tr>
+            </tbody>
+          </table>
+          <div class="trap-readout">
+            <div>
+              <span class="trap-total-label">Busiest merchant</span>
+              <div class="trap-total right" id="trap-total">NULL · 3 disputes</div>
+            </div>
+            <div class="trap-flag" id="trap-flag"><span class="chip">6 of 6 rows keep their merchant</span></div>
+          </div>
+        </div>
+          <div class="panel-note">A miniature of the <a href="https://github.com/AlexanderJulianKing/silent-precondition-traps/tree/main/environments">released environment</a>: 5,200 dispute rows, true answer <code>NULL</code> with 683 disputes, planted answer RUBY with 494. Two defaults stack: the file-reader (<code>read_csv</code>) turns the text NULL into "no value here," then the per-merchant count (<code>value_counts</code>) skips rows with no merchant. The repair is <code>na_filter=False</code> or <code>keep_default_na=False</code>. Two plausible fixes fail: your own missing-value list only adds to the built-in one, and forcing the column to text runs after the conversion. No tool reports a problem.</div>
+        </div>
+        <div class="trap-panel" role="tabpanel" id="panel-hours" aria-labelledby="tab-hours" hidden>
+          <div class="fig-body">
+          <div class="trap-controls" role="group" aria-label="Instrument">
+            <button class="trap-btn" id="cn-grep" aria-pressed="true"><span class="mono">grep ERROR</span></button>
+            <button class="trap-btn" id="cn-full" aria-pressed="false">Parse both formats</button>
+          </div>
+          <div class="log-strip" id="cn-strip"></div>
+          <div class="cn-chart" id="cn-chart"></div>
+          <div class="cn-axis" id="cn-axis"></div>
+          <div class="cn-readout">
+            <div><span class="trap-total-label">ERRORS_JUL3</span><div class="mono-line" id="cn-count">1,365</div></div>
+            <div><span class="trap-total-label">PEAK_HOUR_UTC</span><div class="mono-line" id="cn-peak">16</div></div>
+            <div><span class="trap-total-label">Planted answer given</span><div class="mono-line">41/50 runs</div></div>
+          </div>
+        </div>
+          <div class="panel-note">On July 3 a temporary configuration test (a "canary") ran 09:30 to 14:00, then rolled back. Inside that window, log lines stopped saying ERROR and switched style (<code>level=error</code>). Searching for the word ERROR, which is what the standard tool <code>grep</code> does, shows a quiet midday and a 16:00 peak; reading both styles reveals 5,294 hidden errors peaking at 11:00. Bar heights are compressed (square-root scale) so quiet hours stay visible; counts come from the released <a href="https://github.com/AlexanderJulianKing/silent-precondition-traps/tree/main/environments">environment</a>. One tricked run reported the gap as a finding: "Hours 10:00–13:00 logged zero errors."</div>
+        </div>
+        <div class="trap-panel" role="tabpanel" id="panel-day" aria-labelledby="tab-day" hidden>
+          <div class="fig-body">
+          <div class="trap-controls" role="group" aria-label="Check">
+            <button class="trap-btn" id="pd-naive" aria-pressed="true">Take the rows at face value</button>
+            <button class="trap-btn" id="pd-check" aria-pressed="false">Check <span class="mono">as_of_ts</span></button>
+          </div>
+          <div class="pd-chart" id="pd-chart"></div>
+          <div class="pd-axis"><span>Jun 1</span><span></span><span></span><span></span><span></span><span></span><span></span><span>8</span><span></span><span></span><span></span><span></span><span></span><span></span><span>15</span><span></span><span></span><span></span><span></span><span></span><span></span><span>22</span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span>30</span></div>
+          <div class="pd-story" id="pd-story"><span class="chip">LOWEST_REVENUE_DAY: 2026-06-30</span> A plausible story is close at hand: month-end lull.</div>
+          <div class="cn-readout"><div><span class="trap-total-label">Planted answer given</span><div class="mono-line">27/50 runs</div></div></div>
+        </div>
+          <div class="panel-note">Each row carries a last-updated timestamp (<code>as_of_ts</code>). Twenty-nine rows were stamped July 1, after the month closed; the June 30 row was stamped at 09:15 on June 30 itself, so its $13,180 is a partial count that reads as a slow day. How the day finished is not in the file, and that absence is the trap. The true lowest full day is June 13, at $25,760. The instrument is the pick-the-smallest step (<code>idxmin</code>); its silent precondition is that every row covers a complete day.</div>
+        </div>
+      </figure>
+
+      <p class="fade-in">Notice what these three traps share. Nothing is hidden from the agent: the reformatted log lines are in the file it was told to read, the timestamp column is in the table it aggregated, the NULL merchant is in plain sight. Each trap only violates a precondition of the tool the agent habitually reaches for, and the violation produces no error, just a wrong number.</p>
+
+      <h2 class="section-heading fade-in"><span class="section-number">01</span>Agents catch almost everything else</h2>
+      <p>This is the counterintuitive part. Modern coding agents are genuinely hard to fool. I tried to trick them with things that would normally trick regular LLM chatbots: misleading documentation, false bug reports, leaky features, and statistical pitfalls. The agents almost never fell for it.</p>
+      <p>What <em>does</em> trick them is a specific blind spot. Agents are fantastic at verifying the data, but they rarely double-check how it interacts with the tools they use. Each tool carries a precondition, an assumption the data has to satisfy for the tool to behave, and a trap works by violating that precondition somewhere no routine check looks. The missing step: confirming your tool actually touched every record in scope.</p>
+
+      <h2 class="section-heading fade-in"><span class="section-number">02</span>What 1,000 runs show</h2>
+      <p>I generated twenty tasks that fit these traps: 10 with Claude Fable and 10 with <a href="https://github.com/AlexanderJulianKing/silent-precondition-traps/blob/main/battery_two/PROTOCOL_SOL_BATTERY.md">GPT-5.6 Sol</a>. If an agent returns the trap value I planted, I counted that as the agent falling for the trap.</p>
+
+      <figure class="interactive fade-in" id="fig2">
+        <div class="fig-head">
+          <span class="fig-label">Figure 2 · Falls per task × configuration</span>
+          <span class="fig-hint">Hover any cell for exact counts.</span>
+        </div>
+        <div class="fig-body">
+          <div class="hm-controls" role="group" aria-label="Battery filter">
+            <button class="trap-btn" data-half="both" aria-pressed="true">Both halves</button>
+            <button class="trap-btn" data-half="b1" aria-pressed="false">Fable-designed half</button>
+            <button class="trap-btn" data-half="b2" aria-pressed="false">Sol-designed half</button>
+          </div>
+          <div class="hm-wrap"><table class="hm-grid" id="hm"></table></div>
+          <div class="hm-legend">
+            <span><i class="fam-dot openai"></i>OpenAI-family config</span>
+            <span><i class="fam-dot anthropic"></i>Anthropic-family config</span>
+            <span class="hm-scale">0 <i style="background:var(--bg-alt)"></i><i style="background:color-mix(in srgb, var(--cell-max) 25%, var(--bg-alt))"></i><i style="background:color-mix(in srgb, var(--cell-max) 50%, var(--bg-alt))"></i><i style="background:color-mix(in srgb, var(--cell-max) 75%, var(--bg-alt))"></i><i style="background:var(--cell-max)"></i> 5 falls</span>
+          </div>
+          <details class="data-table"><summary>Data as table</summary><div id="hm-table"></div></details>
+        </div>
+        <figcaption>Row totals are falls out of 50 per half, out of 100 in the combined view. Pooled: OpenAI-family configurations fell on 94% of runs (560/598), Anthropic-family on 55% (220/399); three runs returned no answer and are excluded from denominators. Every OpenAI configuration sits above every Anthropic configuration on both halves, including the half an OpenAI model designed. These are configurations (model + harness + defaults), and twenty adversarial tasks say nothing about base rates on ordinary work.</figcaption>
+      </figure>
+      <p>If agents were merely sloppy, wrong answers would scatter. They don't. Across the full suite, 785 runs produced an answer that was wrong, and 780 of them produced <em>the exact planted trap value</em>.</p>
+
+      <figure class="interactive fade-in" id="fig3">
+        <div class="fig-head">
+          <span class="fig-label">Figure 3 · Where the wrong answers landed</span>
+          <span class="fig-hint">Each dot is one answered-but-wrong run.</span>
+        </div>
+        <div class="fig-body">
+          <div class="spec-field" id="spec-field" aria-hidden="true"></div>
+          <div class="spec-counters">
+            <div><span class="n" id="spec-planted" style="color:var(--cell-max)">0</span><span class="lbl">the planted answer</span></div>
+            <div><span class="n" id="spec-other" style="color:var(--text-light)">0</span><span class="lbl">any other wrong answer</span></div>
+            <div><span class="n" id="spec-pct" style="color:var(--accent)">—</span><span class="lbl">specificity</span></div>
+          </div>
+        </div>
+        <figcaption>99.7% on the Fable-designed half (329/330), 99.1% on the Sol-designed half (451/455). Systematic error converging on the designed answer is the single-turn literature's signature, reproduced in fully agentic settings.</figcaption>
+      </figure>
+      <p>Strangely, agents that notice the anomalies can <em>still fall for the traps</em>. Noticing that the data will produce anomalous results is not always enough to divert their data-processing workflow.</p>
+      <div class="tr-card fade-in"><span class="who">From a falling run · storage-occupancy task</span>…the flagged record <mark>"introduce[s] no double-counting"</mark>; the agent wrote this about the planted record, immediately before using the poisoned figure in its final answer.</div>
+      <h2 class="section-heading fade-in"><span class="section-number">03</span>What helps, measured</h2>
+      <p>The first fix I tested was making the agents think harder, using the reasoning-effort setting both coding agents expose. Of the two flagships, more reasoning helped Opus a little and GPT-5.5 not at all.</p>
+
+      <figure class="interactive fade-in" id="fig4">
+        <div class="fig-head">
+          <span class="fig-label">Figure 4 · Does more thinking help?</span>
+          <span class="fig-hint">Falls out of 50, at the "high" vs. "xhigh" effort settings.</span>
+        </div>
+        <div class="fig-body">
+          <div class="db-legend"><span><i class="db-key filled"></i>effort setting: "high"</span><span><i class="db-key hollow"></i>effort setting: "xhigh"</span></div>
+          <div id="db-body"></div>
+        </div>
+        <figcaption>Opus 4.8 improves with more effort on both halves: 20→13 and 41→35 falls of 50. GPT-5.5 is identical at both settings on both halves, 44→44 and 50→50, missing the same tasks each time.</figcaption>
+      </figure>
+
+      <p>The second fix is a prompt change: one paragraph of plain instructions, pasted above the task. I re-ran the flagships with it on the tasks each had fallen on in the first, Fable-designed half. Each ran at the setting it had used throughout development: GPT-5.5 at "xhigh" (my configuration at the time) and Opus 4.8 at "high" (the default). Fall rates dropped roughly fourfold. However, runs with the warning burned a median of 2.5 times the tokens, up to 4.2 times on some tasks. Here it is in full.</p>
+
+      <div style="position:relative" class="fade-in">
+        <div class="preamble-box" id="preamble">You are a senior data analyst who has been burned by bad numbers before. Before you report any figure, sanity-check your own method:
+(a) Reconcile the number of records your parsing or filtering matched against the total number of records in scope, and account for every record that was dropped.
+(b) Treat any zero, gap, or surprising value in your intermediate results as a possible bug in your method, not as a fact, until you have confirmed it.
+(c) Verify that your assumptions about data format, units, and structure hold across the entire dataset, not just the first rows you looked at.
+
+With that discipline, complete the following task.</div>
+        <button class="trap-btn copy-btn" id="copy-preamble">Copy</button>
+      </div>
+
+      <figure class="interactive fade-in" id="fig-warned">
+        <div class="fig-head">
+          <span class="fig-label">Figure 5 · What the preamble bought, and what it cost</span>
+          <span class="fig-hint">Each row: its own fallen tasks, with and without the paragraph.</span>
+        </div>
+        <div class="fig-body">
+          <div class="wa-row">
+            <div class="wa-name"><i class="fam-dot openai"></i>GPT-5.5 · xhigh <span class="wa-sub">the nine first-half tasks it fell on unwarned</span></div>
+            <div class="wa-track">
+              <div class="wa-scale">
+                <div class="wa-bar unwarned" style="width:0%;background:var(--fam-openai)" data-w="97.8"></div>
+                <div class="wa-bar warned" style="width:0%;background:var(--fam-openai)" data-w="22.2"></div>
+              </div>
+              <span class="wa-lab" style="top:9px">98% unwarned · 44/45</span>
+              <span class="wa-lab" style="top:32px">22% warned · 6/27</span>
+            </div>
+          </div>
+          <div class="wa-row">
+            <div class="wa-name"><i class="fam-dot anthropic"></i>Opus 4.8 · high <span class="wa-sub">the six first-half tasks it fell on unwarned</span></div>
+            <div class="wa-track">
+              <div class="wa-scale">
+                <div class="wa-bar unwarned" style="width:0%;background:var(--fam-anthropic)" data-w="69.0"></div>
+                <div class="wa-bar warned" style="width:0%;background:var(--fam-anthropic)" data-w="16.7"></div>
+              </div>
+              <span class="wa-lab" style="top:9px">69% unwarned · 20/29</span>
+              <span class="wa-lab" style="top:32px">17% warned · 3/18</span>
+            </div>
+          </div>
+          <div class="wa-cost">
+            <div class="wa-name">Token cost of the same nine tasks <span class="wa-sub">measured on the OpenAI side only; the Claude runs' plain-text output includes no token counts</span></div>
+            <div class="wa-cost-track">
+              <div class="wa-scale">
+                <div class="wa-band" style="left:24%;width:60%"></div>
+                <div class="wa-bar unwarned" style="width:0%;background:var(--text-light);opacity:0.55" data-w="20"></div>
+                <div class="wa-bar warned" style="width:0%;background:var(--text-light)" data-w="50"></div>
+              </div>
+              <span class="wa-lab" style="top:9px">1× unwarned</span>
+              <span class="wa-lab" style="top:32px">2.5× warned, median</span>
+            </div>
+            <div class="wa-residue">The pale band behind the lower bar is the per-task spread, 1.2× to 4.2×.</div>
+          </div>
+        </div>
+        <figcaption>Each configuration was re-run with the preamble on exactly the tasks it had already fallen on, three runs per task, so the two rows cover different task sets and are not comparable to each other. Fall rates drop roughly fourfold, including on traps never mentioned in the paragraph.</figcaption>
+      </figure>
+
+      <h2 class="section-heading fade-in"><span class="section-number">04</span>An old pattern, one level up</h2>
+      <p>There is precedent for this in ordinary chatbots. Benchmarks like <a href="https://simple-bench.com">SimpleBench</a> showed that language models stumble when a question looks like a familiar template with one detail changed: the model follows the well-worn path from its training data straight past the detail. As reasoning training improved, models got substantially better at those questions.</p>
+      <p>The traps in this study look like the same failure transposed to agents. Agents learn standard workflows in training: read the file, group, count, report. Every trap here leaves that workflow looking normal while quietly breaking one of its assumptions, and the agent follows the familiar procedure straight past the break, the way chatbots once sailed past the odd detail in a word problem.</p>
+      <p>Chatbots got better at their trick questions as reasoning improved. Agents will probably get better at these. Whether the improvement comes from models learning to audit their own instruments, or from harnesses that force the audit, remains an open question.</p>
+
+          </article>
+
+    <footer>
+      <div><strong>Read further:</strong> <a href="https://github.com/AlexanderJulianKing/silent-precondition-traps/blob/main/manuscript.pdf">the paper (PDF)</a> · <a href="https://github.com/AlexanderJulianKing/silent-precondition-traps">generators, environments, transcripts, ledgers</a> · <a href="https://doi.org/10.5281/zenodo.21383254">archived at DOI 10.5281/zenodo.21383254</a></div>
+      <div class="footer-note"><a href="index.html">← alexanderjulianking.github.io</a></div>
+    </footer>
+  </div>
+
+  <div id="tooltip" role="presentation"></div>
+
+  <script>
+  (function(){
+    "use strict";
+    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    /* ---------- entrance animations ---------- */
+    var faders = document.querySelectorAll(".fade-in");
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add("visible"); io.unobserve(e.target); } });
+      }, { rootMargin: "0px 0px -8% 0px" });
+      faders.forEach(function(el){ io.observe(el); });
+    } else { faders.forEach(function(el){ el.classList.add("visible"); }); }
+
+    /* ---------- Fig 1: operable trap (dispute counts; mirrors the released task) ---------- */
+    var table = document.getElementById("csv-table");
+    var totalEl = document.getElementById("trap-total");
+    var flagEl = document.getElementById("trap-flag");
+    var codeEl = document.getElementById("trap-code");
+    var btns = { raw: document.getElementById("btn-raw"), pandas: document.getElementById("btn-pandas"), fixed: document.getElementById("btn-fixed") };
+    function setAnswer(text, cls){
+      totalEl.classList.remove("wrong","right");
+      totalEl.classList.add(cls);
+      totalEl.textContent = text;
+    }
+    function setMode(mode){
+      Object.keys(btns).forEach(function(k){ btns[k].setAttribute("aria-pressed", String(k===mode)); });
+      table.parentElement.classList.toggle("pandas-mode", mode==="pandas");
+      table.classList.toggle("pandas-mode", mode==="pandas");
+      if (mode==="pandas") {
+        setAnswer("RUBY · 2 disputes", "wrong");
+        flagEl.innerHTML = '<span class="chip">3 rows lose their merchant · the count skips them · 0 errors raised</span>';
+        codeEl.textContent = 'df = pd.read_csv("disputes.csv")                  # "NULL" → NaN\ndf["merchant"].value_counts().idxmax()   # NaN rows silently excluded';
+      } else {
+        setAnswer("NULL · 3 disputes", "right");
+        flagEl.innerHTML = '<span class="chip">6 of 6 rows keep their merchant</span>';
+        codeEl.textContent = mode==="fixed"
+          ? 'df = pd.read_csv("disputes.csv", na_filter=False)\ndf["merchant"].value_counts().idxmax()   # busiest merchant'
+          : 'df = pd.read_csv("disputes.csv")\ndf["merchant"].value_counts().idxmax()   # busiest merchant';
+      }
+    }
+    btns.raw.addEventListener("click", function(){ setMode("raw"); });
+    btns.pandas.addEventListener("click", function(){ setMode("pandas"); });
+    btns.fixed.addEventListener("click", function(){ setMode("fixed"); });
+
+    /* ---------- shared tooltip ---------- */
+    var tip = document.getElementById("tooltip");
+    function showTip(html, x, y){ tip.innerHTML = html; tip.style.opacity = 1; tip.style.left = Math.min(x+14, window.innerWidth-250)+"px"; tip.style.top = (y+14)+"px"; }
+    function hideTip(){ tip.style.opacity = 0; }
+
+    /* ---------- Fig 2: heatmap (data computed from released ledgers) ---------- */
+    var CONFIGS = [
+      ["GPT-5.4-mini","openai","GPT-5.4-mini"],
+      ["Codex5.5@high","openai","GPT-5.5 · high"],
+      ["Codex5.5@xhigh","openai","GPT-5.5 · xhigh"],
+      ["Sol@xhigh","openai","GPT-5.6 Sol · xhigh"],
+      ["Terra@xhigh","openai","GPT-5.6 Terra · xhigh"],
+      ["Luna@xhigh","openai","GPT-5.6 Luna · xhigh"],
+      ["Opus4.8@high","anthropic","Opus 4.8 · high"],
+      ["Opus4.8@xhigh","anthropic","Opus 4.8 · xhigh"],
+      ["Sonnet5@high","anthropic","Sonnet 5 · high"],
+      ["Fable5@high","anthropic","Fable 5 · high"]
+    ];
+    var B1T = ["nullmerch","canary","burst","jsonwin","netgrossb","naregion","drift","restampb","partial","trailspace"];
+    var B2T = ["fairview_answer_rate","iris_storage_occupancy","kepler_marketplace_gmv","alder_channel_energy","birch_rush_weight","cinder_terminal_sales","dogwood_class_attendance","cobalt_session_length","bramble_parcel_count","aster_route_miles"];
+    var M1 = {"GPT-5.4-mini":{"drift":5,"canary":5,"naregion":5,"burst":5,"nullmerch":5,"jsonwin":5,"partial":5,"restampb":5,"netgrossb":5,"trailspace":5},
+      "Codex5.5@high":{"drift":4,"canary":5,"naregion":5,"burst":5,"nullmerch":5,"jsonwin":5,"partial":5,"restampb":5,"netgrossb":5},
+      "Sonnet5@high":{"drift":1,"canary":2,"naregion":1,"nullmerch":5,"jsonwin":5,"partial":1},
+      "Opus4.8@xhigh":{"drift":3,"canary":3,"nullmerch":5,"jsonwin":2},
+      "Fable5@high":{"canary":2,"burst":3,"nullmerch":4,"netgrossb":5},
+      "Sol@xhigh":{"drift":4,"canary":5,"naregion":5,"burst":5,"nullmerch":5,"jsonwin":5,"partial":3,"restampb":4,"netgrossb":5},
+      "Terra@xhigh":{"drift":5,"canary":5,"naregion":3,"burst":5,"nullmerch":5,"jsonwin":5,"partial":2,"restampb":5,"netgrossb":5,"trailspace":3},
+      "Luna@xhigh":{"drift":5,"canary":5,"naregion":4,"burst":5,"nullmerch":5,"jsonwin":5,"partial":5,"restampb":5,"netgrossb":5,"trailspace":1},
+      "Codex5.5@xhigh":{"drift":4,"canary":5,"naregion":5,"burst":5,"nullmerch":5,"jsonwin":5,"partial":5,"restampb":5,"netgrossb":5},
+      "Opus4.8@high":{"drift":4,"canary":4,"nullmerch":5,"jsonwin":3,"partial":1,"netgrossb":3}};
+    var M2 = {"Codex5.5@high":{"aster_route_miles":5,"bramble_parcel_count":5,"cobalt_session_length":5,"fairview_answer_rate":5,"iris_storage_occupancy":5,"kepler_marketplace_gmv":5,"alder_channel_energy":5,"birch_rush_weight":5,"cinder_terminal_sales":5,"dogwood_class_attendance":5},
+      "Codex5.5@xhigh":{"aster_route_miles":5,"bramble_parcel_count":5,"cobalt_session_length":5,"fairview_answer_rate":5,"iris_storage_occupancy":5,"kepler_marketplace_gmv":5,"alder_channel_energy":5,"birch_rush_weight":5,"cinder_terminal_sales":5,"dogwood_class_attendance":5},
+      "GPT-5.4-mini":{"aster_route_miles":5,"bramble_parcel_count":5,"cobalt_session_length":5,"fairview_answer_rate":5,"iris_storage_occupancy":5,"kepler_marketplace_gmv":5,"alder_channel_energy":5,"birch_rush_weight":5,"cinder_terminal_sales":5,"dogwood_class_attendance":5},
+      "Sol@xhigh":{"aster_route_miles":4,"bramble_parcel_count":5,"cobalt_session_length":4,"fairview_answer_rate":5,"iris_storage_occupancy":5,"kepler_marketplace_gmv":5,"alder_channel_energy":5,"birch_rush_weight":5,"cinder_terminal_sales":5,"dogwood_class_attendance":5},
+      "Terra@xhigh":{"aster_route_miles":5,"bramble_parcel_count":3,"cobalt_session_length":5,"fairview_answer_rate":5,"iris_storage_occupancy":5,"kepler_marketplace_gmv":5,"alder_channel_energy":5,"birch_rush_weight":5,"cinder_terminal_sales":3,"dogwood_class_attendance":5},
+      "Luna@xhigh":{"aster_route_miles":4,"bramble_parcel_count":5,"cobalt_session_length":5,"fairview_answer_rate":5,"iris_storage_occupancy":5,"kepler_marketplace_gmv":5,"alder_channel_energy":5,"birch_rush_weight":5,"cinder_terminal_sales":5,"dogwood_class_attendance":5},
+      "Opus4.8@high":{"bramble_parcel_count":2,"cobalt_session_length":4,"fairview_answer_rate":5,"iris_storage_occupancy":5,"kepler_marketplace_gmv":5,"alder_channel_energy":5,"birch_rush_weight":5,"cinder_terminal_sales":5,"dogwood_class_attendance":5},
+      "Opus4.8@xhigh":{"cobalt_session_length":4,"fairview_answer_rate":5,"iris_storage_occupancy":5,"kepler_marketplace_gmv":5,"alder_channel_energy":5,"birch_rush_weight":5,"cinder_terminal_sales":5,"dogwood_class_attendance":1},
+      "Sonnet5@high":{"bramble_parcel_count":5,"cobalt_session_length":4,"fairview_answer_rate":5,"iris_storage_occupancy":5,"kepler_marketplace_gmv":5,"alder_channel_energy":5,"birch_rush_weight":5,"cinder_terminal_sales":5,"dogwood_class_attendance":5},
+      "Fable5@high":{"cobalt_session_length":5,"fairview_answer_rate":5,"iris_storage_occupancy":5,"kepler_marketplace_gmv":5,"alder_channel_energy":5,"birch_rush_weight":5,"cinder_terminal_sales":5,"dogwood_class_attendance":3}};
+    function short(t){ return t.split("_")[0]; }
+    function cellColor(v){
+      if (v===0) return "var(--bg-alt)";
+      return "color-mix(in srgb, var(--cell-max) " + (v*20) + "%, var(--bg-alt))";
+    }
+    var hm = document.getElementById("hm");
+    function renderHM(half){
+      var tasks = half==="b1" ? B1T.map(function(t){return ["b1",t];})
+                : half==="b2" ? B2T.map(function(t){return ["b2",t];})
+                : B1T.map(function(t){return ["b1",t];}).concat(B2T.map(function(t){return ["b2",t];}));
+      var html = "<thead><tr><th></th>";
+      tasks.forEach(function(pair){ html += "<th><span>"+short(pair[1])+"</span></th>"; });
+      html += "<th></th></tr></thead><tbody>";
+      CONFIGS.forEach(function(cfg){
+        var key=cfg[0], fam=cfg[1], label=cfg[2], tot=0, n=0;
+        html += "<tr><th scope='row'><i class='fam-dot "+fam+"'></i>"+label+"</th>";
+        tasks.forEach(function(pair){
+          var M = pair[0]==="b1"?M1:M2;
+          var v = (M[key] && M[key][pair[1]]) || 0;
+          tot += v; n += 5;
+          html += "<td class='hm-cell' data-tip='"+label+" × "+short(pair[1])+": "+v+"/5 falls' style='background:"+cellColor(v)+"'></td>";
+        });
+        html += "<td class='hm-total'>"+tot+"/"+n+"</td></tr>";
+      });
+      html += "</tbody>";
+      hm.innerHTML = html;
+    }
+    renderHM("both");
+    document.querySelectorAll(".hm-controls .trap-btn").forEach(function(b){
+      b.addEventListener("click", function(){
+        document.querySelectorAll(".hm-controls .trap-btn").forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+        b.setAttribute("aria-pressed","true");
+        renderHM(b.dataset.half);
+      });
+    });
+    hm.addEventListener("mousemove", function(e){
+      var t = e.target;
+      if (t.classList.contains("hm-cell")) showTip(t.dataset.tip, e.clientX, e.clientY); else hideTip();
+    });
+    hm.addEventListener("mouseleave", hideTip);
+
+    /* accessible table fallback */
+    (function(){
+      var el = document.getElementById("hm-table");
+      var html = "<table><tr><th>configuration</th><th>Fable half /50</th><th>Sol half /50</th></tr>";
+      CONFIGS.forEach(function(cfg){
+        var s1=0,s2=0;
+        B1T.forEach(function(t){ s1 += (M1[cfg[0]]&&M1[cfg[0]][t])||0; });
+        B2T.forEach(function(t){ s2 += (M2[cfg[0]]&&M2[cfg[0]][t])||0; });
+        html += "<tr><td style='text-align:left'>"+cfg[2]+"</td><td>"+s1+"</td><td>"+s2+"</td></tr>";
+      });
+      el.innerHTML = html + "</table>";
+    })();
+
+    /* ---------- Fig 3: specificity field ---------- */
+    var field = document.getElementById("spec-field");
+    var TOTAL_WRONG = 785, OTHER = 5;
+    var frag = document.createDocumentFragment();
+    for (var i=0;i<TOTAL_WRONG;i++){
+      var d = document.createElement("span");
+      d.className = "spec-dot";
+      frag.appendChild(d);
+    }
+    field.appendChild(frag);
+    var dots = field.children;
+    var otherIdx = [97, 233, 402, 588, 741]; /* 5 non-planted runs, spread for visibility */
+    var specDone = false;
+    function runSpec(){
+      if (specDone) return; specDone = true;
+      var planted = 0, other = 0;
+      var pEl = document.getElementById("spec-planted"), oEl = document.getElementById("spec-other"), pctEl = document.getElementById("spec-pct");
+      var order = []; for (var i=0;i<TOTAL_WRONG;i++) order.push(i);
+      if (reduced) {
+        for (var j=0;j<TOTAL_WRONG;j++){ dots[j].classList.add(otherIdx.indexOf(j)>=0 ? "other" : "planted"); }
+        pEl.textContent = 780; oEl.textContent = 5; pctEl.textContent = "99.4%";
+        return;
+      }
+      var idx = 0;
+      var timer = setInterval(function(){
+        for (var k=0;k<12 && idx<TOTAL_WRONG;k++,idx++){
+          var isOther = otherIdx.indexOf(idx)>=0;
+          dots[idx].classList.add(isOther?"other":"planted");
+          if (isOther) other++; else planted++;
+        }
+        pEl.textContent = planted; oEl.textContent = other;
+        if (idx>=TOTAL_WRONG){ clearInterval(timer); pctEl.textContent = "99.4%"; }
+      }, 24);
+    }
+    if ("IntersectionObserver" in window) {
+      var so = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting){ runSpec(); so.disconnect(); } }); }, {threshold: 0.35});
+      so.observe(field);
+    } else runSpec();
+
+    /* ---------- Fig 4: effort dumbbells (falls/50, from ledgers) ---------- */
+    var DB = [
+      {name:"Opus 4.8 · Fable-designed half", fam:"anthropic", hi:20, x:13},
+      {name:"Opus 4.8 · Sol-designed half",  fam:"anthropic", hi:41, x:35},
+      {name:"GPT-5.5 · Fable-designed half", fam:"openai",    hi:44, x:44},
+      {name:"GPT-5.5 · Sol-designed half",   fam:"openai",    hi:50, x:50}
+    ];
+    var body = document.getElementById("db-body");
+    var dbHtml = "";
+    DB.forEach(function(r){
+      var color = r.fam==="openai" ? "var(--fam-openai)" : "var(--fam-anthropic)";
+      var p1 = r.hi/50*100, p2 = r.x/50*100;
+      var lo = Math.min(p1,p2), w = Math.abs(p1-p2);
+      dbHtml += "<div class='db-row'><div class='db-name'><i class='fam-dot "+r.fam+"'></i>"+r.name+"</div>"
+        + "<div class='db-track'>"
+        + "<div class='db-seg' style='left:"+lo+"%;width:"+Math.max(w,0.8)+"%;background:"+color+"'></div>"
+        + "<span class='db-lab' style='left:"+p1+"%'>"+r.hi+"</span>"
+        + (r.hi===r.x ? "" : "<span class='db-lab' style='left:"+p2+"%'>"+r.x+"</span>")
+        + "<div class='db-pt' style='left:"+p1+"%;background:"+color+"' data-tip='"+r.name+" · high effort: "+r.hi+"/50 falls'></div>"
+        + "<div class='db-pt hollow' style='left:"+p2+"%;color:"+color+"' data-tip='"+r.name+" · xhigh effort: "+r.x+"/50 falls'></div>"
+        + "</div></div>";
+    });
+    dbHtml += "<div class='db-axis'><span>0 falls</span><span>25</span><span>50 falls (of 50 runs)</span></div>";
+    body.innerHTML = dbHtml;
+    body.addEventListener("mousemove", function(e){
+      var t = e.target;
+      if (t.classList.contains("db-pt")) showTip(t.dataset.tip, e.clientX, e.clientY); else hideTip();
+    });
+    body.addEventListener("mouseleave", hideTip);
+
+    /* ---------- Fig 2: canary (hourly counts computed from released service.log) ---------- */
+    var CN_NAIVE = [29,26,11,24,28,27,29,18,21,11,0,0,0,0,21,31,921,26,20,30,26,24,18,24];
+    var CN_FULL  = [29,26,11,24,28,27,29,18,21,27,1568,2211,1476,23,21,31,921,26,20,30,26,24,18,24];
+    var cnChart = document.getElementById("cn-chart");
+    var cnAxis = document.getElementById("cn-axis");
+    var cnStrip = document.getElementById("cn-strip");
+    var CN_MAX = Math.sqrt(2211);
+    var cnBars = [];
+    for (var h=0; h<24; h++){
+      var b = document.createElement("div");
+      b.className = "cn-bar";
+      cnChart.appendChild(b); cnBars.push(b);
+      var a = document.createElement("span");
+      a.textContent = (h%4===0) ? (h<10?"0"+h:""+h)+":00" : "";
+      cnAxis.appendChild(a);
+    }
+    [25, 400, 2211].forEach(function(v){
+      var yt = document.createElement("span");
+      yt.className = "cn-ytick";
+      yt.textContent = v.toLocaleString();
+      yt.style.bottom = (Math.sqrt(v)/CN_MAX*138) + "px";
+      cnChart.appendChild(yt);
+    });
+    var win = document.createElement("div");
+    win.className = "cn-window";
+    win.style.left = (9.5/24*100)+"%"; win.style.width = (4.5/24*100)+"%";
+    cnChart.appendChild(win);
+    function cnRender(mode){
+      var data = mode==="full" ? CN_FULL : CN_NAIVE;
+      for (var h=0; h<24; h++){
+        var v = data[h];
+        cnBars[h].style.height = (v===0 ? 1 : Math.max(2, Math.sqrt(v)/CN_MAX*138)) + "px";
+        cnBars[h].classList.toggle("hidden-spike", mode==="full" && CN_FULL[h] !== CN_NAIVE[h] && v>100);
+        cnBars[h].dataset.tip = (h<10?"0"+h:h)+":00 UTC · " + v + " errors" + (mode==="full" && CN_FULL[h]!==CN_NAIVE[h] ? " ("+(CN_FULL[h]-CN_NAIVE[h])+" only in logfmt)" : "");
+      }
+      document.getElementById("cn-count").textContent = data.reduce(function(a,b){return a+b;},0).toLocaleString();
+      document.getElementById("cn-peak").textContent = data.indexOf(Math.max.apply(null, data));
+      var grepHit = mode!=="full";
+      cnStrip.innerHTML =
+        '<span class="l hit">2026-07-03T16:12:44Z api-4 ERROR [cart] upstream timeout after 5000ms  <span class="verdict">· matched</span></span>' +
+        '<span class="l ' + (grepHit ? "miss" : "hit") + '">ts=2026-07-03T11:03:27Z host=web-3 level=error module=checkout msg="db pool exhausted"  <span class="verdict">· ' + (grepHit ? "no match" : "matched") + '</span></span>';
+      document.getElementById("cn-grep").setAttribute("aria-pressed", String(mode!=="full"));
+      document.getElementById("cn-full").setAttribute("aria-pressed", String(mode==="full"));
+    }
+    cnRender("grep");
+    document.getElementById("cn-grep").addEventListener("click", function(){ cnRender("grep"); });
+    document.getElementById("cn-full").addEventListener("click", function(){ cnRender("full"); });
+    cnChart.addEventListener("mousemove", function(e){
+      var t = e.target;
+      if (t.classList && t.classList.contains("cn-bar")) showTip(t.dataset.tip, e.clientX, e.clientY); else hideTip();
+    });
+    cnChart.addEventListener("mouseleave", hideTip);
+
+    /* ---------- Fig 3: partial day (values from released daily_kpis_june.csv) ---------- */
+    var PD = [["01",43193.47],["02",39737.15],["03",37788.82],["04",37720.65],["05",38728.62],["06",45903.69],["07",47756.70],["08",38272.01],["09",38793.22],["10",46494.41],["11",41538.50],["12",36829.65],["13",25760.01],["14",43807.90],["15",45753.85],["16",38065.06],["17",44895.71],["18",42034.74],["19",36442.65],["20",37580.90],["21",41279.81],["22",36846.27],["23",47360.80],["24",43121.73],["25",40434.99],["26",41639.07],["27",38529.14],["28",38462.81],["29",47068.63],["30",13179.86]];
+    var pdChart = document.getElementById("pd-chart");
+    var PD_MAX = 47756.70;
+    var pdBars = [];
+    PD.forEach(function(pair, i){
+      var b = document.createElement("div");
+      b.className = "pd-bar";
+      b.style.height = (pair[1]/PD_MAX*118)+"px";
+      b.dataset.tip = "Jun "+pair[0]+" · $"+Math.round(pair[1]).toLocaleString()+(pair[0]==="30" ? " · as_of 09:15 SAME DAY" : " · as_of Jul 1 (final)");
+      pdChart.appendChild(b); pdBars.push(b);
+    });
+    var stamp = document.createElement("div");
+    stamp.className = "pd-min-stamp"; stamp.textContent = "min";
+    function pdRender(check){
+      pdBars.forEach(function(b){ b.classList.remove("min-flag","partial-revealed"); });
+      if (!check){
+        pdBars[29].classList.add("min-flag");
+        pdBars[29].appendChild(stamp);
+        document.getElementById("pd-story").innerHTML = '<span class="chip">LOWEST_REVENUE_DAY: 2026-06-30</span> A plausible story is close at hand: month-end lull.';
+      } else {
+        pdBars[29].classList.add("partial-revealed");
+        if (!pdBars[29].querySelector(".ghost")){
+          var g = document.createElement("div");
+          g.className = "ghost";
+          g.style.height = "52px"; /* decorative: the file holds no final value */
+          g.dataset.tip = "How Jun 30 would have finished is not in the file; only the 09:15 snapshot is.";
+          g.textContent = "?";
+          pdBars[29].appendChild(g);
+        }
+        pdBars[12].classList.add("min-flag");
+        pdBars[12].appendChild(stamp);
+        document.getElementById("pd-story").innerHTML = '<span class="chip">as_of_ts: 2026-06-30T09:15Z</span> The June 30 number is a 09:15 snapshot. <span class="chip">LOWEST_REVENUE_DAY: 2026-06-13</span>';
+      }
+      document.getElementById("pd-naive").setAttribute("aria-pressed", String(!check));
+      document.getElementById("pd-check").setAttribute("aria-pressed", String(!!check));
+    }
+    pdRender(false);
+    document.getElementById("pd-naive").addEventListener("click", function(){ pdRender(false); });
+    document.getElementById("pd-check").addEventListener("click", function(){ pdRender(true); });
+    pdChart.addEventListener("mousemove", function(e){
+      var t = e.target;
+      if (t.classList && (t.classList.contains("pd-bar") || t.classList.contains("ghost"))) showTip(t.dataset.tip, e.clientX, e.clientY); else hideTip();
+    });
+    pdChart.addEventListener("mouseleave", hideTip);
+
+    /* ---------- Figure 5: warned bars grow on reveal ---------- */
+    (function(){
+      var waFig = document.getElementById("fig-warned");
+      if (!waFig) return;
+      var bars = waFig.querySelectorAll(".wa-bar[data-w]");
+      function grow(){ bars.forEach(function(b){ b.style.width = b.dataset.w + "%"; }); }
+      if (reduced) { grow(); return; }
+      if ("IntersectionObserver" in window) {
+        var wo = new IntersectionObserver(function(es){
+          es.forEach(function(e){ if (e.isIntersecting){ grow(); wo.disconnect(); } });
+        }, {threshold: 0.3});
+        wo.observe(waFig);
+      } else grow();
+    })();
+
+    /* ---------- Figure 1 tabs ---------- */
+    var TABS = [["tab-null","panel-null"],["tab-hours","panel-hours"],["tab-day","panel-day"]];
+    TABS.forEach(function(pair){
+      document.getElementById(pair[0]).addEventListener("click", function(){
+        TABS.forEach(function(q){
+          document.getElementById(q[0]).setAttribute("aria-selected", String(q[0]===pair[0]));
+          document.getElementById(q[1]).hidden = (q[0]!==pair[0]);
+        });
+      });
+    });
+
+    /* ---------- preamble copy ---------- */
+    document.getElementById("copy-preamble").addEventListener("click", function(){
+      var btn = this;
+      navigator.clipboard.writeText(document.getElementById("preamble").textContent).then(function(){
+        btn.textContent = "Copied"; setTimeout(function(){ btn.textContent = "Copy"; }, 1600);
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

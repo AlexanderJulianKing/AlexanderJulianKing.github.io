@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Newscaster: Daily News-Podcast Pipeline</title>
-<meta name="description" content="How Newscaster builds a daily AI news podcast end to end: it scrapes the day's news, grounds every story with a controlled source hunter, scripts two anchors, fact-checks before voicing, and ships an episode to YouTube, unattended.">
-<meta property="og:title" content="Newscaster: Daily News-Podcast Pipeline">
+<title>Newscaster: Agentic AI Research and Publishing System</title>
+<meta name="description" content="How Newscaster uses agentic source-grounded research, adversarial review, embedding-based RAG memory, fact-checking, and automated production to publish a daily news episode.">
+<meta property="og:title" content="Newscaster: Agentic AI Research and Publishing System">
 <meta property="og:description" content="A self-running pipeline that scrapes the day's news, grounds it against real sources, scripts an anchor and two reporters, fact-checks, and publishes an episode to YouTube.">
 <meta property="og:type" content="article">
 <meta property="og:image" content="og-image.png">
@@ -305,10 +305,10 @@
 
   <header class="hero">
     <h1 class="hero-name hero-anim hero-anim-1">Newscaster</h1>
-    <p class="hero-subtitle hero-anim hero-anim-2">Daily News-Podcast Pipeline</p>
+    <p class="hero-subtitle hero-anim hero-anim-2">Agentic AI Research &amp; Automated Publishing</p>
     <hr class="hero-rule hero-anim hero-anim-3" aria-hidden="true">
     <div class="abstract hero-anim hero-anim-4">
-      <p>An automated news program that <strong>agentically researches</strong> the day's news, writes an anchor-and-reporter script, <strong>fact-checks the script against the sources it gathered</strong> and auto-corrects source-grounded errors, then ships an audio and video episode to YouTube.</p>
+      <p>An agentic research and automated publishing system that searches and validates evidence, demands counter-evidence, fact-checks each script against its sources, and ships an audio and video episode to YouTube &mdash; more than 525 episodes published. An embedding-based RAG memory carries relevant reporting across episodes.</p>
     </div>
     <p class="hero-anim hero-anim-4" style="margin-top:1.5rem;">
       <a href="https://www.youtube.com/@NewsFromAlex" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor;">Watch on YouTube</a>
@@ -508,8 +508,8 @@
   </svg>
   <p class="fine">One tool is the source hunter (workflow 3), which answers only from verified sources; the other runs a fresh web search and pulls in another relevant article. The adversary checks once: if it spots a gap, it forces one more dig; otherwise the agent hands its findings back to Gather.</p>
 
-  <h3 class="fch fade-in"><span class="n">5.</span> Cross-day memory <span class="em">· what past episodes already covered</span></h3>
-  <p class="fcap">So the system remembers what past episodes covered. Each note is turned into a vector (a list of numbers that captures its meaning) and stored; a new story's question becomes a vector too, and the most similar past notes come back. Written each day (left), read per story (right).</p>
+  <h3 class="fch fade-in"><span class="n">5.</span> Embedding-based RAG memory <span class="em">· what past episodes already covered</span></h3>
+  <p class="fcap">The embedding-based retrieval system remembers what past episodes covered. Each note is turned into a vector (a list of numbers that captures its meaning) and stored; a new story's question becomes a vector too, and the most similar past notes come back. Written each day (left), read per story (right).</p>
   <svg class="fc wide" viewBox="0 0 640 430" role="img" aria-label="Cross-day memory flowchart: write path indexes notes into the database; read path finds similar past notes and Gemma writes a briefing">
     <defs><marker id="arR" markerWidth="9" markerHeight="9" refX="6.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="context-stroke"/></marker></defs>
     <text class="hd" x="105" y="30" text-anchor="middle">WRITE · each day</text>
@@ -536,7 +536,7 @@
     <g><rect class="box" x="450" y="310" width="180" height="44" rx="9"/><text class="t" x="540" y="330" text-anchor="middle">Summarize past coverage</text><text class="s ai" x="540" y="346" text-anchor="middle">AI · Gemma</text></g>
     <g><rect class="term acc" x="450" y="370" width="180" height="40" rx="20"/><text class="t" x="540" y="394" text-anchor="middle">Briefing → research agent</text></g>
   </svg>
-  <p class="fine">The memory gives the system <b>continuity</b> (build on a running story), avoids <b>repeating</b> what it already covered, and nudges toward <b>fresh angles</b>; notes are tagged by storyline. If nothing matches, it simply starts fresh.</p>
+  <p class="fine">The memory gives the system <b>continuity</b> (build on a running story), avoids <b>repeating</b> what it already covered, and nudges toward <b>fresh angles</b>; notes are tagged by storyline. If nothing matches, it simply starts fresh. In leakage-free chronological replay, the right prior coverage ranked first in <b>12/12</b> recurring-story tests, with <b>93%</b> of the top six results relevant.</p>
 
   <h3 class="fch fade-in"><span class="n">6.</span> The fact-finder <span class="em">· the last check before voicing</span></h3>
   <p class="secnote">One last fact-check before the episode is voiced and published. Every script is checked against the <b>real source text the pipeline fetched</b> (the saved excerpts), <em>not</em> the LLM summaries, which would carry any invented claim straight through. Three passes, each matched to a different way fabrication slips in: a quote check (are quoted words verbatim?), a faithfulness check (does every claim match its source?), and a stable-fact check (are names and titles right?).</p>

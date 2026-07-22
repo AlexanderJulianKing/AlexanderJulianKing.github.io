@@ -1,0 +1,3010 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: http://localhost:8400 https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src 'unsafe-inline' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data: http://localhost:8400; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>When will Codex reset again? — Alexander King</title>
+<meta name="description" content="An interactive forecast for the next Codex active-user milestone and likely rate-limit reset.">
+<meta property="og:title" content="When will Codex reset again? — Alexander King">
+<meta property="og:description" content="Explore when the 11 million user post and likely next Codex rate-limit reset may arrive.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='Georgia, serif' fill='%237a2e2e'>A</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>:root {
+  color-scheme: light dark;
+  background-color: var(--background) !important;
+
+  /* Agent-facing contract; keep in sync with SKILL.md. */
+  --background: light-dark(rgb(255 255 255), rgb(24 24 24));
+  --foreground: light-dark(rgb(26 28 31), rgb(255 255 255));
+  --card: color-mix(in oklab, var(--foreground) 5%, transparent);
+  --card-foreground: var(--foreground);
+  --popover: light-dark(rgb(255 255 255), rgb(45 45 45));
+  --popover-foreground: var(--foreground);
+  --primary: light-dark(rgb(51 156 255), rgb(131 195 255));
+  --primary-foreground: light-dark(rgb(255 255 255), rgb(13 13 13));
+  --secondary: light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%));
+  --secondary-foreground: var(--foreground);
+  --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
+  --muted-foreground: light-dark(
+    rgb(26 28 31 / 49.4%),
+    rgb(255 255 255 / 49.8%)
+  );
+  --accent: light-dark(rgb(229 242 255), rgb(13 39 63));
+  --accent-foreground: var(--primary);
+  --destructive: light-dark(rgb(226 85 7), rgb(255 133 73));
+  --border: light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%));
+  --input: light-dark(
+    rgb(26 28 31 / 11.8%),
+    color-mix(in oklab, rgb(0 0 0) 10%, transparent)
+  );
+  --ring: light-dark(rgb(51 156 255), rgb(131 195 255 / 76%));
+  --font-size-base: 14px;
+  --viz-series-1: var(--primary);
+  --viz-series-2: light-dark(rgb(243 136 59), rgb(245 154 86));
+  --viz-series-3: light-dark(rgb(93 201 119), rgb(116 213 139));
+  --viz-series-4: light-dark(rgb(235 119 177), rgb(240 143 192));
+  --viz-series-5: light-dark(rgb(155 121 236), rgb(170 145 239));
+  --viz-series-6: light-dark(rgb(58 185 177), rgb(90 203 194));
+
+  /* Internal implementation variables; not part of the agent contract. */
+  --font-sans: -apple-system, system-ui, "Segoe UI", sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+  --font-size-normal: max(11px, var(--font-size-base));
+  --font-size-tooltip: calc(var(--font-size-base) - 1px);
+  --font-size-small: max(11px, calc(var(--font-size-base) - 2px));
+  --font-size-h1: calc(var(--font-size-normal) * 1.7142857143);
+  --font-size-h2: calc(var(--font-size-normal) * 1.4285714286);
+  --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
+  --font-weight-normal: 430;
+  --font-weight-medium: 500;
+  --line-height-normal: calc(var(--font-size-normal) * 1.5);
+  --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
+  --line-height-small: calc(var(--font-size-small) + 4px);
+  --radius: 12.5px;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-2xl: calc(var(--radius) * 1.6);
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 8%);
+  --checkmark-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 17'%3E%3Cpath d='M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z'/%3E%3C/svg%3E");
+
+  /* Legacy aliases; not part of the current agent contract. */
+  --viz-bg: transparent;
+  --viz-panel: var(--card);
+  --viz-border: var(--border);
+  --viz-text: var(--foreground);
+  --viz-muted: var(--muted-foreground);
+  --viz-accent: var(--primary);
+  --viz-accent-text: var(--primary-foreground);
+  --viz-accent-bg: var(--accent);
+  --viz-font-size: var(--font-size-base);
+  --viz-warning: var(--destructive);
+  --color-background-primary: var(--background);
+  --color-text-primary: var(--foreground);
+  --color-border-secondary: var(--border);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html > body {
+  margin: 0;
+  padding: 5px;
+  color: var(--foreground);
+  background: transparent !important;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-normal);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+}
+
+a {
+  color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
+  cursor: pointer;
+  font-weight: var(--viz-font-weight-medium);
+  text-decoration: none;
+  text-underline-offset: 2px;
+}
+
+a:is(:hover, :focus-visible) {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 0.5px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin-block: 0;
+}
+
+h1 {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+h3,
+h4,
+h5,
+h6 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3;
+}
+
+b,
+strong,
+th {
+  font-weight: var(--font-weight-medium);
+}
+
+code:not(pre code) {
+  display: inline;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  corner-shape: superellipse(1.5);
+  background: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  overflow-wrap: anywhere;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  word-break: break-word;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--foreground);
+  font: inherit;
+  text-align: start;
+}
+
+.table :is(th, td) {
+  padding-block: 10px;
+  padding-inline: 0 24px;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.table-responsive > .table :is(th, td) {
+  overflow-wrap: break-word;
+}
+
+.table :is(th, td):last-child {
+  padding-inline-end: 0;
+}
+
+.table :is(caption, thead th) {
+  font-weight: 600;
+}
+
+.table thead th {
+  padding-block: 8px;
+  border-bottom-color: color-mix(in srgb, var(--foreground) 16%, transparent);
+}
+
+.table tbody tr:last-child :is(th, td) {
+  border-bottom: 0;
+}
+
+.table.table-sm :is(th, td) {
+  padding-block: 6px;
+}
+
+.table.table-sm :is(th, td):not(:last-child) {
+  padding-inline-end: 16px;
+}
+
+.table :is(.text-end, [align="right"]) {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.table :is(.text-center, [align="center"]) {
+  text-align: center;
+}
+
+.table .text-nowrap {
+  white-space: nowrap;
+}
+
+#widget {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  background: transparent !important;
+}
+
+.card {
+  min-width: 0;
+  padding: 12px;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  border-radius: var(--radius-2xl);
+  corner-shape: superellipse(1.5);
+  color: var(--card-foreground);
+  background: var(--card);
+}
+
+#widget > :not(.card) {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: min(
+    20rem,
+    var(--tooltip-available-width, calc(100vw - 10px)),
+    calc(100vw - 10px)
+  );
+  max-height: min(
+    var(--tooltip-available-height, calc(100vh - 10px)),
+    calc(100vh - 10px)
+  );
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  corner-shape: superellipse(1.5);
+  color: var(--popover-foreground);
+  background: var(--popover);
+  box-shadow: none;
+  font-size: var(--font-size-tooltip);
+  line-height: var(--line-height-tooltip);
+  overflow-wrap: break-word;
+  white-space: normal;
+  pointer-events: none;
+  user-select: none;
+}
+
+.viz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(180px, 24%), 1fr));
+  gap: 10px;
+}
+
+.viz-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.viz-stat-value {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+.viz-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.viz-badge {
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  color: var(--accent-foreground);
+  background: var(--accent);
+  font-weight: var(--font-weight-medium);
+}
+
+small,
+.text-small,
+.viz-badge {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.text-muted {
+  color: var(--muted-foreground);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.viz-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.viz-controls > .form-label {
+  display: grid;
+  min-width: min(100%, 260px);
+  flex: 1 1 280px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin-bottom: 0;
+}
+
+.viz-controls > .form-label > :is(.form-control, .form-range, .form-select) {
+  grid-column: 1 / -1;
+}
+
+.btn,
+.form-check-input,
+.form-control,
+.form-range,
+.form-select {
+  font: inherit;
+}
+
+.btn {
+  appearance: button;
+  display: inline-flex;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0 8px;
+  -webkit-app-region: no-drag;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  corner-shape: superellipse(1.5);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: var(--cursor-interaction, pointer);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.btn:is(.btn-block, .viz-tile) {
+  inline-size: 100%;
+}
+
+.btn.viz-tile {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+a.btn {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.btn-primary {
+  border-color: transparent;
+  color: var(--primary-foreground);
+  background: var(--foreground);
+  background-clip: padding-box;
+}
+
+.btn-primary .text-muted {
+  color: color-mix(in srgb, var(--primary-foreground) 50%, transparent);
+}
+
+.btn-primary:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 80%, transparent);
+  background-clip: padding-box;
+}
+
+.btn-ghost {
+  border-color: transparent;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+
+.btn-ghost:not(:disabled):hover {
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+[data-lucide] {
+  stroke-width: 1.6;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--foreground);
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  padding: 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  corner-shape: superellipse(1.5);
+  color: var(--foreground);
+  background: var(--secondary);
+}
+
+.form-control::placeholder {
+  color: var(--muted-foreground);
+}
+
+.form-control[type="file"] {
+  padding: 0;
+  overflow: hidden;
+  cursor: var(--cursor-interaction, pointer);
+}
+
+.form-control[type="file"]::file-selector-button {
+  min-height: 26px;
+  margin-right: 8px;
+  padding: 0 8px;
+  border: 0;
+  border-right: 1px solid var(--input);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: inherit;
+  font: inherit;
+}
+
+.form-control[type="file"]:not(:disabled):hover::file-selector-button {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-control-color[type="color"] {
+  width: 40px;
+  height: 28px;
+  padding: 3px;
+  cursor: var(--cursor-interaction, pointer);
+}
+
+.form-control-color[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.form-control-color[type="color"]::-webkit-color-swatch {
+  border: 0;
+  border-radius: calc(var(--radius-lg) - 4px);
+  corner-shape: superellipse(1.5);
+}
+
+textarea.form-control {
+  height: auto;
+  min-height: 72px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.form-control:focus-visible {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.form-select {
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 32px 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  corner-shape: superellipse(1.5);
+  color: var(--foreground);
+  background-color: var(--secondary);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted-foreground) 50%),
+    linear-gradient(135deg, var(--muted-foreground) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 10px) 50%;
+  background-repeat: no-repeat;
+  background-size: 4px 4px;
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-select:not(:disabled):hover {
+  background-color: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-select:focus-visible {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-check {
+  display: flex;
+  min-height: 20px;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-check-input {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  margin: 0;
+  border: 1px solid var(--input);
+  color: var(--primary-foreground);
+  background-color: transparent;
+  cursor: var(--cursor-interaction, default);
+  transition:
+    background-color 150ms,
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"] {
+  border-color: var(--input);
+  border-radius: var(--radius-sm);
+  corner-shape: superellipse(1.5);
+  background-color: var(--secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input:not(:disabled):not(:checked):hover {
+  background-color: var(--card);
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"]:checked {
+  border-color: var(--primary);
+  background-color: var(--primary);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input[type="checkbox"]:checked::before {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-foreground);
+  content: "";
+  mask: var(--checkmark-image) center / 12px 12px no-repeat;
+}
+
+.form-check-input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+}
+
+.form-check-input[type="radio"]:checked {
+  border: 2px solid var(--primary);
+  background:
+    radial-gradient(circle, var(--primary-foreground) 0 2.5px, transparent 3px),
+    var(--primary);
+}
+
+.form-check:not(.form-switch) .form-check-input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+}
+
+.form-switch .form-check-input:disabled,
+.form-switch .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-check-label {
+  color: var(--foreground);
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-switch .form-check-input {
+  position: relative;
+  width: 32px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  box-shadow: none;
+  transition: background-color 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid light-dark(var(--primary-foreground), var(--foreground));
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+  box-shadow: var(--shadow-sm);
+  content: "";
+  transform: translate(2px, -50%);
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input:checked {
+  background: var(--primary);
+}
+
+.form-switch .form-check-input:checked::before {
+  transform: translate(14px, -50%);
+}
+
+.form-switch .form-check-input:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.form-range {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 28px;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  border: 0;
+  accent-color: var(--primary);
+  background: linear-gradient(
+      color-mix(in srgb, var(--foreground) 7%, transparent),
+      color-mix(in srgb, var(--foreground) 7%, transparent)
+    )
+    center / 100% 2px no-repeat;
+}
+
+.form-range::-webkit-slider-runnable-track {
+  height: 28px;
+  background: transparent;
+}
+
+.form-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+}
+
+.form-range:focus-visible::-webkit-slider-thumb {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-range::-moz-range-track {
+  height: 28px;
+  background: transparent;
+}
+
+.form-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+}
+
+.form-range:focus-visible::-moz-range-thumb {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-range:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.btn:not(.btn-primary, .viz-tile):is(
+    [aria-pressed="true"],
+    [aria-selected="true"],
+    .is-selected
+  ) {
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+
+.btn.viz-tile:is([aria-pressed="true"], [aria-selected="true"], .is-selected) {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+#widget > svg {
+  width: 100%;
+}
+
+.text-warning,
+.text-destructive {
+  color: var(--destructive);
+}
+
+html>body{padding:0}</style>
+<style>
+  :root {
+    --background: light-dark(#fafaf8, #141414);
+    --foreground: light-dark(#1a1a1a, #d8d4cf);
+    --card: light-dark(#ffffff, #1a1a1a);
+    --card-foreground: var(--foreground);
+    --popover: light-dark(#ffffff, #1c1c1c);
+    --popover-foreground: var(--foreground);
+    --primary: light-dark(#7a2e2e, #c46b6b);
+    --primary-foreground: light-dark(#ffffff, #141414);
+    --secondary: light-dark(#f3f2ef, #1c1c1c);
+    --secondary-foreground: var(--foreground);
+    --muted: light-dark(#eeeeec, #262626);
+    --muted-foreground: light-dark(#555555, #a09a90);
+    --accent: light-dark(#f2e8e8, #321f1f);
+    --accent-foreground: var(--primary);
+    --destructive: light-dark(#9f3f22, #ef956f);
+    --border: light-dark(#d4d0c8, #2e2e2e);
+    --input: light-dark(#c4c0b8, #3a3a3a);
+    --ring: var(--primary);
+    --viz-series-1: var(--primary);
+    --viz-series-2: light-dark(#b47422, #d59a55);
+    --viz-series-3: light-dark(#477d5d, #74aa87);
+    --viz-series-4: light-dark(#986477, #c58a9f);
+    --font-serif: "EB Garamond", Georgia, serif;
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "JetBrains Mono", Menlo, monospace;
+    --font-size-base: 16px;
+    --radius: 4px;
+    --radius-sm: 2px;
+    --radius-md: 3px;
+    --radius-lg: 4px;
+    --radius-2xl: 2px;
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 8%);
+    --page-width: 900px;
+  }
+
+  html {
+    font-size: 18px;
+    scroll-behavior: auto;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+
+  html > body.site-page {
+    min-width: 320px;
+    margin: 0;
+    padding: 0;
+    color: var(--foreground);
+    background: var(--background) !important;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.68;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+
+  .skip-link {
+    position: fixed;
+    z-index: 30;
+    top: 0.5rem;
+    left: 0.75rem;
+    padding: 0.45rem 0.7rem;
+    color: var(--primary-foreground);
+    background: var(--primary);
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    transform: translateY(-180%);
+  }
+
+  .skip-link:focus { transform: translateY(0); }
+
+  .page-wrapper {
+    width: min(100% - 3rem, var(--page-width));
+    margin-inline: auto;
+  }
+
+  .site-nav {
+    position: sticky;
+    z-index: 20;
+    top: 0;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--background) 88%, transparent);
+    backdrop-filter: blur(8px);
+  }
+
+  .nav-inner {
+    display: flex;
+    min-height: 2.85rem;
+    align-items: center;
+    gap: 1.45rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav-inner::-webkit-scrollbar { display: none; }
+
+  .nav-name,
+  .nav-link {
+    flex: 0 0 auto;
+    color: var(--muted-foreground);
+    font-family: var(--font-serif);
+    font-weight: 400;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .nav-name {
+    margin-right: auto;
+    color: var(--foreground);
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  .nav-link { font-size: 0.82rem; }
+
+  .nav-name:hover,
+  .nav-link:hover,
+  .nav-link:focus-visible { color: var(--primary); }
+
+  .nav-resume {
+    color: var(--primary);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--primary) 55%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  .project-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(20rem, 1.05fr);
+    gap: 2rem;
+    align-items: end;
+    padding: 2rem 0 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .project-context {
+    margin-bottom: 0.35rem;
+    color: var(--primary);
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+  }
+
+  .project-hero h1 {
+    max-width: 18ch;
+    margin: 0;
+    color: var(--foreground);
+    font-family: var(--font-serif);
+    font-size: clamp(2.15rem, 5vw, 3rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  .project-lede {
+    max-width: 48ch;
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 1.02rem;
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  main { padding-top: 1.35rem; }
+
+  .evidence-note {
+    margin: 1rem 0 0;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--border);
+    color: var(--muted-foreground);
+    background: var(--secondary);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .evidence-note strong { color: var(--foreground); }
+
+  .site-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+    padding: 2rem 0 2.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+  }
+
+  .site-footer a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  a:focus-visible,
+  summary:focus-visible {
+    border-radius: 2px;
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+  }
+
+  [id] { scroll-margin-top: 4rem; }
+
+  @media (max-width: 720px) {
+    html { font-size: 16px; }
+    .page-wrapper { width: min(100% - 2rem, var(--page-width)); }
+    .nav-inner { gap: 1rem; }
+    .project-hero { grid-template-columns: 1fr; gap: 0.75rem; padding: 1.55rem 0 1.25rem; }
+    .site-footer { flex-direction: column; gap: 0.5rem; }
+  }
+
+  @media (max-width: 480px) {
+    .nav-resume { display: none; }
+    .project-hero h1 { font-size: 2.25rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+
+  @media print {
+    .site-nav,
+    .skip-link { display: none; }
+    .page-wrapper { width: 100%; max-width: none; }
+    html > body.site-page { color: #000; background: #fff !important; }
+  }
+</style>
+</head>
+<body class="site-page">
+<a class="skip-link" href="#forecast">Skip to forecast</a>
+
+<nav class="site-nav" aria-label="Primary navigation">
+  <div class="page-wrapper nav-inner">
+    <a class="nav-name" href="index.html">A. King</a>
+    <a class="nav-link" href="#forecast">Forecast</a>
+    <a class="nav-link" href="#history">Evidence</a>
+    <a class="nav-link" href="#method">Model</a>
+    <a class="nav-link nav-resume" href="Alexander_King_Resume.pdf" target="_blank" rel="noopener">Resume</a>
+  </div>
+</nav>
+
+<header class="page-wrapper project-hero">
+  <div class="hero-title-group">
+    <p class="project-context">Codex rate-limit forecast</p>
+    <h1>When will Codex reset again?</h1>
+  </div>
+  <p class="project-lede">Tibo has reset Codex limits at each million-user milestone. This estimates when the 11M post, and likely next reset, will arrive.</p>
+</header>
+
+<main class="page-wrapper" id="main">
+  <section id="forecast" aria-labelledby="forecast-heading">
+    <h2 class="sr-only" id="forecast-heading">11 million milestone forecast</h2>
+<div id="codex-reset-regime-lab-v2">
+  <style>
+    #codex-reset-regime-lab-v2 {
+      color: var(--foreground);
+      width: 100%;
+    }
+
+    #codex-reset-regime-lab-v2 .regime-controls {
+      align-items: flex-end;
+      margin-bottom: 0.75rem;
+    }
+
+    #codex-reset-regime-lab-v2 .regime-field {
+      flex: 1 1 15rem;
+      min-width: 0;
+    }
+
+    #codex-reset-regime-lab-v2 .regime-value {
+      color: var(--foreground);
+      font-variant-numeric: tabular-nums;
+    }
+
+    #codex-reset-regime-lab-v2 .regime-stats {
+      margin: 1rem 0 0.75rem;
+    }
+
+    #codex-reset-regime-lab-v2 .chart-shell {
+      position: relative;
+      width: 100%;
+    }
+
+    #codex-reset-regime-lab-v2 .forecast-chart,
+    #codex-reset-regime-lab-v2 .history-chart {
+      display: block;
+      height: auto;
+      overflow: visible;
+      width: 100%;
+    }
+
+    #codex-reset-regime-lab-v2 .grid-line,
+    #codex-reset-regime-lab-v2 .axis-line {
+      stroke: var(--border);
+      stroke-width: 1;
+      vector-effect: non-scaling-stroke;
+    }
+
+    #codex-reset-regime-lab-v2 .grid-line {
+      opacity: 0.75;
+    }
+
+    #codex-reset-regime-lab-v2 .axis-label,
+    #codex-reset-regime-lab-v2 .context-label {
+      fill: var(--muted-foreground);
+    }
+
+    #codex-reset-regime-lab-v2 .weekend-band {
+      fill: var(--muted);
+      opacity: 0.45;
+    }
+
+    #codex-reset-regime-lab-v2 .mixture-area {
+      fill: color-mix(in srgb, var(--viz-series-1) 13%, transparent);
+    }
+
+    #codex-reset-regime-lab-v2 .history-projection-band {
+      fill: color-mix(in srgb, var(--viz-series-1) 12%, transparent);
+    }
+
+    #codex-reset-regime-lab-v2 .history-projection-line {
+      fill: none;
+      stroke: var(--viz-series-1);
+      stroke-width: 2;
+      stroke-dasharray: 6 4;
+      vector-effect: non-scaling-stroke;
+    }
+
+    #codex-reset-regime-lab-v2 .history-target circle {
+      fill: var(--primary);
+      stroke: var(--card);
+      stroke-width: 2;
+      vector-effect: non-scaling-stroke;
+    }
+
+    #codex-reset-regime-lab-v2 .history-target text {
+      fill: var(--foreground);
+      paint-order: stroke;
+      stroke: var(--card);
+      stroke-width: 4px;
+      stroke-linejoin: round;
+    }
+
+    #codex-reset-regime-lab-v2 .mixture-line,
+    #codex-reset-regime-lab-v2 .history-line {
+      fill: none;
+      stroke: var(--viz-series-1);
+      stroke-width: 2.5;
+      vector-effect: non-scaling-stroke;
+    }
+
+    #codex-reset-regime-lab-v2 .weekly-line {
+      stroke: var(--viz-series-3);
+      stroke-dasharray: 3 3;
+      stroke-width: 1.5;
+      vector-effect: non-scaling-stroke;
+    }
+
+    #codex-reset-regime-lab-v2 .probability-mark circle,
+    #codex-reset-regime-lab-v2 .history-point {
+      fill: var(--background);
+      stroke: var(--viz-series-1);
+      stroke-width: 2;
+      vector-effect: non-scaling-stroke;
+    }
+
+    #codex-reset-regime-lab-v2 .probability-mark text,
+    #codex-reset-regime-lab-v2 .history-label {
+      fill: var(--foreground);
+    }
+
+    #codex-reset-regime-lab-v2 .history-label {
+      paint-order: stroke;
+      stroke: var(--card);
+      stroke-width: 4px;
+      stroke-linejoin: round;
+    }
+
+    #codex-reset-regime-lab-v2 .probability-mark text {
+      paint-order: stroke;
+      stroke: var(--card);
+      stroke-width: 4px;
+      stroke-linejoin: round;
+    }
+
+    #codex-reset-regime-lab-v2 .now-line,
+    #codex-reset-regime-lab-v2 .release-line {
+      stroke: var(--muted-foreground);
+      stroke-dasharray: 4 4;
+      stroke-width: 1;
+      vector-effect: non-scaling-stroke;
+    }
+
+    #codex-reset-regime-lab-v2 .regime-readout {
+      font-variant-numeric: tabular-nums;
+      justify-content: flex-start;
+      margin-top: 0.5rem;
+    }
+
+    #codex-reset-regime-lab-v2 .weight-row {
+      align-items: center;
+      margin: 0.5rem 0;
+    }
+
+    #codex-reset-regime-lab-v2 .weight-item {
+      align-items: center;
+      display: inline-flex;
+      gap: 0.35rem;
+      white-space: nowrap;
+    }
+
+    #codex-reset-regime-lab-v2 .weight-swatch {
+      border-radius: 50%;
+      display: inline-block;
+      height: 0.55rem;
+      width: 0.55rem;
+    }
+
+    #codex-reset-regime-lab-v2 .weight-swatch.revert {
+      background: var(--viz-series-2);
+    }
+
+    #codex-reset-regime-lab-v2 .weight-swatch.repeat {
+      background: var(--viz-series-3);
+    }
+
+    #codex-reset-regime-lab-v2 .weight-swatch.lengthen {
+      background: var(--viz-series-5);
+    }
+
+    #codex-reset-regime-lab-v2 .weight-swatch.none {
+      background: var(--viz-series-4);
+    }
+
+    #codex-reset-regime-lab-v2 .advanced-block,
+    #codex-reset-regime-lab-v2 .history-block,
+    #codex-reset-regime-lab-v2 .method-block {
+      border-top: 1px solid var(--border);
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+    }
+
+    #codex-reset-regime-lab-v2 .advanced-block summary,
+    #codex-reset-regime-lab-v2 .history-block h3,
+    #codex-reset-regime-lab-v2 .method-block h3 {
+      font-weight: 500;
+      text-wrap: balance;
+    }
+
+    #codex-reset-regime-lab-v2 .advanced-controls {
+      margin-top: 1rem;
+    }
+
+    #codex-reset-regime-lab-v2 .method-copy {
+      max-width: 70ch;
+      text-wrap: pretty;
+    }
+
+    #codex-reset-regime-lab-v2 .method-list {
+      display: grid;
+      gap: 0.75rem 1.25rem;
+      grid-template-columns: minmax(10rem, 0.8fr) minmax(0, 2fr);
+      margin: 0 0 1rem;
+      max-width: 70ch;
+    }
+
+    #codex-reset-regime-lab-v2 .method-list dt {
+      font-weight: 500;
+    }
+
+    #codex-reset-regime-lab-v2 .method-list dd {
+      margin: 0;
+    }
+
+    #codex-reset-regime-lab-v2 .source-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 0.9rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    @media (max-width: 520px) {
+      #codex-reset-regime-lab-v2 .regime-field {
+        flex-basis: 100%;
+      }
+
+      #codex-reset-regime-lab-v2 .method-list {
+        grid-template-columns: 1fr;
+      }
+
+      #codex-reset-regime-lab-v2 .method-list dd {
+        margin-top: -0.45rem;
+      }
+    }
+  </style>
+
+  <style>
+    #codex-reset-regime-lab-v2 {
+      font-family: var(--font-serif);
+    }
+
+    #codex-reset-regime-lab-v2 .assumption-panel {
+      display: grid;
+      gap: 0.85rem;
+      margin: 1.5rem 0 0;
+      padding: 1.15rem 1.2rem 0.45rem;
+      border: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    #codex-reset-regime-lab-v2 .assumption-panel legend {
+      padding: 0 0.45rem;
+      color: var(--foreground);
+      font-size: 1.08rem;
+      font-weight: 500;
+    }
+
+    #codex-reset-regime-lab-v2 .regime-controls {
+      gap: 0.85rem 1.25rem;
+      margin-bottom: 0.7rem;
+    }
+
+    #codex-reset-regime-lab-v2 .form-label,
+    #codex-reset-regime-lab-v2 .form-check-label,
+    #codex-reset-regime-lab-v2 .form-select {
+      font-family: var(--font-sans);
+      font-size: 0.76rem;
+      line-height: 1.45;
+    }
+
+    #codex-reset-regime-lab-v2 .form-select {
+      min-height: 2.75rem;
+      margin-top: 0.28rem;
+      border-radius: var(--radius-lg);
+      background-color: var(--background);
+    }
+
+    #codex-reset-regime-lab-v2 .form-select:focus-visible,
+    #codex-reset-regime-lab-v2 .form-control:focus-visible {
+      border-color: var(--ring);
+      box-shadow: 0 0 0 1px var(--ring);
+    }
+
+    #codex-reset-regime-lab-v2 .form-range {
+      height: 44px;
+      accent-color: var(--primary);
+    }
+
+    #codex-reset-regime-lab-v2 .form-range::-webkit-slider-runnable-track {
+      height: 44px;
+    }
+
+    #codex-reset-regime-lab-v2 .form-range::-webkit-slider-thumb {
+      width: 22px;
+      height: 22px;
+      margin-top: 11px;
+      border-color: var(--primary);
+      background: var(--background);
+    }
+
+    #codex-reset-regime-lab-v2 .form-range::-moz-range-track {
+      height: 44px;
+    }
+
+    #codex-reset-regime-lab-v2 .form-range::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-color: var(--primary);
+      background: var(--background);
+    }
+
+    #codex-reset-regime-lab-v2 .regime-value {
+      color: var(--primary);
+      font-family: var(--font-mono);
+      font-size: 0.92em;
+    }
+
+    #codex-reset-regime-lab-v2 .regime-stats {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
+      margin: 0 0 0.8rem;
+      border-top: 2px solid var(--primary);
+      border-bottom: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
+      background: color-mix(in srgb, var(--primary) 4%, var(--background));
+    }
+
+    #codex-reset-regime-lab-v2 .regime-stats .card {
+      min-height: 8.25rem;
+      justify-content: center;
+      padding: 1.2rem 1.25rem;
+      border-right: 1px solid var(--border);
+      border-radius: 0;
+      background: transparent;
+    }
+
+    #codex-reset-regime-lab-v2 .regime-stats .card:last-child {
+      border-right: 0;
+    }
+
+    #codex-reset-regime-lab-v2 .regime-stats .text-muted {
+      color: color-mix(in srgb, var(--foreground) 72%, var(--muted-foreground));
+      font-family: var(--font-sans);
+      font-size: 0.73rem;
+    }
+
+    #codex-reset-regime-lab-v2 .viz-stat-value {
+      margin: 0.22rem 0;
+      color: var(--foreground);
+      font-family: var(--font-serif);
+      font-size: clamp(1.65rem, 3.4vw, 2rem);
+      font-weight: 500;
+      letter-spacing: -0.015em;
+    }
+
+    #codex-reset-regime-lab-v2 .regime-stats .card:first-child {
+      background: color-mix(in srgb, var(--primary) 6%, transparent);
+    }
+
+    #codex-reset-regime-lab-v2 .regime-stats .card:first-child .viz-stat-value {
+      color: var(--primary);
+      font-size: clamp(1.85rem, 4vw, 2.35rem);
+    }
+
+    #codex-reset-regime-lab-v2 .text-small,
+    #codex-reset-regime-lab-v2 .viz-badge {
+      font-family: var(--font-sans);
+      font-size: 0.67rem;
+      line-height: 1.45;
+    }
+
+    #codex-reset-regime-lab-v2 .viz-badge {
+      border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
+      border-radius: 2px;
+      color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 7%, transparent);
+      font-family: var(--font-mono);
+      font-weight: 400;
+    }
+
+    #codex-reset-regime-lab-v2 .weight-row {
+      gap: 0.45rem 1rem;
+      margin: 1rem 0;
+    }
+
+    #codex-reset-regime-lab-v2 .weight-swatch {
+      border-radius: 50%;
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--foreground) 12%, transparent);
+    }
+
+    #codex-reset-regime-lab-v2 .chart-shell,
+    #codex-reset-regime-lab-v2 .chart-scroll {
+      overflow-x: auto;
+      scrollbar-color: var(--border) transparent;
+      scrollbar-width: thin;
+    }
+
+    #codex-reset-regime-lab-v2 .chart-shell:focus-visible,
+    #codex-reset-regime-lab-v2 .chart-scroll:focus-visible {
+      outline: 2px solid var(--ring);
+      outline-offset: 3px;
+    }
+
+    #codex-reset-regime-lab-v2 .chart-shell {
+      margin-top: 0.55rem;
+      padding: 1rem 0.85rem 0.45rem;
+      border: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    #codex-reset-regime-lab-v2 .chart-hint {
+      display: none;
+      margin: 0 0 0.45rem;
+      color: var(--muted-foreground);
+      font-family: var(--font-sans);
+      font-size: 0.67rem;
+    }
+
+    #codex-reset-regime-lab-v2 .forecast-chart text,
+    #codex-reset-regime-lab-v2 .history-chart text {
+      font-family: var(--font-sans);
+    }
+
+    #codex-reset-regime-lab-v2 .grid-line {
+      opacity: 0.55;
+    }
+
+    #codex-reset-regime-lab-v2 .mixture-area {
+      fill: color-mix(in srgb, var(--primary) 12%, transparent);
+    }
+
+    #codex-reset-regime-lab-v2 .mixture-line,
+    #codex-reset-regime-lab-v2 .history-line {
+      stroke-width: 2.25;
+    }
+
+    #codex-reset-regime-lab-v2 .regime-readout {
+      max-width: 78ch;
+      color: var(--muted-foreground);
+      line-height: 1.5;
+    }
+
+    #codex-reset-regime-lab-v2 .weekly-planner {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(9rem, 0.65fr);
+      gap: 0.8rem 1.5rem;
+      margin: 0.75rem 0 0.4rem;
+      padding: 0.9rem 1rem;
+      border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border));
+      color: var(--foreground);
+      background: color-mix(in srgb, var(--primary) 6%, var(--background));
+      line-height: 1.45;
+    }
+
+    #codex-reset-regime-lab-v2 .weekly-planner h3 {
+      margin: 0.1rem 0 0.2rem;
+      font-size: 1.12rem;
+      font-weight: 500;
+    }
+
+    #codex-reset-regime-lab-v2 .weekly-planner p {
+      margin: 0;
+      color: var(--muted-foreground);
+      font-size: 0.82rem;
+    }
+
+    #codex-reset-regime-lab-v2 .planner-probability {
+      align-self: center;
+      text-align: right;
+    }
+
+    #codex-reset-regime-lab-v2 .planner-probability strong {
+      display: block;
+      font-family: var(--font-serif);
+      font-size: clamp(1.65rem, 4vw, 2.15rem);
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    #codex-reset-regime-lab-v2 .planner-controls {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.55rem 1.2rem;
+      padding-top: 0.7rem;
+      border-top: 1px solid var(--border);
+    }
+
+    #codex-reset-regime-lab-v2 .planner-check,
+    #codex-reset-regime-lab-v2 .planner-date {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-height: 44px;
+      color: var(--foreground);
+      font-family: var(--font-sans);
+      font-size: 0.74rem;
+    }
+
+    #codex-reset-regime-lab-v2 .planner-date input {
+      min-height: 2.35rem;
+      padding: 0.35rem 0.5rem;
+      border: 1px solid var(--input);
+      border-radius: var(--radius-lg);
+      color: var(--foreground);
+      background: var(--background);
+      font: inherit;
+    }
+
+    #codex-reset-regime-lab-v2 .planner-date input:disabled {
+      opacity: 0.55;
+    }
+
+    #codex-reset-regime-lab-v2 .equation-display--folio {
+      --eq-scale: 1.05;
+      margin: 1rem 0 1.5rem;
+      padding: 1.2rem 0;
+      border-block: 1px solid var(--border);
+    }
+
+    #codex-reset-regime-lab-v2 .equation-display--folio .equation-kicker {
+      margin: 0 0 0.25rem;
+      color: var(--primary);
+      font: 500 0.7rem/1.4 var(--font-sans);
+    }
+
+    #codex-reset-regime-lab-v2 .equation-display--folio .equation-intro {
+      max-width: 58ch;
+      margin: 0;
+      color: var(--muted-foreground);
+    }
+
+    #codex-reset-regime-lab-v2 .equation-display--folio .equation-stage {
+      margin: 1.1rem 0;
+      padding: 1rem;
+      background: var(--secondary);
+      overflow-x: auto;
+    }
+
+    #codex-reset-regime-lab-v2 .equation-display--folio math {
+      min-width: max-content;
+      margin: 0.25rem auto;
+      color: var(--foreground);
+      font-family: var(--font-serif);
+      font-size: calc(1.15rem * var(--eq-scale));
+    }
+
+    #codex-reset-regime-lab-v2 .equation-display--folio math.equation-primary {
+      font-size: calc(1.48rem * var(--eq-scale));
+    }
+
+    #codex-reset-regime-lab-v2 .equation-display--folio .equation-key {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.7rem 1.1rem;
+      margin: 0;
+    }
+
+    #codex-reset-regime-lab-v2 .equation-display--folio .equation-key div {
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    #codex-reset-regime-lab-v2 .equation-display--folio .equation-key dt {
+      color: var(--foreground);
+      font: 500 0.75rem/1.4 var(--font-mono);
+    }
+
+    #codex-reset-regime-lab-v2 .equation-display--folio .equation-key dd {
+      margin: 0.12rem 0 0;
+      color: var(--muted-foreground);
+      font-size: 0.84rem;
+      line-height: 1.4;
+    }
+
+    #codex-reset-regime-lab-v2 .equation-display--folio .equation-source {
+      margin-top: 0.85rem;
+      color: var(--primary);
+    }
+
+    #codex-reset-regime-lab-v2 .equation-display--folio .equation-source summary {
+      min-height: 44px;
+      padding: 0.7rem 0;
+      cursor: pointer;
+    }
+
+    #codex-reset-regime-lab-v2 .equation-display--folio pre {
+      margin: 0;
+      padding: 0.8rem;
+      color: var(--foreground);
+      background: var(--card);
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      font: 0.68rem/1.65 var(--font-mono);
+    }
+
+    @media (max-width: 620px) {
+      #codex-reset-regime-lab-v2 .equation-display--folio .equation-key {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    #codex-reset-regime-lab-v2 .forecast-caption {
+      margin-top: 0.55rem;
+      color: var(--muted-foreground);
+      font-family: var(--font-sans);
+      font-size: 0.7rem;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.45;
+    }
+
+    #codex-reset-regime-lab-v2 .assumption-why {
+      margin: -0.15rem 0 0;
+      color: var(--muted-foreground);
+      font-size: 0.86rem;
+    }
+
+    #codex-reset-regime-lab-v2 .assumption-why summary {
+      width: fit-content;
+      min-height: 44px;
+      padding: 0.65rem 0;
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    #codex-reset-regime-lab-v2 .assumption-why p {
+      max-width: 72ch;
+      margin: 0.55rem 0 0;
+      color: var(--muted-foreground);
+      line-height: 1.55;
+    }
+
+    #codex-reset-regime-lab-v2 .advanced-block,
+    #codex-reset-regime-lab-v2 .history-block,
+    #codex-reset-regime-lab-v2 .method-block {
+      margin-top: 2.8rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    #codex-reset-regime-lab-v2 .advanced-block {
+      margin-top: 1.4rem;
+      padding-top: 1.2rem;
+    }
+
+    #codex-reset-regime-lab-v2 .advanced-block summary {
+      width: fit-content;
+      min-height: 44px;
+      padding: 0.55rem 0;
+      color: var(--primary);
+      cursor: pointer;
+      font-size: 0.92rem;
+    }
+
+    #codex-reset-regime-lab-v2 .history-block h3,
+    #codex-reset-regime-lab-v2 .method-block h3 {
+      margin-bottom: 0.85rem;
+      color: var(--foreground);
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    #codex-reset-regime-lab-v2 .history-chart {
+      min-width: 620px;
+    }
+
+    #codex-reset-regime-lab-v2 .history-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem 1rem;
+      margin: -0.25rem 0 0.55rem;
+      color: var(--muted-foreground);
+      font-family: var(--font-sans);
+    }
+
+    #codex-reset-regime-lab-v2 .history-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    #codex-reset-regime-lab-v2 .legend-rule {
+      width: 1.65rem;
+      border-top: 2px solid var(--viz-series-1);
+    }
+
+    #codex-reset-regime-lab-v2 .legend-rule.projected {
+      border-top-style: dashed;
+    }
+
+    #codex-reset-regime-lab-v2 .legend-band {
+      width: 1.65rem;
+      height: 0.55rem;
+      background: color-mix(in srgb, var(--viz-series-1) 12%, transparent);
+    }
+
+    #codex-reset-regime-lab-v2 .method-copy {
+      max-width: none;
+    }
+
+    #codex-reset-regime-lab-v2 .method-list {
+      max-width: 72ch;
+      gap: 1rem 1.5rem;
+      margin-top: 1.25rem;
+    }
+
+    #codex-reset-regime-lab-v2 .method-list dt {
+      color: var(--foreground);
+      font-family: var(--font-sans);
+      font-size: 0.73rem;
+      font-weight: 500;
+      letter-spacing: 0.025em;
+    }
+
+    #codex-reset-regime-lab-v2 .method-list dd {
+      color: var(--muted-foreground);
+      line-height: 1.55;
+    }
+
+    #codex-reset-regime-lab-v2 .source-list {
+      gap: 0.5rem 1.1rem;
+      max-width: 72ch;
+    }
+
+    #codex-reset-regime-lab-v2 .source-list a {
+      color: var(--primary);
+      font-weight: 400;
+      text-decoration: underline;
+      text-decoration-color: color-mix(in srgb, var(--primary) 45%, transparent);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.2em;
+    }
+
+    @media (max-width: 720px) {
+      #codex-reset-regime-lab-v2 .regime-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      #codex-reset-regime-lab-v2 .regime-stats .card {
+        min-height: 0;
+        border-right: 0;
+        border-bottom: 0;
+      }
+
+      #codex-reset-regime-lab-v2 .regime-stats .card:first-child {
+        grid-column: 1 / -1;
+        border-bottom: 1px solid var(--border);
+      }
+
+      #codex-reset-regime-lab-v2 .regime-stats .card:nth-child(2) {
+        border-right: 1px solid var(--border);
+      }
+
+      #codex-reset-regime-lab-v2 .forecast-chart {
+        min-width: 620px;
+      }
+
+      #codex-reset-regime-lab-v2 .chart-hint {
+        display: block;
+      }
+
+      #codex-reset-regime-lab-v2 .method-list {
+        grid-template-columns: 1fr;
+      }
+
+      #codex-reset-regime-lab-v2 .method-list dd {
+        margin-top: -0.5rem;
+      }
+
+      #codex-reset-regime-lab-v2 .weekly-planner {
+        grid-template-columns: 1fr;
+      }
+
+      #codex-reset-regime-lab-v2 .planner-probability {
+        text-align: left;
+      }
+
+      #codex-reset-regime-lab-v2 .planner-controls {
+        grid-column: 1;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #codex-reset-regime-lab-v2 .assumption-panel {
+        padding-inline: 0.85rem;
+      }
+    }
+  </style>
+
+  <input type="checkbox" id="crr-condition" checked hidden aria-hidden="true">
+  <div class="viz-grid regime-stats" aria-live="polite">
+    <div class="card viz-stat">
+      <span class="text-muted">Median forecast date for the 11M post</span>
+      <span class="viz-stat-value" id="crr-median">…</span>
+      <span class="text-small" id="crr-median-wait">…</span>
+    </div>
+    <div class="card viz-stat">
+      <span class="text-muted">Likely 11M window</span>
+      <span class="viz-stat-value" id="crr-window">…</span>
+      <span class="text-small">Middle 80% of the forecast</span>
+    </div>
+    <div class="card viz-stat">
+      <span class="text-muted">Chance of an 11M post in 48h</span>
+      <span class="viz-stat-value" id="crr-next-48">…</span>
+      <span class="text-small" id="crr-conditioning-state">Updated automatically as time passes</span>
+    </div>
+  </div>
+
+  <p class="chart-hint">Swipe horizontally to inspect the fixed time axis.</p>
+  <div class="chart-shell" tabindex="0" aria-label="Scrollable cumulative forecast chart">
+    <svg class="forecast-chart" id="crr-chart" viewBox="0 0 720 360" role="img" aria-labelledby="crr-chart-title crr-chart-desc">
+      <title id="crr-chart-title">Chance of the 11 million active-user announcement by date</title>
+      <desc id="crr-chart-desc">A three-scenario announcement forecast on fixed axes from July 21 through August 11, with the next personal weekly renewal marked.</desc>
+      <g id="crr-weekends"></g>
+      <g id="crr-grid"></g>
+      <path class="mixture-area" id="crr-area"></path>
+      <path class="mixture-line" id="crr-line"></path>
+      <g id="crr-weekly-line"></g>
+      <g id="crr-now"></g>
+      <g class="probability-mark" id="crr-p50">
+        <circle r="4"></circle>
+        <text class="text-small"></text>
+      </g>
+      <g class="probability-mark" id="crr-p80">
+        <circle r="4"></circle>
+        <text class="text-small"></text>
+      </g>
+      <g id="crr-x-axis"></g>
+      <g id="crr-y-axis"></g>
+    </svg>
+  </div>
+
+  <div class="forecast-caption" id="crr-deadlines" aria-live="polite"></div>
+  <section class="weekly-planner" aria-labelledby="crr-weekly-heading">
+    <div>
+      <h3 id="crr-weekly-heading">Will another global reset beat your weekly renewal?</h3>
+      <p id="crr-weekly-date">Your weekly limit renews one week after the Jul 21 global reset.</p>
+    </div>
+    <div class="planner-probability">
+      <strong id="crr-before-weekly">…</strong>
+      <p>estimated chance of an immediate global reset first</p>
+    </div>
+    <div class="planner-controls">
+      <label class="planner-check" for="crr-custom-reset">
+        <input id="crr-custom-reset" type="checkbox">
+        I used a banked reset or my window started another time
+      </label>
+      <label class="planner-date" id="crr-last-reset-field" for="crr-last-reset" hidden>
+        My last reset was
+        <input id="crr-last-reset" type="datetime-local" value="2026-07-21T09:47" disabled>
+      </label>
+    </div>
+  </section>
+
+  <fieldset class="assumption-panel">
+    <legend>Try a different assumption</legend>
+    <div class="viz-controls regime-controls">
+      <label class="form-label regime-field" for="crr-preset">
+        Scenario
+        <select class="form-select" id="crr-preset">
+          <option value="default" selected>Default: slowdown keeps compounding</option>
+          <option value="skeptic">Skeptic: more re-acceleration</option>
+          <option value="plateau">Plateau: slower pace holds</option>
+          <option value="custom">Custom</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="viz-controls regime-controls">
+      <label class="form-label regime-field" for="crr-revert-weight">
+        Chance the early-July pace returns <span class="regime-value" id="crr-revert-weight-value">5%</span>
+        <input class="form-range" id="crr-revert-weight" type="range" min="0" max="100" step="1" value="5">
+        <span class="text-small text-muted">Median 1.8 days. This would require renewed acceleration.</span>
+      </label>
+
+      <label class="form-label regime-field" for="crr-lengthen-weight">
+        Chance the slowdown keeps compounding <span class="regime-value" id="crr-lengthen-weight-value">80%</span>
+        <input class="form-range" id="crr-lengthen-weight" type="range" min="0" max="100" step="1" value="80">
+        <span class="text-small text-muted">Median 9.4 days. The remaining weight holds near 5.5 days.</span>
+      </label>
+    </div>
+
+    <details class="assumption-why">
+      <summary>Why these three scenarios?</summary>
+      <p>The 5.5-day gap establishes that the cadence changed; it does not reveal whether the slower rate now holds or keeps slowing. The default puts 80% on continued slowing, 15% on holding, and 5% on renewed acceleration. That is an explicit prior stance, not an objective probability learned from four gaps.</p>
+      <p id="crr-shorter-readout">This mix implies a 23% chance the next gap is shorter than 5.5 days.</p>
+    </details>
+
+  </fieldset>
+
+  <details class="advanced-block">
+    <summary>More model settings and diagnostics</summary>
+    <div class="viz-row text-small weight-row" aria-live="polite">
+      <span class="text-muted" id="crr-weight-label">Current model mix:</span>
+      <span class="weight-item"><span class="weight-swatch revert"></span>Re-accelerate <span class="regime-value" id="crr-weight-revert">…</span></span>
+      <span class="weight-item"><span class="weight-swatch repeat"></span>Hold <span class="regime-value" id="crr-weight-repeat">…</span></span>
+      <span class="weight-item"><span class="weight-swatch lengthen"></span>Keep slowing <span class="regime-value" id="crr-weight-lengthen">…</span></span>
+      <span class="weight-item"><span class="weight-swatch none"></span>No post by 60d <span class="regime-value" id="crr-weight-none">…</span></span>
+      <span class="viz-badge">4 intervals</span>
+    </div>
+    <div class="viz-controls regime-controls advanced-controls">
+      <label class="form-label regime-field" for="crr-dispersion">
+        Dispersion multiplier: <span class="regime-value" id="crr-dispersion-value">1.00×</span>
+        <input class="form-range" id="crr-dispersion" type="range" min="0.75" max="2" step="0.05" value="1">
+        <span class="text-small text-muted">Widens or narrows all three scenarios without moving their medians.</span>
+      </label>
+      <label class="form-label regime-field" for="crr-no-post">
+        Chance of no milestone post within 60 days: <span class="regime-value" id="crr-no-post-value">5%</span>
+        <input class="form-range" id="crr-no-post" type="range" min="0" max="20" step="1" value="5">
+        <span class="text-small text-muted">A scoreable structural outcome, separate from ordinary waiting-time uncertainty.</span>
+      </label>
+    </div>
+    <div class="viz-row text-small text-muted regime-readout" id="crr-tail"></div>
+    <div class="viz-row text-small text-muted regime-readout" id="crr-status"></div>
+  </details>
+
+  <section class="history-block" id="history" aria-labelledby="crr-history-heading">
+    <h3 id="crr-history-heading">Observed milestones and modeled users</h3>
+    <p class="chart-hint">Swipe horizontally to inspect the full milestone timeline.</p>
+    <div class="history-legend text-small" aria-hidden="true">
+      <span><i class="legend-rule"></i>Observed milestones</span>
+      <span><i class="legend-rule projected"></i>Median projection · conditional on continued growth</span>
+      <span><i class="legend-band"></i>Middle 80%</span>
+    </div>
+    <div class="chart-scroll" tabindex="0" aria-label="Scrollable milestone history chart">
+    <svg class="history-chart" id="crr-history-chart" viewBox="0 0 720 360" role="img" aria-labelledby="crr-history-title crr-history-desc">
+      <title id="crr-history-title">Observed active-user milestones and a conditional projection through August 11</title>
+      <desc id="crr-history-desc">Observed milestone announcements from six million through ten million are connected by a solid line. From ten million, a dashed median projection and shaded middle eighty percent extend through August 11, conditional on continued user growth. Each modeled signup pace continues beyond the next milestone; this is not internal OpenAI telemetry.</desc>
+      <g id="crr-history-grid"></g>
+      <line class="release-line" id="crr-release-line"></line>
+      <text class="context-label text-small" id="crr-release-label">GPT-5.6 rollout began · Jul 9</text>
+      <path class="history-projection-band" id="crr-history-projection-band"></path>
+      <path class="history-projection-line" id="crr-history-projection-line"></path>
+      <g class="history-target" id="crr-history-11m" aria-label="Projected median 11 million milestone">
+        <circle r="4"></circle>
+        <text class="text-small"></text>
+      </g>
+      <path class="history-line" id="crr-history-line"></path>
+      <g id="crr-history-points"></g>
+      <g id="crr-history-x-axis"></g>
+      <g id="crr-history-y-axis"></g>
+    </svg>
+    </div>
+    <div class="viz-row text-small text-muted regime-readout">Post times (PT): 6M Jul 12, 10:59 AM · 7M Jul 13, 11:29 AM · 8M Jul 14, 12:34 PM · 9M Jul 15, 9:14 PM · 10M Jul 21, 9:47 AM</div>
+    <div class="viz-row text-small text-muted regime-readout">Announcement gaps: 24.5h · 25.1h · 32.7h · 132.6h. Projection is conditional on continued user growth and assumes each sampled signup pace continues; the compounding-slowdown scenario lengthens later million-user gaps. The separate no-post outcome is not treated as zero user growth.</div>
+  </section>
+
+  <section class="method-block method-copy" id="method" aria-labelledby="crr-method-heading">
+    <h3 id="crr-method-heading">What this forecast means</h3>
+    <div class="equation-display equation-display--folio" aria-label="Statistical model equations and variable definitions">
+                <p class="equation-kicker">THE FORECAST, FORMALLY</p>
+                <p class="equation-intro">Three possible growth regimes are mixed into one distribution, then updated as time passes without an announcement.</p>
+                <div class="equation-stage">
+                  <math class="equation-primary" display="block"><mi>F</mi><mo>(</mo><mi>t</mi><mo>)</mo><mo>=</mo><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>π</mi><mn>0</mn></msub><mo>)</mo><munder><mo>∑</mo><mrow><mi>z</mi><mo>∈</mo><mi mathvariant="normal">Z</mi></mrow></munder><msub><mi>w</mi><mi>z</mi></msub><mi>Φ</mi><mo>(</mo><mfrac><mrow><mi>ln</mi><mi>t</mi><mo>−</mo><mi>ln</mi><msub><mi>m</mi><mi>z</mi></msub></mrow><mrow><mi>κ</mi><msub><mi>σ</mi><mi>z</mi></msub></mrow></mfrac><mo>)</mo></math>
+                </div>
+                <dl class="equation-key">
+                  <div><dt>t</dt><dd>Days since the 10M post.</dd></div><div><dt>G₁₁</dt><dd>Days from the 10M post to the 11M post.</dd></div><div><dt>z ∈ Z</dt><dd>Return, hold, or compound scenario.</dd></div><div><dt>m_z</dt><dd>Scenario median: 1.8, 5.5, or 9.4 days.</dd></div><div><dt>σ_z</dt><dd>Scenario log-scale spread: 0.50, 0.35, 0.50.</dd></div><div><dt>w_z</dt><dd>Starting scenario weight set by the controls.</dd></div><div><dt>κ</dt><dd>Dispersion multiplier.</dd></div><div><dt>π₀</dt><dd>Chance of no milestone post within 60 days.</dd></div><div><dt>Φ</dt><dd>Standard normal cumulative distribution.</dd></div><div><dt>e</dt><dd>Days elapsed with no announcement.</dd></div>
+                </dl>
+                <details class="equation-source"><summary>Copyable model specification</summary><pre><code>G11 | z ~ LogNormal(ln(m_z), (kappa*sigma_z)^2)
+      Z = {return, hold, compound}
+      m = (1.8, 5.5, 9.4); sigma = (0.50, 0.35, 0.50)
+      w = (p_return, 1 - p_return - p_compound, p_compound)
+      F(t) = (1 - pi0) * sum_z w_z * Phi((ln(t) - ln(m_z))/(kappa*sigma_z))
+      F_e(t) = (F(t) - F(e))/(1 - F(e)), t &gt; e</code></pre></details>
+    </div>
+    <dl class="method-list">
+      <dt>Target</dt>
+      <dd>The timing model predicts the next public 11M announcement, measured from the 10M post. The separate reset estimate asks whether Tibo resets limits when that post appears.</dd>
+
+      <dt>Why three scenarios</dt>
+      <dd>The 9M→10M interval took 5.5 days, so the average signup rate in that window was about a fifth of the early-July rate. The data show that change but cannot tell whether the slower pace now reverses, holds, or keeps lengthening.</dd>
+
+      <dt>Why those defaults</dt>
+      <dd>The first three million-user gaps were about a day each; the latest took 5.5 days. The controls start at 5% for a return to the early pace, 15% for the latest pace holding, and 80% for another slowdown. That reflects the view that another growth burst would probably need a new launch. These are adjustable assumptions, not probabilities proven by four gaps.</dd>
+
+      <dt>Why 1.8, 5.5, and 9.4 days</dt>
+      <dd><strong>1.8 days</strong> is a conservative partial return toward the roughly one-day early-July cadence, rather than assuming the initial burst resumes in full. <strong>5.5 days</strong> repeats the latest observed 9M→10M gap. <strong>9.4 days</strong> continues the multiplicative lengthening of the observed gaps, but is slightly less extreme than the raw trend extrapolation of roughly 9.7 days.</dd>
+
+      <dt>Survival update</dt>
+      <dd>When no public post has appeared, dates that have already passed are removed automatically and the remaining scenario weights are recalculated.</dd>
+
+      <dt>No-post outcome</dt>
+      <dd>A default 5% structural chance represents no milestone post within 60 days. It gains conditional weight during prolonged silence and keeps the chart from promising an announcement with certainty.</dd>
+
+      <dt>Why a lognormal wait</dt>
+      <dd>The wait cannot be negative, and proportional misses are more plausible than equal hour-by-hour errors: taking twice as long is comparable to taking half as long. A lognormal distribution captures that while leaving room for an unusually delayed post.</dd>
+
+      <dt>Reset estimate</dt>
+      <dd>Four of five milestone posts triggered immediate global resets. To avoid treating five observations as certainty, the calculation begins by giving every reset rate from 0% to 100% equal plausibility—called a Beta(1,1), or uniform Beta, prior. After the four observed resets, the estimated chance next time is 71%, but remains weakly known, with a 36–96% interval. The weekly-renewal planner multiplies the chance of an 11M post before your renewal by 71%, assuming reset policy is independent of timing.</dd>
+
+    </dl>
+
+    <h3>Sources</h3>
+    <ul class="source-list text-small">
+      <li><a href="https://openai.com/index/gpt-5-6/" target="_blank" rel="noopener noreferrer">GPT-5.6 rollout began · Jul 9</a></li>
+      <li><a href="https://x.com/thsottiaux/status/2076365965915467978" target="_blank" rel="noopener noreferrer">6M + immediate reset</a></li>
+      <li><a href="https://x.com/thsottiaux/status/2076735790567338203" target="_blank" rel="noopener noreferrer">7M + banked reset</a></li>
+      <li><a href="https://x.com/thsottiaux/status/2077114635308986427" target="_blank" rel="noopener noreferrer">8M + immediate reset</a></li>
+      <li><a href="https://x.com/thsottiaux/status/2077607697487188198" target="_blank" rel="noopener noreferrer">9M + immediate reset</a></li>
+      <li><a href="https://x.com/thsottiaux/status/2079609157934886975" target="_blank" rel="noopener noreferrer">10M + immediate reset</a></li>
+    </ul>
+  </section>
+
+  <script>
+    (() => {
+      const root = document.getElementById('codex-reset-regime-lab-v2');
+      if (!root) return;
+
+      const DAY = 86400000;
+      const FORECAST_DAYS = 21;
+      const RESET_PROBABILITY = 5 / 7;
+      const start = new Date('2026-07-21T09:47:15.178-07:00');
+      const releaseDate = new Date('2026-07-09T00:00:00-07:00');
+      const ns = 'http://www.w3.org/2000/svg';
+      const plot = { left: 58, right: 696, top: 24, bottom: 310 };
+      const plotWidth = plot.right - plot.left;
+      const plotHeight = plot.bottom - plot.top;
+      const historyPlot = { left: 58, right: 696, top: 32, bottom: 305 };
+      const historyWidth = historyPlot.right - historyPlot.left;
+      const historyHeight = historyPlot.bottom - historyPlot.top;
+      const HISTORY_MIN_USERS = 6;
+      const HISTORY_MAX_USERS = 18;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const milestones = [
+        { users: 6, date: new Date('2026-07-12T10:59:57.945-07:00') },
+        { users: 7, date: new Date('2026-07-13T11:29:31.013-07:00') },
+        { users: 8, date: new Date('2026-07-14T12:34:54.638-07:00') },
+        { users: 9, date: new Date('2026-07-15T21:14:09.822-07:00') },
+        { users: 10, date: start }
+      ];
+
+      const presets = {
+        default: { revertWeight: 5, lengthenWeight: 80, noPost: 5 },
+        skeptic: { revertWeight: 30, lengthenWeight: 25, noPost: 5 },
+        plateau: { revertWeight: 5, lengthenWeight: 25, noPost: 5 }
+      };
+
+      const controls = {
+        preset: root.querySelector('#crr-preset'),
+        condition: root.querySelector('#crr-condition'),
+        revertWeight: root.querySelector('#crr-revert-weight'),
+        lengthenWeight: root.querySelector('#crr-lengthen-weight'),
+        dispersion: root.querySelector('#crr-dispersion'),
+        noPost: root.querySelector('#crr-no-post'),
+        customReset: root.querySelector('#crr-custom-reset'),
+        lastReset: root.querySelector('#crr-last-reset'),
+        lastResetField: root.querySelector('#crr-last-reset-field')
+      };
+
+      const outputs = {
+        revertWeight: root.querySelector('#crr-revert-weight-value'),
+        lengthenWeight: root.querySelector('#crr-lengthen-weight-value'),
+        dispersion: root.querySelector('#crr-dispersion-value'),
+        noPost: root.querySelector('#crr-no-post-value'),
+        median: root.querySelector('#crr-median'),
+        medianWait: root.querySelector('#crr-median-wait'),
+        window: root.querySelector('#crr-window'),
+        next48: root.querySelector('#crr-next-48'),
+        conditioningState: root.querySelector('#crr-conditioning-state'),
+        shorterReadout: root.querySelector('#crr-shorter-readout'),
+        weightLabel: root.querySelector('#crr-weight-label'),
+        weightRevert: root.querySelector('#crr-weight-revert'),
+        weightRepeat: root.querySelector('#crr-weight-repeat'),
+        weightLengthen: root.querySelector('#crr-weight-lengthen'),
+        weightNone: root.querySelector('#crr-weight-none'),
+        weeklyDate: root.querySelector('#crr-weekly-date'),
+        beforeWeekly: root.querySelector('#crr-before-weekly'),
+        deadlines: root.querySelector('#crr-deadlines'),
+        tail: root.querySelector('#crr-tail'),
+        status: root.querySelector('#crr-status')
+      };
+
+      const chart = {
+        svg: root.querySelector('#crr-chart'),
+        description: root.querySelector('#crr-chart-desc'),
+        weekends: root.querySelector('#crr-weekends'),
+        grid: root.querySelector('#crr-grid'),
+        area: root.querySelector('#crr-area'),
+        line: root.querySelector('#crr-line'),
+        weeklyLine: root.querySelector('#crr-weekly-line'),
+        now: root.querySelector('#crr-now'),
+        p50: root.querySelector('#crr-p50'),
+        p80: root.querySelector('#crr-p80'),
+        xAxis: root.querySelector('#crr-x-axis'),
+        yAxis: root.querySelector('#crr-y-axis')
+      };
+
+      const history = {
+        grid: root.querySelector('#crr-history-grid'),
+        line: root.querySelector('#crr-history-line'),
+        projectionBand: root.querySelector('#crr-history-projection-band'),
+        projectionLine: root.querySelector('#crr-history-projection-line'),
+        target11m: root.querySelector('#crr-history-11m'),
+        points: root.querySelector('#crr-history-points'),
+        xAxis: root.querySelector('#crr-history-x-axis'),
+        yAxis: root.querySelector('#crr-history-y-axis'),
+        releaseLine: root.querySelector('#crr-release-line'),
+        releaseLabel: root.querySelector('#crr-release-label')
+      };
+
+      let previousProbabilities = null;
+      let animationFrame = null;
+
+      function normalCdf(value) {
+        if (value === 0) return 0.5;
+        const sign = value < 0 ? -1 : 1;
+        const x = Math.abs(value) / Math.sqrt(2);
+        const t = 1 / (1 + 0.3275911 * x);
+        const polynomial = (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t;
+        const erf = 1 - polynomial * Math.exp(-x * x);
+        return Math.max(0, Math.min(1, 0.5 * (1 + sign * erf)));
+      }
+
+      function makeSvg(tag, attrs, content) {
+        const node = document.createElementNS(ns, tag);
+        Object.entries(attrs || {}).forEach(([key, value]) => node.setAttribute(key, value));
+        if (content !== undefined) node.textContent = content;
+        return node;
+      }
+
+      function formatDate(date, includeTime = false) {
+        const options = includeTime
+          ? { timeZone: 'America/Los_Angeles', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }
+          : { timeZone: 'America/Los_Angeles', month: 'short', day: 'numeric' };
+        return new Intl.DateTimeFormat('en-US', options).format(date);
+      }
+
+      function dateAtDays(days) {
+        return new Date(start.getTime() + days * DAY);
+      }
+
+      function dayAtDate(date) {
+        return (date - start) / DAY;
+      }
+
+      function components() {
+        const dispersion = Number(controls.dispersion.value);
+        return [
+          { name: 'Re-accelerate', loc: Math.log(1.8), scale: 0.50 * dispersion },
+          { name: 'Hold', loc: Math.log(5.5), scale: 0.35 * dispersion },
+          { name: 'Keep slowing', loc: Math.log(9.4), scale: 0.50 * dispersion }
+        ];
+      }
+
+      function componentCdf(component, days) {
+        if (days <= 0) return 0;
+        const standardized = (Math.log(days) - component.loc) / component.scale;
+        return normalCdf(standardized);
+      }
+
+      function makeDistribution(elapsed) {
+        const models = components();
+        const conditional = controls.condition.checked;
+        const noPost = Number(controls.noPost.value) / 100;
+        const revertAmongPosts = Number(controls.revertWeight.value) / 100;
+        const lengthenAmongPosts = Number(controls.lengthenWeight.value) / 100;
+        const repeatAmongPosts = Math.max(0, 1 - revertAmongPosts - lengthenAmongPosts);
+        const scenarioWeights = [revertAmongPosts, repeatAmongPosts, lengthenAmongPosts];
+        const weights = [
+          (1 - noPost) * scenarioWeights[0],
+          (1 - noPost) * scenarioWeights[1],
+          (1 - noPost) * scenarioWeights[2],
+          noPost
+        ];
+        const elapsedCdfs = models.map(model => componentCdf(model, elapsed));
+        const survivalMasses = [
+          weights[0] * (1 - elapsedCdfs[0]),
+          weights[1] * (1 - elapsedCdfs[1]),
+          weights[2] * (1 - elapsedCdfs[2]),
+          weights[3]
+        ];
+        const totalSurvival = Math.max(0.0000001, survivalMasses.reduce((sum, value) => sum + value, 0));
+        const liveWeights = conditional
+          ? survivalMasses.map(value => value / totalSurvival)
+          : weights.slice();
+
+        function baseCdf(days) {
+          return models.reduce((sum, model, index) => sum + weights[index] * componentCdf(model, days), 0);
+        }
+
+        function cdf(days) {
+          if (!conditional) return baseCdf(days);
+          if (days <= elapsed) return 0;
+          const remaining = models.reduce((sum, model, index) => {
+            return sum + weights[index] * Math.max(0, componentCdf(model, days) - elapsedCdfs[index]);
+          }, 0);
+          return Math.max(0, Math.min(1, remaining / totalSurvival));
+        }
+
+        const maxCdf = conditional
+          ? (survivalMasses[0] + survivalMasses[1] + survivalMasses[2]) / totalSurvival
+          : 1 - noPost;
+
+        function quantile(probability) {
+          if (probability >= maxCdf - 0.0000001) return Infinity;
+          let low = conditional ? elapsed : 0.00001;
+          let high = Math.max(21, low + 21, low * 2);
+          while (cdf(high) < probability && high < 100000) high *= 2;
+          if (cdf(high) < probability) return Infinity;
+          for (let iteration = 0; iteration < 72; iteration += 1) {
+            const midpoint = (low + high) / 2;
+            if (cdf(midpoint) < probability) low = midpoint;
+            else high = midpoint;
+          }
+          return (low + high) / 2;
+        }
+
+        const lastGap = (start - milestones[milestones.length - 2].date) / DAY;
+        const shorterProbability = (1 - noPost) * models.reduce((sum, model, index) => {
+          return sum + scenarioWeights[index] * componentCdf(model, lastGap);
+        }, 0);
+
+        return { baseCdf, cdf, quantile, liveWeights, maxCdf, models, shorterProbability };
+      }
+
+      function buildForecastAxes(condition) {
+        chart.weekends.replaceChildren();
+        chart.grid.replaceChildren();
+        chart.xAxis.replaceChildren();
+        chart.yAxis.replaceChildren();
+
+        [
+          ['2026-07-25T00:00:00-07:00', '2026-07-27T00:00:00-07:00'],
+          ['2026-08-01T00:00:00-07:00', '2026-08-03T00:00:00-07:00'],
+          ['2026-08-08T00:00:00-07:00', '2026-08-10T00:00:00-07:00']
+        ].forEach(([begin, end]) => {
+          const beginDay = Math.max(0, dayAtDate(new Date(begin)));
+          const endDay = Math.min(FORECAST_DAYS, dayAtDate(new Date(end)));
+          const x = plot.left + beginDay / FORECAST_DAYS * plotWidth;
+          const width = Math.max(0, endDay - beginDay) / FORECAST_DAYS * plotWidth;
+          chart.weekends.appendChild(makeSvg('rect', {
+            class: 'weekend-band',
+            x,
+            y: plot.top,
+            width,
+            height: plotHeight
+          }));
+        });
+
+        [0, 0.25, 0.5, 0.75, 1].forEach(probability => {
+          const y = plot.bottom - probability * plotHeight;
+          chart.grid.appendChild(makeSvg('line', { class: 'grid-line', x1: plot.left, y1: y, x2: plot.right, y2: y }));
+          chart.yAxis.appendChild(makeSvg('text', {
+            class: 'axis-label text-small',
+            x: plot.left - 10,
+            y: y + 4,
+            'text-anchor': 'end'
+          }, `${Math.round(probability * 100)}%`));
+        });
+
+        chart.yAxis.appendChild(makeSvg('text', {
+          class: 'axis-label text-small',
+          x: plot.left,
+          y: 13
+        }, condition ? 'Cumulative chance by date · given no post yet' : 'Unconditioned cumulative chance by date'));
+
+        [0, 4, 8, 12, 16, 21].forEach((days, index, ticks) => {
+          const x = plot.left + days / FORECAST_DAYS * plotWidth;
+          chart.xAxis.appendChild(makeSvg('line', { class: 'axis-line', x1: x, y1: plot.bottom, x2: x, y2: plot.bottom + 5 }));
+          chart.xAxis.appendChild(makeSvg('text', {
+            class: 'axis-label text-small',
+            x,
+            y: plot.bottom + 23,
+            'text-anchor': index === 0 ? 'start' : index === ticks.length - 1 ? 'end' : 'middle'
+          }, formatDate(dateAtDays(days))));
+        });
+
+        chart.xAxis.appendChild(makeSvg('line', { class: 'axis-line', x1: plot.left, y1: plot.bottom, x2: plot.right, y2: plot.bottom }));
+      }
+
+      function pathFor(probabilities, area = false) {
+        const points = probabilities.map((probability, index) => {
+          const x = plot.left + index / (probabilities.length - 1) * plotWidth;
+          const y = plot.bottom - probability * plotHeight;
+          return `${index === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`;
+        }).join(' ');
+        return area ? `${points} L${plot.right},${plot.bottom} L${plot.left},${plot.bottom} Z` : points;
+      }
+
+      function placeProbabilityMark(group, probability, days) {
+        if (!Number.isFinite(days) || days < 0 || days > FORECAST_DAYS) {
+          group.setAttribute('display', 'none');
+          return;
+        }
+        group.removeAttribute('display');
+        const x = plot.left + days / FORECAST_DAYS * plotWidth;
+        const y = plot.bottom - probability * plotHeight;
+        group.setAttribute('transform', `translate(${x},${y})`);
+        const label = group.querySelector('text');
+        const useEnd = x > plot.right - 120;
+        label.setAttribute('x', useEnd ? -8 : 8);
+        label.setAttribute('y', 22);
+        label.setAttribute('text-anchor', useEnd ? 'end' : 'start');
+        label.textContent = `${Math.round(probability * 100)}% · ${formatDate(dateAtDays(days))}`;
+      }
+
+      function drawNow(elapsed, condition) {
+        chart.now.replaceChildren();
+        if (elapsed <= 0 || elapsed >= FORECAST_DAYS) return;
+        const x = plot.left + elapsed / FORECAST_DAYS * plotWidth;
+        chart.now.appendChild(makeSvg('line', { class: 'now-line', x1: x, y1: plot.top, x2: x, y2: plot.bottom }));
+        chart.now.appendChild(makeSvg('text', {
+          class: 'context-label text-small',
+          x: x + 5,
+          y: plot.top + 28
+        }, condition ? 'Now · past dates removed' : 'Now'));
+      }
+
+      function selectedLastReset() {
+        if (!controls.customReset.checked) return start;
+        const parsed = new Date(controls.lastReset.value);
+        return Number.isFinite(parsed.getTime()) ? parsed : start;
+      }
+
+      function nextWeeklyRenewal(now) {
+        const cycle = 7 * DAY;
+        let renewal = new Date(selectedLastReset().getTime() + cycle);
+        if (renewal <= now) {
+          const cyclesToAdd = Math.floor((now - renewal) / cycle) + 1;
+          renewal = new Date(renewal.getTime() + cyclesToAdd * cycle);
+        }
+        return renewal;
+      }
+
+      function drawWeeklyRenewal(renewal) {
+        chart.weeklyLine.replaceChildren();
+        const days = dayAtDate(renewal);
+        if (days <= 0 || days >= FORECAST_DAYS) return;
+        const x = plot.left + days / FORECAST_DAYS * plotWidth;
+        chart.weeklyLine.appendChild(makeSvg('line', {
+          class: 'weekly-line',
+          x1: x,
+          y1: plot.top,
+          x2: x,
+          y2: plot.bottom
+        }));
+        chart.weeklyLine.appendChild(makeSvg('text', {
+          class: 'context-label text-small',
+          x: x + 5,
+          y: plot.top + 28
+        }, `Your weekly renewal · ${formatDate(renewal)}`));
+      }
+
+      function animateCurve(target) {
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        if (!previousProbabilities || reduceMotion) {
+          chart.line.setAttribute('d', pathFor(target));
+          chart.area.setAttribute('d', pathFor(target, true));
+          previousProbabilities = target;
+          return;
+        }
+
+        const from = previousProbabilities;
+        const started = performance.now();
+        const duration = 220;
+
+        function frame(timestamp) {
+          const raw = Math.min(1, (timestamp - started) / duration);
+          const eased = 1 - Math.pow(1 - raw, 4);
+          const current = target.map((value, index) => from[index] + (value - from[index]) * eased);
+          chart.line.setAttribute('d', pathFor(current));
+          chart.area.setAttribute('d', pathFor(current, true));
+          if (raw < 1) animationFrame = requestAnimationFrame(frame);
+          else previousProbabilities = target;
+        }
+
+        animationFrame = requestAnimationFrame(frame);
+      }
+
+      function probabilityBy(model, elapsed, date) {
+        const days = dayAtDate(date);
+        if (days <= elapsed) return null;
+        if (controls.condition.checked) return model.cdf(days);
+        return Math.max(0, model.baseCdf(days) - model.baseCdf(elapsed));
+      }
+
+      function deadlineText(label, probability) {
+        return probability === null ? `${label}: passed` : `${label}: ${percent(probability)}`;
+      }
+
+      function percent(value) {
+        return `${Math.round(Math.max(0, Math.min(1, value)) * 100)}%`;
+      }
+
+      function drawHistory(model, elapsed) {
+        const historyEnd = dateAtDays(FORECAST_DAYS);
+        const timeSpan = historyEnd - releaseDate;
+        const xForDate = date => historyPlot.left + (date - releaseDate) / timeSpan * historyWidth;
+        const yForUsers = users => historyPlot.bottom - (users - HISTORY_MIN_USERS) / (HISTORY_MAX_USERS - HISTORY_MIN_USERS) * historyHeight;
+
+        history.grid.replaceChildren();
+        history.points.replaceChildren();
+        history.xAxis.replaceChildren();
+        history.yAxis.replaceChildren();
+
+        [6, 10, 11, 14, 18].forEach(users => {
+          const y = yForUsers(users);
+          history.grid.appendChild(makeSvg('line', { class: 'grid-line', x1: historyPlot.left, y1: y, x2: historyPlot.right, y2: y }));
+          history.yAxis.appendChild(makeSvg('text', {
+            class: 'axis-label text-small',
+            x: historyPlot.left - 10,
+            y: y + 4,
+            'text-anchor': 'end'
+          }, `${users}M`));
+        });
+
+        history.yAxis.appendChild(makeSvg('text', {
+          class: 'axis-label text-small',
+          x: historyPlot.left,
+          y: 14
+        }, 'Active users · observed milestones and implied projection'));
+
+        [
+          releaseDate,
+          new Date('2026-07-15T00:00:00-07:00'),
+          start,
+          new Date('2026-07-27T00:00:00-07:00'),
+          new Date('2026-08-02T00:00:00-07:00'),
+          new Date('2026-08-08T00:00:00-07:00'),
+          historyEnd
+        ].forEach((date, index, ticks) => {
+          const x = xForDate(date);
+          history.xAxis.appendChild(makeSvg('line', { class: 'axis-line', x1: x, y1: historyPlot.bottom, x2: x, y2: historyPlot.bottom + 5 }));
+          history.xAxis.appendChild(makeSvg('text', {
+            class: 'axis-label text-small',
+            x,
+            y: historyPlot.bottom + 23,
+            'text-anchor': index === 0 ? 'start' : index === ticks.length - 1 ? 'end' : 'middle'
+          }, formatDate(date)));
+        });
+        history.xAxis.appendChild(makeSvg('line', { class: 'axis-line', x1: historyPlot.left, y1: historyPlot.bottom, x2: historyPlot.right, y2: historyPlot.bottom }));
+
+        history.releaseLine.setAttribute('x1', historyPlot.left);
+        history.releaseLine.setAttribute('x2', historyPlot.left);
+        history.releaseLine.setAttribute('y1', historyPlot.top);
+        history.releaseLine.setAttribute('y2', historyPlot.bottom);
+        history.releaseLabel.setAttribute('x', historyPlot.left + 6);
+        history.releaseLabel.setAttribute('y', historyPlot.top + 14);
+
+        history.line.setAttribute('d', milestones.map((milestone, index) => {
+          const x = xForDate(milestone.date);
+          const y = yForUsers(milestone.users);
+          return `${index === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`;
+        }).join(' '));
+
+        const growthMass = model.liveWeights.slice(0, 3).reduce((sum, value) => sum + value, 0);
+        const growthWeights = model.liveWeights.slice(0, 3).map(value => value / Math.max(0.0000001, growthMass));
+        let randomState = 0x11c0d3;
+        const random = () => {
+          randomState = (1664525 * randomState + 1013904223) >>> 0;
+          return (randomState + 0.5) / 4294967296;
+        };
+        const sampleNormal = () => Math.sqrt(-2 * Math.log(Math.max(0.0000001, random()))) * Math.cos(2 * Math.PI * random());
+        const samples = Array.from({ length: 900 }, () => {
+          const scenarioDraw = random();
+          const scenario = scenarioDraw < growthWeights[0] ? 0 : scenarioDraw < growthWeights[0] + growthWeights[1] ? 1 : 2;
+          const component = model.models[scenario];
+          let gap = Math.exp(component.loc + component.scale * sampleNormal());
+          for (let attempt = 0; controls.condition.checked && gap <= elapsed && attempt < 48; attempt += 1) {
+            gap = Math.exp(component.loc + component.scale * sampleNormal());
+          }
+          if (controls.condition.checked) gap = Math.max(gap, elapsed + 0.01);
+          return { gap, multiplier: scenario === 2 ? 9.4 / 5.5 : 1 };
+        });
+
+        const projectedUsers = (days, sample) => {
+          let remaining = Math.max(0, days);
+          let users = 10;
+          let gap = sample.gap;
+          for (let milestone = 0; remaining > 0 && milestone < 24; milestone += 1) {
+            if (remaining < gap) return users + remaining / gap;
+            users += 1;
+            remaining -= gap;
+            gap *= sample.multiplier;
+          }
+          return users;
+        };
+
+        const sampleQuantile = (values, probability) => {
+          values.sort((a, b) => a - b);
+          const position = (values.length - 1) * probability;
+          const lower = Math.floor(position);
+          const upper = Math.ceil(position);
+          const weight = position - lower;
+          return values[lower] * (1 - weight) + values[upper] * weight;
+        };
+
+        const projection = Array.from({ length: 85 }, (_, index) => {
+          const days = FORECAST_DAYS * index / 84;
+          const values = samples.map(sample => projectedUsers(days, sample));
+          return {
+            days,
+            low: sampleQuantile(values.slice(), 0.10),
+            median: sampleQuantile(values.slice(), 0.50),
+            high: sampleQuantile(values.slice(), 0.90)
+          };
+        });
+
+        const projectionPoint = (point, key) => {
+          const x = xForDate(dateAtDays(point.days));
+          const y = yForUsers(Math.min(HISTORY_MAX_USERS, point[key]));
+          return `${x.toFixed(2)},${y.toFixed(2)}`;
+        };
+        const upperPath = projection.map((point, index) => `${index === 0 ? 'M' : 'L'}${projectionPoint(point, 'high')}`).join(' ');
+        const lowerPath = projection.slice().reverse().map(point => `L${projectionPoint(point, 'low')}`).join(' ');
+        history.projectionBand.setAttribute('d', `${upperPath} ${lowerPath} Z`);
+        history.projectionLine.setAttribute('d', projection.map((point, index) => `${index === 0 ? 'M' : 'L'}${projectionPoint(point, 'median')}`).join(' '));
+
+        const crossingIndex = projection.findIndex(point => point.median >= 11);
+        if (crossingIndex < 1) {
+          history.target11m.setAttribute('display', 'none');
+        } else {
+          const before = projection[crossingIndex - 1];
+          const after = projection[crossingIndex];
+          const fraction = (11 - before.median) / Math.max(0.000001, after.median - before.median);
+          const crossingDays = before.days + (after.days - before.days) * fraction;
+          const x = xForDate(dateAtDays(crossingDays));
+          const y = yForUsers(11);
+          history.target11m.removeAttribute('display');
+          history.target11m.setAttribute('transform', `translate(${x},${y})`);
+          const targetLabel = history.target11m.querySelector('text');
+          targetLabel.setAttribute('x', 9);
+          targetLabel.setAttribute('y', -10);
+          targetLabel.textContent = '11M projection';
+        }
+
+        const labelPlacements = [
+          { dx: 8, dy: -9, anchor: 'start' },
+          { dx: 8, dy: 18, anchor: 'start' },
+          { dx: -9, dy: -11, anchor: 'end' },
+          { dx: 10, dy: 20, anchor: 'start' },
+          { dx: -8, dy: -9, anchor: 'end' }
+        ];
+
+        milestones.forEach((milestone, index) => {
+          const x = xForDate(milestone.date);
+          const y = yForUsers(milestone.users);
+          const placement = labelPlacements[index];
+          const point = makeSvg('circle', { class: 'history-point', cx: x, cy: y, r: 4 });
+          point.appendChild(makeSvg('title', {}, `${milestone.users} million · ${formatDate(milestone.date, true)} PT`));
+          history.points.appendChild(point);
+          history.points.appendChild(makeSvg('text', {
+            class: 'history-label text-small',
+            x: x + placement.dx,
+            y: y + placement.dy,
+            'text-anchor': placement.anchor
+          }, `${milestone.users}M`));
+        });
+      }
+
+      function update() {
+        const now = new Date();
+        const elapsed = Math.max(0, (now - start) / DAY);
+        const conditional = controls.condition.checked;
+        const model = makeDistribution(elapsed);
+        const q10 = model.quantile(0.10);
+        const q50 = model.quantile(0.50);
+        const q80 = model.quantile(0.80);
+        const q90 = model.quantile(0.90);
+        const probabilities = Array.from({ length: 121 }, (_, index) => model.cdf(FORECAST_DAYS * index / 120));
+        const weeklyRenewal = nextWeeklyRenewal(now);
+        const weeklyRenewalDay = dayAtDate(weeklyRenewal);
+        const postBeforeWeekly = weeklyRenewalDay > elapsed ? model.cdf(weeklyRenewalDay) : 0;
+        const resetBeforeWeekly = postBeforeWeekly * RESET_PROBABILITY;
+
+        outputs.revertWeight.textContent = `${Math.round(Number(controls.revertWeight.value))}%`;
+        outputs.lengthenWeight.textContent = `${Math.round(Number(controls.lengthenWeight.value))}%`;
+        outputs.dispersion.textContent = `${Number(controls.dispersion.value).toFixed(2)}×`;
+        outputs.noPost.textContent = `${Math.round(Number(controls.noPost.value))}%`;
+        outputs.median.textContent = Number.isFinite(q50) ? formatDate(dateAtDays(q50)) : 'No finite median';
+        outputs.medianWait.textContent = Number.isFinite(q50) ? `${q50.toFixed(1)} days after 10M` : 'No-post probability exceeds 50%';
+        if (!Number.isFinite(q10)) {
+          outputs.window.textContent = 'No finite 10th or 90th percentile';
+        } else if (!Number.isFinite(q90)) {
+          outputs.window.textContent = `${formatDate(dateAtDays(q10))}–no finite 90th`;
+        } else {
+          outputs.window.textContent = `${formatDate(dateAtDays(q10))}–${formatDate(dateAtDays(q90))}`;
+        }
+
+        const next48End = elapsed + 2;
+        const next48 = conditional
+          ? model.cdf(next48End)
+          : Math.max(0, model.baseCdf(next48End) - model.baseCdf(elapsed));
+        outputs.next48.textContent = percent(next48);
+        outputs.conditioningState.textContent = conditional ? 'Live: past dates removed automatically' : 'Ignoring elapsed time';
+        outputs.shorterReadout.textContent = `This mix implies a ${percent(model.shorterProbability)} chance the next gap is shorter than the observed 5.5-day gap.`;
+        outputs.beforeWeekly.textContent = percent(resetBeforeWeekly);
+        outputs.weeklyDate.textContent = controls.customReset.checked
+          ? `Based on the reset time you entered, your next weekly renewal is ${formatDate(weeklyRenewal, true)}.`
+          : `If your window began with the Jul 21 global reset, it renews ${formatDate(weeklyRenewal, true)}.`;
+
+        outputs.weightLabel.textContent = conditional ? 'Current model mix:' : 'Starting model mix:';
+        outputs.weightRevert.textContent = percent(model.liveWeights[0]);
+        outputs.weightRepeat.textContent = percent(model.liveWeights[1]);
+        outputs.weightLengthen.textContent = percent(model.liveWeights[2]);
+        outputs.weightNone.textContent = percent(model.liveWeights[3]);
+
+        const friday = new Date('2026-07-24T23:59:59-07:00');
+        const sunday = new Date('2026-07-26T23:59:59-07:00');
+        const deadlinePrefix = conditional ? 'Chance the 11M post has arrived' : 'Chance from the 10M post';
+        outputs.deadlines.textContent = `${deadlinePrefix} · ${deadlineText('by Fri Jul 24', probabilityBy(model, elapsed, friday))} · ${deadlineText('by Sun Jul 26', probabilityBy(model, elapsed, sunday))}`;
+
+        const beyondChart = Math.max(0, model.maxCdf - model.cdf(FORECAST_DAYS));
+        outputs.tail.textContent = `After Aug 11: ${percent(beyondChart)} · No post within 60 days: ${percent(1 - model.maxCdf)} · Weekend bands are visual context only.`;
+        outputs.status.textContent = elapsed > FORECAST_DAYS
+          ? 'Forecast horizon ended. Update the milestone data before interpreting this page.'
+          : `Time since the 10M post: ${elapsed.toFixed(1)} days`;
+
+        buildForecastAxes(conditional);
+        chart.description.textContent = conditional
+          ? `No 11M announcement has appeared for ${elapsed.toFixed(1)} days. Elapsed dates are removed, the milestone curve updates with the silence, and the green vertical line marks the user's next weekly renewal.`
+          : 'The curve shows the unconditioned announcement probability and the green vertical line marks the user’s next weekly renewal.';
+        drawNow(elapsed, conditional);
+        drawWeeklyRenewal(weeklyRenewal);
+        placeProbabilityMark(chart.p50, 0.50, q50);
+        placeProbabilityMark(chart.p80, 0.80, q80);
+        drawHistory(model, elapsed);
+        animateCurve(probabilities);
+      }
+
+      controls.preset.addEventListener('change', () => {
+        const preset = presets[controls.preset.value];
+        if (!preset) return;
+        controls.revertWeight.value = preset.revertWeight;
+        controls.lengthenWeight.value = preset.lengthenWeight;
+        controls.noPost.value = preset.noPost;
+        update();
+      });
+
+      function constrainScenarioWeights(changedControl) {
+        const revert = Number(controls.revertWeight.value);
+        const lengthen = Number(controls.lengthenWeight.value);
+        if (revert + lengthen <= 100) return;
+        if (changedControl === controls.revertWeight) controls.lengthenWeight.value = Math.max(0, 100 - revert);
+        else controls.revertWeight.value = Math.max(0, 100 - lengthen);
+      }
+
+      [controls.revertWeight, controls.lengthenWeight].forEach(control => {
+        control.addEventListener('input', () => {
+          constrainScenarioWeights(control);
+          controls.preset.value = 'custom';
+          update();
+        });
+      });
+
+      [controls.dispersion, controls.noPost].forEach(control => {
+        control.addEventListener('input', () => {
+          controls.preset.value = 'custom';
+          update();
+        });
+      });
+
+      controls.customReset.addEventListener('change', () => {
+        controls.lastReset.disabled = !controls.customReset.checked;
+        controls.lastResetField.hidden = !controls.customReset.checked;
+        update();
+      });
+      controls.lastReset.addEventListener('input', update);
+      controls.condition.addEventListener('change', update);
+      update();
+      window.setInterval(update, 60000);
+    })();
+  </script>
+</div>
+  </section>
+</main>
+
+<footer class="page-wrapper site-footer">
+  <span>&copy; 2026 Alexander King</span>
+  <span>Built as an inspectable forecasting exercise, not usage advice.</span>
+  <a href="index.html#contact">Contact</a>
+</footer>
+
+
+<script src="https://unpkg.com/@floating-ui/core@1.7.3/dist/floating-ui.core.umd.min.js"></script>
+<script src="https://unpkg.com/@floating-ui/dom@1.7.4/dist/floating-ui.dom.umd.min.js"></script>
+<script>
+(() => {
+  if (window.FloatingUIDOM == null) {
+    return;
+  }
+  const { autoUpdate, computePosition, flip, offset, shift, size } =
+    window.FloatingUIDOM;
+  const tooltipPlacements = new Set(["top", "right", "bottom", "left"]);
+  const tooltipId = `codex-visualization-tooltip-${
+    window.crypto?.randomUUID?.() ?? Date.now().toString(36)
+  }`;
+  const tooltipGap = 5;
+  const hoverDelay = 700;
+  const skipDelay = 300;
+  let activeTrigger = null;
+  let pendingTrigger = null;
+  let tooltip = null;
+  let openTimeout = null;
+  let autoUpdateCleanup = null;
+  let positionRequest = 0;
+  let skipDelayUntil = 0;
+
+  const getTrigger = (target) =>
+    target?.nodeType === Node.ELEMENT_NODE
+      ? target.closest("[data-tooltip]")
+      : null;
+  const containsTarget = (trigger, target) =>
+    target?.nodeType != null && trigger.contains(target);
+  const getContent = (trigger) =>
+    trigger.getAttribute("data-tooltip")?.trim() ?? "";
+  const getPlacement = (trigger) => {
+    const placement = trigger.getAttribute("data-tooltip-placement");
+    return tooltipPlacements.has(placement) ? placement : "top";
+  };
+  const getTooltip = () => {
+    if (tooltip == null) {
+      tooltip = document.createElement("div");
+      tooltip.id = tooltipId;
+      tooltip.className = "tooltip";
+      tooltip.setAttribute("role", "tooltip");
+    }
+    return tooltip;
+  };
+  const setDescribedBy = (trigger, described) => {
+    const ids = new Set(
+      (trigger.getAttribute("aria-describedby") ?? "")
+        .split(/\s+/)
+        .filter(Boolean),
+    );
+    if (described) {
+      ids.add(tooltipId);
+    } else {
+      ids.delete(tooltipId);
+    }
+    if (ids.size === 0) {
+      trigger.removeAttribute("aria-describedby");
+    } else {
+      trigger.setAttribute("aria-describedby", [...ids].join(" "));
+    }
+  };
+  const clearOpenTimeout = () => {
+    if (openTimeout != null) {
+      window.clearTimeout(openTimeout);
+      openTimeout = null;
+    }
+    pendingTrigger = null;
+  };
+  const closeTooltip = (activateSkipDelay = true) => {
+    clearOpenTimeout();
+    positionRequest += 1;
+    autoUpdateCleanup?.();
+    autoUpdateCleanup = null;
+    if (activeTrigger == null) {
+      return;
+    }
+    setDescribedBy(activeTrigger, false);
+    activeTrigger = null;
+    tooltip?.remove();
+    if (activateSkipDelay) {
+      skipDelayUntil = Date.now() + skipDelay;
+    }
+  };
+  const updatePosition = (trigger, floating) => {
+    const request = ++positionRequest;
+    void computePosition(trigger, floating, {
+      middleware: [
+        offset(tooltipGap),
+        flip({ padding: tooltipGap }),
+        shift({ padding: tooltipGap }),
+        size({
+          padding: tooltipGap,
+          apply({ availableHeight, availableWidth, elements }) {
+            elements.floating.style.setProperty(
+              "--tooltip-available-width",
+              `${Math.max(0, availableWidth)}px`,
+            );
+            elements.floating.style.setProperty(
+              "--tooltip-available-height",
+              `${Math.max(0, availableHeight)}px`,
+            );
+          },
+        }),
+      ],
+      placement: getPlacement(trigger),
+      strategy: "fixed",
+    })
+      .then(({ x, y }) => {
+        if (activeTrigger !== trigger || request !== positionRequest) {
+          return;
+        }
+        const scale = window.devicePixelRatio || 1;
+        floating.style.transform = `translate(${Math.round(x * scale) / scale}px, ${Math.round(y * scale) / scale}px)`;
+        floating.style.visibility = "visible";
+      })
+      .catch(() => {
+        if (activeTrigger === trigger && request === positionRequest) {
+          closeTooltip(false);
+        }
+      });
+  };
+  const openTooltip = (trigger) => {
+    const content = getContent(trigger);
+    if (!trigger.isConnected || content.length === 0) {
+      return;
+    }
+    clearOpenTimeout();
+    if (activeTrigger === trigger) {
+      return;
+    }
+    closeTooltip();
+    const floating = getTooltip();
+    floating.textContent = content;
+    floating.style.visibility = "hidden";
+    floating.style.transform = "translate(0, 0)";
+    document.body.appendChild(floating);
+    activeTrigger = trigger;
+    setDescribedBy(trigger, true);
+    autoUpdateCleanup = autoUpdate(trigger, floating, () => {
+      updatePosition(trigger, floating);
+    });
+  };
+  const requestOpen = (trigger, immediate = false) => {
+    if (
+      getContent(trigger).length === 0 ||
+      activeTrigger === trigger ||
+      pendingTrigger === trigger
+    ) {
+      return;
+    }
+    clearOpenTimeout();
+    pendingTrigger = trigger;
+    const delay =
+      immediate || activeTrigger != null || Date.now() < skipDelayUntil
+        ? 0
+        : hoverDelay;
+    if (delay === 0) {
+      openTooltip(trigger);
+      return;
+    }
+    openTimeout = window.setTimeout(() => {
+      openTimeout = null;
+      pendingTrigger = null;
+      openTooltip(trigger);
+    }, delay);
+  };
+  const handlePointerOpen = (event) => {
+    if (event.pointerType === "touch") {
+      return;
+    }
+    const trigger = getTrigger(event.target);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    requestOpen(trigger);
+  };
+  const handleLeave = (event) => {
+    const trigger = getTrigger(event.target);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const handleFocusIn = (event) => {
+    const trigger = getTrigger(event.target);
+    if (trigger?.matches(":focus-visible")) {
+      requestOpen(trigger, true);
+    }
+  };
+  const handleKeyDown = (event) => {
+    if (event.key === "Escape") {
+      closeTooltip();
+    }
+  };
+  const handleContextMenu = (event) => {
+    const trigger = getTrigger(event.target);
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const destroy = () => {
+    closeTooltip(false);
+    document.removeEventListener("pointerover", handlePointerOpen);
+    document.removeEventListener("pointerout", handleLeave);
+    document.removeEventListener("focusin", handleFocusIn);
+    document.removeEventListener("focusout", handleLeave);
+    document.removeEventListener("keydown", handleKeyDown);
+    document.removeEventListener("contextmenu", handleContextMenu);
+    tooltip = null;
+  };
+
+  document.addEventListener("pointerover", handlePointerOpen);
+  document.addEventListener("pointerout", handleLeave);
+  document.addEventListener("focusin", handleFocusIn);
+  document.addEventListener("focusout", handleLeave);
+  document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("contextmenu", handleContextMenu);
+  window.addEventListener("pagehide", destroy, { once: true });
+})();
+</script>
+<script id="codex-visualization-lucide" async src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js"></script>
+<script>
+(() => {
+  const initialize = () => {
+    globalThis.lucide?.createIcons({ attrs: { width: 16, height: 16 } });
+  };
+  if (globalThis.lucide != null) {
+    initialize();
+    return;
+  }
+  document
+    .getElementById("codex-visualization-lucide")
+    ?.addEventListener("load", initialize, { once: true });
+})();
+</script>
+
+</body>
+</html>

@@ -7,9 +7,9 @@
 <meta name="color-scheme" content="light dark">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: http://localhost:8400 https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src 'unsafe-inline' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data: http://localhost:8400; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>When will Codex reset again? — Alexander King</title>
-<meta name="description" content="An interactive forecast for the next Codex active-user milestone and likely rate-limit reset.">
+<meta name="description" content="An interactive forecast for the Codex 11M active-user post, with milestone-linked resets separated from recent non-milestone resets.">
 <meta property="og:title" content="When will Codex reset again? — Alexander King">
-<meta property="og:description" content="Explore when the 11 million user post and likely next Codex rate-limit reset may arrive.">
+<meta property="og:description" content="Explore when the 11 million user post may arrive and why recent rate-limit resets do not change that date forecast.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='Georgia, serif' fill='%237a2e2e'>A</text></svg>">
@@ -1074,7 +1074,7 @@ html>body{padding:0}</style>
     <p class="project-context">Codex rate-limit forecast</p>
     <h1>When will Codex reset again?</h1>
   </div>
-  <p class="project-lede">Tibo has reset Codex limits at each million-user milestone. This estimates when the 11M post, and likely next reset, will arrive.</p>
+  <p class="project-lede">Recent global resets arrived without an 11M post. This keeps the announcement forecast separate from the narrower chance that 11M itself triggers another reset.</p>
 </header>
 
 <main class="page-wrapper" id="main">
@@ -1927,12 +1927,12 @@ html>body{padding:0}</style>
   <div class="forecast-caption" id="crr-deadlines" aria-live="polite"></div>
   <section class="weekly-planner" aria-labelledby="crr-weekly-heading">
     <div>
-      <h3 id="crr-weekly-heading">Will another global reset beat your weekly renewal?</h3>
-      <p id="crr-weekly-date">Your weekly limit renews one week after the Jul 21 global reset.</p>
+      <h3 id="crr-weekly-heading">Could an 11M-linked reset beat your weekly renewal?</h3>
+      <p id="crr-weekly-date">If the Jul 28 Sol limits reset restarted your weekly window, it renews one week later.</p>
     </div>
     <div class="planner-probability">
       <strong id="crr-before-weekly">…</strong>
-      <p>estimated chance of an immediate global reset first</p>
+      <p>estimated chance of an 11M-linked reset first</p>
     </div>
     <div class="planner-controls">
       <label class="planner-check" for="crr-custom-reset">
@@ -1941,7 +1941,7 @@ html>body{padding:0}</style>
       </label>
       <label class="planner-date" id="crr-last-reset-field" for="crr-last-reset" hidden>
         My last reset was
-        <input id="crr-last-reset" type="datetime-local" value="2026-07-21T09:47" disabled>
+        <input id="crr-last-reset" type="datetime-local" value="2026-07-28T21:09" disabled>
       </label>
     </div>
   </section>
@@ -2080,7 +2080,13 @@ html>body{padding:0}</style>
       <dd>The wait cannot be negative, and proportional misses are more plausible than equal hour-by-hour errors: taking twice as long is comparable to taking half as long. A lognormal distribution captures that while leaving room for an unusually delayed post.</dd>
 
       <dt>Reset estimate</dt>
-      <dd>Four of five milestone posts triggered immediate global resets. To avoid treating five observations as certainty, the calculation begins by giving every reset rate from 0% to 100% equal plausibility—called a Beta(1,1), or uniform Beta, prior. After the four observed resets, the estimated chance next time is 71%, but remains weakly known, with a 36–96% interval. The weekly-renewal planner multiplies the chance of an 11M post before your renewal by 71%, assuming reset policy is independent of timing.</dd>
+      <dd>Four of five milestone posts triggered immediate global resets. To avoid treating five observations as certainty, the calculation begins by giving every reset rate from 0% to 100% equal plausibility—called a Beta(1,1), or uniform Beta, prior. After the four observed resets, the estimated chance next time is 71%, but remains weakly known, with a 36–96% interval. The weekly-renewal planner multiplies the chance of an 11M post before your renewal by 71%. It estimates only the 11M-linked route to a reset, not every way Tibo might reset limits.</dd>
+
+      <dt>Resets outside milestones</dt>
+      <dd>Three global resets arrived without a numbered milestone post: after an outage on Jul 25, as a discretionary adoption celebration on Jul 27, and alongside the Sol usage-limit update on Jul 28. They are not additional milestone trials, so they leave both the 11M date forecast and the 71% milestone-reset estimate untouched. The planner now uses the latest reset as its default weekly baseline.</dd>
+
+      <dt>Limit of the reset estimate</dt>
+      <dd>The recent clustering shows that global resets can arrive independently of the 11M post, but three discretionary or operational events do not provide a defensible background reset rate. The planner therefore understates the chance of <em>any</em> reset before renewal: it deliberately counts only a post-before-renewal followed by an immediate milestone reset.</dd>
 
     </dl>
 
@@ -2092,6 +2098,9 @@ html>body{padding:0}</style>
       <li><a href="https://x.com/thsottiaux/status/2077114635308986427" target="_blank" rel="noopener noreferrer">8M + immediate reset</a></li>
       <li><a href="https://x.com/thsottiaux/status/2077607697487188198" target="_blank" rel="noopener noreferrer">9M + immediate reset</a></li>
       <li><a href="https://x.com/thsottiaux/status/2079609157934886975" target="_blank" rel="noopener noreferrer">10M + immediate reset</a></li>
+      <li><a href="https://x.com/thsottiaux/status/2081096447718723984" target="_blank" rel="noopener noreferrer">Jul 25 outage + global reset</a></li>
+      <li><a href="https://x.com/thsottiaux/status/2081940052154933696" target="_blank" rel="noopener noreferrer">Jul 27 adoption celebration + global reset</a></li>
+      <li><a href="https://x.com/thsottiaux/status/2082317452755751098" target="_blank" rel="noopener noreferrer">Jul 28 Sol limits update + global reset</a></li>
     </ul>
   </section>
 
@@ -2102,8 +2111,13 @@ html>body{padding:0}</style>
 
       const DAY = 86400000;
       const FORECAST_DAYS = 21;
-      const RESET_PROBABILITY = 5 / 7;
+      const MILESTONE_RESET_PROBABILITY = 5 / 7;
       const start = new Date('2026-07-21T09:47:15.178-07:00');
+      // Most recent global reset, which anchors every user's weekly window. The
+      // Jul 28 reset accompanied the Sol limits update and was not tied to a
+      // numbered milestone, so it moves the default renewal date without
+      // entering the 4-of-5 milestone tally.
+      const lastGlobalReset = new Date('2026-07-28T21:09:02-07:00');
       const releaseDate = new Date('2026-07-09T00:00:00-07:00');
       const ns = 'http://www.w3.org/2000/svg';
       const plot = { left: 58, right: 696, top: 24, bottom: 310 };
@@ -2402,9 +2416,9 @@ html>body{padding:0}</style>
       }
 
       function selectedLastReset() {
-        if (!controls.customReset.checked) return start;
+        if (!controls.customReset.checked) return lastGlobalReset;
         const parsed = new Date(controls.lastReset.value);
-        return Number.isFinite(parsed.getTime()) ? parsed : start;
+        return Number.isFinite(parsed.getTime()) ? parsed : lastGlobalReset;
       }
 
       function nextWeeklyRenewal(now) {
@@ -2656,7 +2670,7 @@ html>body{padding:0}</style>
         const weeklyRenewal = nextWeeklyRenewal(now);
         const weeklyRenewalDay = dayAtDate(weeklyRenewal);
         const postBeforeWeekly = weeklyRenewalDay > elapsed ? model.cdf(weeklyRenewalDay) : 0;
-        const resetBeforeWeekly = postBeforeWeekly * RESET_PROBABILITY;
+        const milestoneResetBeforeWeekly = postBeforeWeekly * MILESTONE_RESET_PROBABILITY;
 
         outputs.revertWeight.textContent = `${Math.round(Number(controls.revertWeight.value))}%`;
         outputs.lengthenWeight.textContent = `${Math.round(Number(controls.lengthenWeight.value))}%`;
@@ -2679,10 +2693,10 @@ html>body{padding:0}</style>
         outputs.next48.textContent = percent(next48);
         outputs.conditioningState.textContent = conditional ? 'Live: past dates removed automatically' : 'Ignoring elapsed time';
         outputs.shorterReadout.textContent = `This mix implies a ${percent(model.shorterProbability)} chance the next gap is shorter than the observed 5.5-day gap.`;
-        outputs.beforeWeekly.textContent = percent(resetBeforeWeekly);
+        outputs.beforeWeekly.textContent = percent(milestoneResetBeforeWeekly);
         outputs.weeklyDate.textContent = controls.customReset.checked
           ? `Based on the reset time you entered, your next weekly renewal is ${formatDate(weeklyRenewal, true)}.`
-          : `If your window began with the Jul 21 global reset, it renews ${formatDate(weeklyRenewal, true)}.`;
+          : `If your window began with the Jul 28 Sol limits reset, it renews ${formatDate(weeklyRenewal, true)}.`;
 
         outputs.weightLabel.textContent = conditional ? 'Current model mix:' : 'Starting model mix:';
         outputs.weightRevert.textContent = percent(model.liveWeights[0]);

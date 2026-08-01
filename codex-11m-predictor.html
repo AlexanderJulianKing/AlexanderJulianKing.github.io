@@ -1928,7 +1928,7 @@ html>body{padding:0}</style>
   <section class="weekly-planner" aria-labelledby="crr-weekly-heading">
     <div>
       <h3 id="crr-weekly-heading">Could an 11M-linked reset beat your weekly renewal?</h3>
-      <p id="crr-weekly-date">If the Jul 28 Sol limits reset restarted your weekly window, it renews one week later.</p>
+      <p id="crr-weekly-date">If the Jul 31 Luna weekend reset restarted your weekly window, it renews one week later.</p>
     </div>
     <div class="planner-probability">
       <strong id="crr-before-weekly">…</strong>
@@ -1941,7 +1941,7 @@ html>body{padding:0}</style>
       </label>
       <label class="planner-date" id="crr-last-reset-field" for="crr-last-reset" hidden>
         My last reset was
-        <input id="crr-last-reset" type="datetime-local" value="2026-07-28T21:09" disabled>
+        <input id="crr-last-reset" type="datetime-local" value="2026-07-31T20:32" disabled>
       </label>
     </div>
   </section>
@@ -2083,10 +2083,10 @@ html>body{padding:0}</style>
       <dd>Four of five milestone posts triggered immediate global resets. To avoid treating five observations as certainty, the calculation begins by giving every reset rate from 0% to 100% equal plausibility—called a Beta(1,1), or uniform Beta, prior. After the four observed resets, the estimated chance next time is 71%, but remains weakly known, with a 36–96% interval. The weekly-renewal planner multiplies the chance of an 11M post before your renewal by 71%. It estimates only the 11M-linked route to a reset, not every way Tibo might reset limits.</dd>
 
       <dt>Resets outside milestones</dt>
-      <dd>Three global resets arrived without a numbered milestone post: after an outage on Jul 25, as a discretionary adoption celebration on Jul 27, and alongside the Sol usage-limit update on Jul 28. They are not additional milestone trials, so they leave both the 11M date forecast and the 71% milestone-reset estimate untouched. The planner now uses the latest reset as its default weekly baseline.</dd>
+      <dd>Four global resets arrived without a numbered milestone post: after an outage on Jul 25, as a discretionary adoption celebration on Jul 27, alongside the Sol usage-limit update on Jul 28, and for a Luna weekend on Jul 31. They are not additional milestone trials, so they leave both the 11M date forecast and the 71% milestone-reset estimate untouched. The planner now uses the latest reset as its default weekly baseline.</dd>
 
       <dt>Limit of the reset estimate</dt>
-      <dd>The recent clustering shows that global resets can arrive independently of the 11M post, but three discretionary or operational events do not provide a defensible background reset rate. The planner therefore understates the chance of <em>any</em> reset before renewal: it deliberately counts only a post-before-renewal followed by an immediate milestone reset.</dd>
+      <dd>The recent clustering shows that global resets can arrive independently of the 11M post, but four discretionary or operational events do not provide a defensible background reset rate. The planner therefore understates the chance of <em>any</em> reset before renewal: it deliberately counts only a post-before-renewal followed by an immediate milestone reset.</dd>
 
     </dl>
 
@@ -2101,6 +2101,7 @@ html>body{padding:0}</style>
       <li><a href="https://x.com/thsottiaux/status/2081096447718723984" target="_blank" rel="noopener noreferrer">Jul 25 outage + global reset</a></li>
       <li><a href="https://x.com/thsottiaux/status/2081940052154933696" target="_blank" rel="noopener noreferrer">Jul 27 adoption celebration + global reset</a></li>
       <li><a href="https://x.com/thsottiaux/status/2082317452755751098" target="_blank" rel="noopener noreferrer">Jul 28 Sol limits update + global reset</a></li>
+      <li><a href="https://x.com/thsottiaux/status/2083395449814229287" target="_blank" rel="noopener noreferrer">Jul 31 Luna weekend + global reset</a></li>
     </ul>
   </section>
 
@@ -2114,10 +2115,10 @@ html>body{padding:0}</style>
       const MILESTONE_RESET_PROBABILITY = 5 / 7;
       const start = new Date('2026-07-21T09:47:15.178-07:00');
       // Most recent global reset, which anchors every user's weekly window. The
-      // Jul 28 reset accompanied the Sol limits update and was not tied to a
-      // numbered milestone, so it moves the default renewal date without
-      // entering the 4-of-5 milestone tally.
-      const lastGlobalReset = new Date('2026-07-28T21:09:02-07:00');
+      // Jul 31 reset celebrated a week of efficiency and a Luna weekend; it was
+      // not tied to a numbered milestone, so it moves the default renewal date
+      // without entering the 4-of-5 milestone tally.
+      const lastGlobalReset = new Date('2026-07-31T20:32:37-07:00');
       const releaseDate = new Date('2026-07-09T00:00:00-07:00');
       const ns = 'http://www.w3.org/2000/svg';
       const plot = { left: 58, right: 696, top: 24, bottom: 310 };
@@ -2696,7 +2697,7 @@ html>body{padding:0}</style>
         outputs.beforeWeekly.textContent = percent(milestoneResetBeforeWeekly);
         outputs.weeklyDate.textContent = controls.customReset.checked
           ? `Based on the reset time you entered, your next weekly renewal is ${formatDate(weeklyRenewal, true)}.`
-          : `If your window began with the Jul 28 Sol limits reset, it renews ${formatDate(weeklyRenewal, true)}.`;
+          : `If your window began with the Jul 31 Luna weekend reset, it renews ${formatDate(weeklyRenewal, true)}.`;
 
         outputs.weightLabel.textContent = conditional ? 'Current model mix:' : 'Starting model mix:';
         outputs.weightRevert.textContent = percent(model.liveWeights[0]);

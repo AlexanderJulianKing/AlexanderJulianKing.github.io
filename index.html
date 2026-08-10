@@ -966,12 +966,12 @@
             </h2>
             <p class="fade-in stagger-1">Across biology and AI, I work on the same problem: turning messy, incomplete evidence into conclusions and systems people can trust.</p>
             <p class="fade-in stagger-2">During my neuroscience PhD, I discovered cell-type-specific alternative splicing across more than 100,000 single cells, then validated the result experimentally through mouse genetics, blood-brain-barrier assays, and confocal imaging. That work became a first-author paper in the <em>Journal of Neuroscience</em>.</p>
-            <p class="fade-in stagger-3">My recent AI work applies the same rigor to model behavior and scientific software. I identified and experimentally reproduced a class of silent failure modes in data-science agents across 1,000 primary runs<a class="sidenote-number" id="fnref-1" href="#fn-1" role="doc-noteref" aria-label="Sidenote 1">1</a>; built SC-Referee, a deterministic scientific-analysis checker delivered as a Python application and Claude Code skill<a class="sidenote-number" id="fnref-2" href="#fn-2" role="doc-noteref" aria-label="Sidenote 2">2</a>; and shipped systems for Arena.ai prediction, agentic research, embedding-based retrieval, fact-checking, and automated publishing.</p>
+            <p class="fade-in stagger-3">My recent AI work applies the same rigor to model behavior and scientific software. I identified and experimentally reproduced a class of silent failure modes in data-science agents across 1,000 primary runs<a class="sidenote-number" id="fnref-1" href="#fn-1" role="doc-noteref" aria-label="Sidenote 1">1</a>; built SC-Referee, an auditor for scientific code that checks for commonly overlooked bioinformatics mistakes<a class="sidenote-number" id="fnref-2" href="#fn-2" role="doc-noteref" aria-label="Sidenote 2">2</a>; and shipped systems for Arena.ai prediction, agentic research, embedding-based retrieval, fact-checking, and automated publishing.</p>
             <p class="fade-in stagger-4">I work end to end: framing the question, gathering evidence, building the system, designing the evaluation, tracing failures, and communicating what the result does and does not support. I am most useful where technical building and judgment meet&mdash;evaluating AI systems, designing reliable workflows, or turning difficult scientific data into decisions.</p>
           </div>
           <aside class="sidenote fade-in" aria-label="Sidenotes">
             <p id="fn-1" role="doc-footnote"><sup>1</sup> Two frozen 10-task batteries across 10 model-scaffold configurations; 329 of 330 answered-but-wrong runs returned the exact planted error.</p>
-            <p id="fn-2" role="doc-footnote"><sup>2</sup> In its strongest public example, 16,289 significant genes fell to 770 when the analysis was rebuilt at the biological-sample level.</p>
+            <p id="fn-2" role="doc-footnote"><sup>2</sup> In its strongest public example, it found an error in a published study that had reported 16,289 significant genes; fixing the error reduced that number to 770.</p>
           </aside>
         </div>
       </section>
@@ -1001,19 +1001,19 @@
         </article>
 
         <article class="project-card fade-in stagger-2">
-          <h3 class="project-title">SC-Referee: Deterministic Scientific-Analysis Checker</h3>
-          <p class="project-desc">Built for Anthropic's Built with Claude: Life Sciences Builder track, SC-Referee is a deterministic checker for single-cell analysis folders delivered as a Python application and Claude Code skill. It reconstructs experimental designs, asks scientists to confirm ambiguous context, and dispatches 12+ verifiers for pseudoreplication, confounding, multiple testing, model-data mismatch, aggregation errors, and circular analysis. Evidence-linked reports mark each conclusion <em>clear</em>, <em>flagged</em>, <em>needs review</em>, or <em>not evaluated</em>.</p>
+          <h3 class="project-title">SC-Referee: A Conservative Auditor for Scientific Code</h3>
+          <p class="project-desc">SC-Referee reads a scientific analysis, meaning the code, the exact input data, and the reported results, and checks whether the paper's method is what the code actually did, without ever running the code. In its strongest public case, it caught a published analysis whose statistics treated repeated measurements from the same samples as independent evidence: rebuilt at the biological-sample level, 16,289 significant genes fell to 770. It is built to never cry wolf: when it cannot be certain it stays silent or asks the scientist one bounded question, and it has issued zero false accusations in every blind trial to date.</p>
           <div class="project-meta">
             <div class="tags">
               <span class="tag">Python</span>
               <span class="tag">Claude Code Skill</span>
-              <span class="tag">Statistical Auditing</span>
+              <span class="tag">Static Analysis</span>
               <span class="tag">Human-in-the-Loop AI</span>
               <span class="tag">Scientific Software</span>
             </div>
             <span class="card-links">
               <a href="https://github.com/AlexanderJulianKing/sc-referee" class="read-more card-link-primary" target="_blank" rel="noopener noreferrer" aria-label="View SC-Referee on GitHub">GitHub &rarr;</a>
-              <a href="https://www.youtube.com/watch?v=1VGWTWFhlNI" class="read-more" target="_blank" rel="noopener noreferrer" aria-label="Watch the SC-Referee demo">Demo &rarr;</a>
+              <a href="https://www.youtube.com/watch?v=1VGWTWFhlNI" class="read-more" target="_blank" rel="noopener noreferrer" aria-label="Watch the original SC-Referee demo">Original demo &rarr;</a>
             </span>
           </div>
         </article>

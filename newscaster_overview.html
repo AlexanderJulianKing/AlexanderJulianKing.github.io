@@ -320,22 +320,20 @@
   <div class="legend fade-in">
     <span class="lt">Models</span>
     <span class="chip">Gemini 3.1 Flash-Lite · <em>low-stakes utility calls</em></span>
-    <span class="chip">Gemma 4 31B · <em>everyday summaries and rewrites</em></span>
-    <span class="chip">GLM 5.2 · <em>harder reads and faithfulness checks</em></span>
-    <span class="chip">Claude Opus 4.8 · <em>story picks, scripts, research, and the editor</em></span>
-    <span class="chip">GPT-5.5 · <em>adversarial vetting</em></span>
+    <span class="chip">GPT-6 Luna · <em>reading front pages, summaries, research answers, faithfulness checks</em></span>
+    <span class="chip">Claude Opus 5.5 · <em>story picks, scripts, research, and the editor</em></span>
+    <span class="chip">GPT-6 Sol · <em>marking repeats and adversarial vetting</em></span>
   </div>
 
   <h2 class="section-heading fade-in"><span class="section-number">1.</span> The pipeline</h2>
-  <p class="secnote">Six stages run top to bottom each morning. Each one skips itself if its output already exists, so the run is resilient to LLM-provider hiccups: a retry resumes where it left off instead of redoing finished work.</p>
+  <p class="secnote">Six stages, every morning, with no one at the keyboard.</p>
 
   <div class="flow fade-in">
     <div class="stage">
       <div class="rail"><span class="num">1</span></div>
       <div class="card">
         <div class="ch"><span class="nm">Gather</span><span class="tag">deep-dive below ↓</span></div>
-        <p>Scrape <b>NPR, AP, Democracy Now, ProPublica, CalMatters, Drop Site News, City of Riverside</b> → research the headlines and pick <b>2 to cover in depth</b> and <b>5 to cover briefly</b> → dig into the two deep-dive picks with an <b>adaptive agent</b> backed by <b>cross-day memory</b> (what past episodes already covered) → dedupe against the last 7 days.</p>
-        <div class="out">produces → vetted story summaries · research notes · saved source excerpts (raw fetched article text, kept for fact-checking) · a cross-day memory store</div>
+        <p>Read about 150 headlines, pick <b>2 stories to go deep on</b> and <b>5 to cover briefly</b>, and research them.</p>
       </div>
     </div>
 
@@ -343,23 +341,23 @@
       <div class="rail"><span class="num">2</span></div>
       <div class="card">
         <div class="ch"><span class="nm">Write scripts</span></div>
-        <p>Each episode is two parts: a 5-story <b>overview</b> the anchor reads solo (written by Gemma from the five stories’ short web briefs), and two in-depth <b>segments</b> told as dialogue between one anchor and two reporters (written by Opus). Plus the episode title.</p>
+        <p>The two deep dives become conversations between an anchor and a reporter. The other five become a short roundup.</p>
       </div>
     </div>
 
     <div class="stage">
       <div class="rail"><span class="num">3</span></div>
       <div class="card">
-        <div class="ch"><span class="nm">Fact-finder gate</span></div>
-        <p>A fact-check of the finished script (the overview <em>and</em> both segments) before any audio is made: three passes (detailed below), then an editor that corrects the factual errors the sources contradict.</p>
+        <div class="ch"><span class="nm">Fact-check</span></div>
+        <p>Check every quote and claim against the sources, and fix what's wrong before anything is voiced.</p>
       </div>
     </div>
 
     <div class="stage">
       <div class="rail"><span class="num">4</span></div>
       <div class="card">
-        <div class="ch"><span class="nm">Generate audio</span></div>
-        <p>Cloud text-to-speech, a distinct voice for the anchor and each reporter, with intro music mixed in and assembled into the full episode.</p>
+        <div class="ch"><span class="nm">Audio</span></div>
+        <p>A different voice for each speaker, plus theme music.</p>
       </div>
     </div>
 
@@ -367,7 +365,7 @@
       <div class="rail"><span class="num">5</span></div>
       <div class="card">
         <div class="ch"><span class="nm">Video</span></div>
-        <p>Combines the audio with the cover image into the final video file.</p>
+        <p>The audio over the cover image.</p>
       </div>
     </div>
 
@@ -375,14 +373,13 @@
       <div class="rail"><span class="num">6</span></div>
       <div class="card">
         <div class="ch"><span class="nm">Upload</span></div>
-        <p>Uploaded to YouTube and published public, with the generated episode title.</p>
+        <p>Published to YouTube.</p>
       </div>
     </div>
   </div>
 
   <hr class="rule">
   <h2 class="section-heading fade-in"><span class="section-number">2.</span> Inside the pipeline, step by step</h2>
-  <p class="secnote">Start to finish: how the day's stories get <b>picked</b>, <b>researched</b> in depth, <b>fact-checked</b>, and <b>corrected</b> before they're voiced. Every box says <em>what it does</em> and <em>who does it</em>: plain program code, Google's search, a database, or an AI model (an LLM, like ChatGPT, but called from code; the model is named).</p>
   <div class="fckey fade-in">
     <span class="k"><span class="sw ai"></span><b>AI model</b> (LLM)</span>
     <span class="k"><span class="sw py"></span><b>plain code</b> (Python)</span>
@@ -391,8 +388,7 @@
   </div>
 
   <h3 class="fch fade-in"><span class="n">1.</span> Story selection <span class="em">· headlines → the day's picks</span></h3>
-  <p class="fcap">Headlines come from 7 sites: NPR, AP, Democracy Now, ProPublica, CalMatters, Drop Site News, and City of Riverside (local-government notices). Most are read by Gemini with web grounding, two (CalMatters, Drop Site) by direct scrapers. Then a two-tier funnel narrows them: Tier 1 scores every headline and keeps the top ~10, then Tier 2 web-researches those and makes the final picks.</p>
-  <svg class="fc" viewBox="0 0 580 530" role="img" aria-label="Story selection flowchart: scrape headlines from seven sites, drop repeats by comparing against previous stories from recent days, Tier 1 score, Tier 2 research, Tier 3 pick the stories">
+  <svg class="fc" viewBox="0 0 580 530" role="img" aria-label="Story selection flowchart: read about 150 headlines from 16 sections, mark repeats against the story ledger, Tier 1 scores and keeps the top 10 plus 5 for California, Tier 2 researches the shortlist and picks the stories">
     <defs><marker id="arP" markerWidth="9" markerHeight="9" refX="6.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="context-stroke"/></marker></defs>
     <path class="edge" marker-end="url(#arP)" d="M190,50 V78"/>
     <path class="edge" marker-end="url(#arP)" d="M190,124 V154"/>
@@ -404,17 +400,17 @@
     <path class="edge" marker-end="url(#arP)" d="M155,450 V470"/>
     <path class="edge" marker-end="url(#arP)" d="M425,450 V470"/>
     <g><rect class="term" x="95" y="14" width="190" height="36" rx="18"/><text class="t" x="190" y="37" text-anchor="middle">Each morning</text></g>
-    <g><rect class="box" x="80" y="78" width="220" height="46" rx="9"/><text class="t" x="190" y="98" text-anchor="middle">Grab today's headlines</text><text class="s ai" x="190" y="114" text-anchor="middle">AI · Gemini + code scrapers</text></g>
-    <g><rect class="box" x="80" y="154" width="220" height="46" rx="9"/><text class="t" x="190" y="174" text-anchor="middle">Drop retreads, keep updates</text><text class="s ai" x="190" y="190" text-anchor="middle">AI · Gemma</text></g>
+    <g><rect class="box" x="80" y="78" width="220" height="46" rx="9"/><text class="t" x="190" y="98" text-anchor="middle">Grab today's headlines</text><text class="s ai" x="190" y="114" text-anchor="middle">AI · browser + Luna, RSS, code</text></g>
+    <g><rect class="box" x="80" y="154" width="220" height="46" rx="9"/><text class="t" x="190" y="174" text-anchor="middle">Mark repeats, keep updates</text><text class="s ai" x="190" y="190" text-anchor="middle">AI · GPT-6 Sol</text></g>
     <path class="edge" marker-end="url(#arP)" d="M355,177 H304"/>
-    <g><rect class="box muted" x="355" y="154" width="200" height="46" rx="9"/><text class="t" x="455" y="174" text-anchor="middle">Previous stories</text><text class="s" x="455" y="190" text-anchor="middle">from recent days</text></g>
-    <g><rect class="box" x="80" y="230" width="220" height="46" rx="9"/><text class="t" x="190" y="250" text-anchor="middle">TIER 1 · score → keep top 10</text><text class="s ai" x="190" y="266" text-anchor="middle">AI · Opus</text></g>
-    <g><rect class="box" x="80" y="306" width="220" height="46" rx="9"/><text class="t" x="190" y="326" text-anchor="middle">Research the top 10</text><text class="s ai" x="190" y="342" text-anchor="middle">AI · Gemma + web</text></g>
-    <g><rect class="box" x="80" y="382" width="220" height="46" rx="9"/><text class="t" x="190" y="402" text-anchor="middle">Pick the day's stories</text><text class="s ai" x="190" y="418" text-anchor="middle">AI · Opus + Gemma</text></g>
+    <g><rect class="box muted" x="355" y="154" width="200" height="46" rx="9"/><text class="t" x="455" y="174" text-anchor="middle">Story ledger</text><text class="s" x="455" y="190" text-anchor="middle">every story arc covered</text></g>
+    <g><rect class="box" x="80" y="230" width="220" height="46" rx="9"/><text class="t" x="190" y="250" text-anchor="middle">TIER 1 · top 10 + 5 for CA</text><text class="s ai" x="190" y="266" text-anchor="middle">AI · Opus</text></g>
+    <g><rect class="box" x="80" y="306" width="220" height="46" rx="9"/><text class="t" x="190" y="326" text-anchor="middle">Research the shortlist</text><text class="s ai" x="190" y="342" text-anchor="middle">AI · GPT-6 Luna + web</text></g>
+    <g><rect class="box" x="80" y="382" width="220" height="46" rx="9"/><text class="t" x="190" y="402" text-anchor="middle">Pick the day's stories</text><text class="s ai" x="190" y="418" text-anchor="middle">AI · Opus + GPT-6 Luna</text></g>
     <path class="edge a" d="M303,306 H314 V428 H303"/><path class="edge a" d="M314,367 H321"/>
     <text class="hd" x="325" y="371">TIER 2</text>
     <g><rect class="box" x="30" y="470" width="250" height="46" rx="9"/><text class="t" x="155" y="490" text-anchor="middle">2 deep-dive picks</text><text class="s ai" x="155" y="506" text-anchor="middle">AI · Opus → Gather (workflow <tspan font-size="12" font-weight="700">2</tspan>)</text></g>
-    <g><rect class="box" x="300" y="470" width="250" height="46" rx="9"/><text class="t" x="425" y="490" text-anchor="middle">5 overview stories</text><text class="s ai" x="425" y="506" text-anchor="middle">AI · Gemma → spoken intro</text></g>
+    <g><rect class="box" x="300" y="470" width="250" height="46" rx="9"/><text class="t" x="425" y="490" text-anchor="middle">5 overview stories</text><text class="s ai" x="425" y="506" text-anchor="middle">AI · Luna → spoken roundup</text></g>
   </svg>
 
   <h3 class="fch fade-in"><span class="n">2.</span> Gather <span class="em">· one story → in-depth summary</span></h3>
@@ -441,16 +437,15 @@
     <polygon class="dec" points="150,130 222,160 150,190 78,160"/><text class="t" x="150" y="164" text-anchor="middle">usable article?</text>
     <g><rect class="box" x="42" y="214" width="216" height="46" rx="9"/><text class="t" x="150" y="234" text-anchor="middle">Search, last 3 days</text><text class="s web" x="150" y="250" text-anchor="middle">Google → read &amp; summarize</text></g>
     <polygon class="dec" points="150,278 222,308 150,338 78,308"/><text class="t" x="150" y="312" text-anchor="middle">usable now?</text>
-    <g><rect class="box" x="42" y="362" width="216" height="46" rx="9"/><text class="t" x="150" y="382" text-anchor="middle">Reword query, search again</text><text class="s ai" x="150" y="398" text-anchor="middle">Gemma rewords → Google</text></g>
+    <g><rect class="box" x="42" y="362" width="216" height="46" rx="9"/><text class="t" x="150" y="382" text-anchor="middle">Reword query, search again</text><text class="s ai" x="150" y="398" text-anchor="middle">Flash-Lite rewords → Google</text></g>
     <polygon class="dec" points="150,426 222,456 150,486 78,456"/><text class="t" x="150" y="460" text-anchor="middle">usable now?</text>
     <g><rect class="term" x="40" y="512" width="220" height="40" rx="20"/><text class="t" x="150" y="537" text-anchor="middle">Skip story, segment dropped</text></g>
-    <g><rect class="box" x="290" y="590" width="220" height="56" rx="9"/><text class="t" x="400" y="608" text-anchor="middle">Grounded overview (workflow 3)</text><text class="s" x="400" y="624" text-anchor="middle">its own search on the story</text><text class="s ai" x="400" y="640" text-anchor="middle">AI · Gemma + Google</text></g>
+    <g><rect class="box" x="290" y="590" width="220" height="56" rx="9"/><text class="t" x="400" y="608" text-anchor="middle">Grounded overview (workflow 3)</text><text class="s" x="400" y="624" text-anchor="middle">its own search on the story</text><text class="s ai" x="400" y="640" text-anchor="middle">AI · GPT-6 Luna + Google</text></g>
     <g><rect class="box" x="290" y="666" width="220" height="46" rx="9"/><text class="t" x="400" y="686" text-anchor="middle">Research agent investigates</text><text class="s ai" x="400" y="702" text-anchor="middle">AI · Opus → workflow <tspan font-size="12" font-weight="700">4</tspan></text></g>
-    <g><rect class="box" x="290" y="742" width="220" height="46" rx="9"/><text class="t" x="400" y="762" text-anchor="middle">Write the story summary</text><text class="s ai" x="400" y="778" text-anchor="middle">AI · Gemma</text></g>
-    <g><rect class="box" x="290" y="818" width="220" height="46" rx="9"/><text class="t" x="400" y="838" text-anchor="middle">Trim off-topic bits</text><text class="s ai" x="400" y="854" text-anchor="middle">AI · Gemma</text></g>
+    <g><rect class="box" x="290" y="742" width="220" height="46" rx="9"/><text class="t" x="400" y="762" text-anchor="middle">Write the story summary</text><text class="s ai" x="400" y="778" text-anchor="middle">AI · GPT-6 Luna</text></g>
+    <g><rect class="box" x="290" y="818" width="220" height="46" rx="9"/><text class="t" x="400" y="838" text-anchor="middle">Trim off-topic bits</text><text class="s ai" x="400" y="854" text-anchor="middle">AI · Flash-Lite + Luna</text></g>
     <g><rect class="term" x="290" y="894" width="220" height="38" rx="19"/><text class="t" x="400" y="917" text-anchor="middle">Save summary + research notes</text></g>
   </svg>
-  <p class="fine">"Usable" means an article whose headline read as relevant, downloaded, and summarized cleanly. It keeps up to 3. The search <b>escalates</b> on an empty result: last 1 day → last 3 days → a reworded query. If all three fail, the story is <b>dropped</b>: the episode just airs one fewer deep-dive segment, never dead air. The grounded overview that follows doesn't reuse that article; it takes the story and runs its own search.</p>
 
   <h3 class="fch fade-in"><span class="n">3.</span> Grounded search <span class="em">· answers only from verified sources</span></h3>
   <p class="fcap">"Grounded" means tied to real fetched sources, never the model's own memory. Both the first pass and the research agent's source-checking tool (the "source hunter") use this: it answers <em>only</em> from verified excerpts, or reports no evidence. It never guesses.</p>
@@ -469,21 +464,21 @@
     <path class="edge" marker-end="url(#arS)" d="M185,598 V626"/><text class="lbl" x="192" y="614">yes</text>
     <path class="edge" marker-end="url(#arS)" d="M267,568 H345"/><text class="lbl" x="298" y="562">no</text>
     <g><rect class="term" x="100" y="14" width="170" height="36" rx="18"/><text class="t" x="185" y="37" text-anchor="middle">A research question</text></g>
-    <g><rect class="box" x="90" y="78" width="190" height="46" rx="9"/><text class="t" x="185" y="98" text-anchor="middle">Build an evidence checklist</text><text class="s ai" x="185" y="114" text-anchor="middle">AI · Gemma</text></g>
+    <g><rect class="box" x="90" y="78" width="190" height="46" rx="9"/><text class="t" x="185" y="98" text-anchor="middle">Build an evidence checklist</text><text class="s ai" x="185" y="114" text-anchor="middle">AI · GPT-6 Luna</text></g>
     <g><rect class="box" x="90" y="154" width="190" height="46" rx="9"/><text class="t" x="185" y="174" text-anchor="middle">Search Google for pages</text><text class="s web" x="185" y="190" text-anchor="middle">Google Search</text></g>
     <g><rect class="box" x="90" y="230" width="190" height="46" rx="9"/><text class="t" x="185" y="250" text-anchor="middle">Download &amp; read each page</text><text class="s py" x="185" y="266" text-anchor="middle">code · HTML/PDF</text></g>
     <g><rect class="box" x="90" y="306" width="190" height="46" rx="9"/><text class="t" x="185" y="326" text-anchor="middle">Check each page vs checklist</text><text class="s py" x="185" y="342" text-anchor="middle">code · rules (no AI)</text></g>
     <polygon class="dec" points="185,374 267,404 185,434 103,404"/><text class="t" x="185" y="408" text-anchor="middle">any page passes?</text>
     <g><rect class="box" x="345" y="381" width="205" height="46" rx="9"/><text class="t" x="447" y="401" text-anchor="middle">Follow near-miss links</text><text class="s py" x="447" y="417" text-anchor="middle">code</text></g>
-    <g><rect class="box" x="90" y="462" width="190" height="46" rx="9"/><text class="t" x="185" y="482" text-anchor="middle">Write findings + open gaps</text><text class="s ai" x="185" y="498" text-anchor="middle">AI · Gemma</text></g>
+    <g><rect class="box" x="90" y="462" width="190" height="46" rx="9"/><text class="t" x="185" y="482" text-anchor="middle">Write findings + open gaps</text><text class="s ai" x="185" y="498" text-anchor="middle">AI · GPT-6 Luna</text></g>
     <polygon class="dec" points="185,538 267,568 185,598 103,568"/><text class="t" x="185" y="572" text-anchor="middle">solid answer?</text>
-    <g><rect class="box" x="345" y="548" width="205" height="44" rx="9"/><text class="t" x="447" y="566" text-anchor="middle">Retry, stronger model</text><text class="s ai" x="447" y="580" text-anchor="middle">AI · GLM 5.2</text></g>
+    <g><rect class="box" x="345" y="548" width="205" height="44" rx="9"/><text class="t" x="447" y="566" text-anchor="middle">Retry, more reasoning</text><text class="s ai" x="447" y="580" text-anchor="middle">AI · GPT-6 Luna</text></g>
     <g><rect class="term" x="92" y="626" width="186" height="38" rx="19"/><text class="t" x="185" y="649" text-anchor="middle">Answer + the sources used</text></g>
   </svg>
-  <p class="fine">The whole flow runs once with a <em>standard</em> model and, if that comes up short, retries once with a <em>stronger</em> one. Every run is logged, and those saved excerpts become what the fact-finder later checks against.</p>
+  <p class="fine">Code checks each page for the right date, people and topic. For news, the checklist ranks the pages rather than rejecting them, because a strict checklist was throwing out real coverage of breaking stories. The whole flow runs once and, if no page passes, runs again with the model reasoning harder. Every run is logged, and those saved excerpts become what the fact-finder later checks against.</p>
 
   <h3 class="fch fade-in"><span class="n">4.</span> Research agent <span class="em">· the dig-deeper loop</span></h3>
-  <p class="fcap">It starts from the story's research so far, the article summaries plus the grounded search's first findings, then the orchestrator (Opus) keeps deciding "dig more or stop," calling two tools, until a second model (GPT-5.5), acting as an adversary that tries to poke holes in the findings, signs off. Up to ~5 rounds; it stops after 2 rounds that turn up nothing new.</p>
+  <p class="fcap">It starts from the story's research so far, the article summaries plus the grounded search's first findings, then the orchestrator (Opus) keeps deciding "dig more or stop," calling two tools, until a second model (GPT-6 Sol), acting as an adversary that tries to poke holes in the findings, signs off. Up to ~5 rounds; it stops after 2 rounds that turn up nothing new.</p>
   <svg class="fc" viewBox="0 0 580 500" role="img" aria-label="Research agent loop: pull a memory note from the cross-day memory, the controller plans, and if more research is needed runs a search tool with a targeted question and loops, the adversary checks for gaps, then it is done">
     <defs><marker id="arA" markerWidth="9" markerHeight="9" refX="6.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="context-stroke"/></marker></defs>
     <path class="edge" marker-end="url(#arA)" d="M175,60 V72"/>
@@ -496,13 +491,13 @@
     <path class="edge loop" marker-end="url(#arA)" d="M105,386 H35 V163 H75"/><text class="lbl" x="40" y="272">gap → dig</text>
     <path class="edge" marker-end="url(#arA)" d="M175,414 V444"/><text class="lbl" x="147" y="432">all clear</text>
     <g><rect class="term" x="55" y="14" width="240" height="46" rx="23"/><text class="t" x="175" y="33" text-anchor="middle">Story + research so far</text><text class="s" x="175" y="49" text-anchor="middle">summaries + grounded findings</text></g>
-    <g><rect class="box" x="75" y="72" width="200" height="46" rx="9"/><text class="t" x="175" y="92" text-anchor="middle">Pull a memory note</text><text class="s ai" x="175" y="108" text-anchor="middle">AI · Gemma · workflow <tspan font-size="12" font-weight="700">5</tspan></text></g>
+    <g><rect class="box" x="75" y="72" width="200" height="46" rx="9"/><text class="t" x="175" y="92" text-anchor="middle">Pull a memory note</text><text class="s ai" x="175" y="108" text-anchor="middle">AI · Luna · workflow <tspan font-size="12" font-weight="700">5</tspan></text></g>
     <path class="edge" marker-end="url(#arA)" d="M340,95 H277"/>
     <g><rect class="store" x="340" y="72" width="210" height="46" rx="11"/><text class="t" x="445" y="92" text-anchor="middle">Cross-day memory</text><text class="s db" x="445" y="108" text-anchor="middle">what past days found</text></g>
     <g><rect class="box" x="75" y="140" width="200" height="46" rx="9"/><text class="t" x="175" y="160" text-anchor="middle">Orchestrator plans next step</text><text class="s ai" x="175" y="176" text-anchor="middle">AI · Opus</text></g>
     <polygon class="dec" points="175,206 245,234 175,262 105,234"/><text class="t" x="175" y="238" text-anchor="middle">more research?</text>
-    <g><rect class="box" x="355" y="211" width="215" height="46" rx="9"/><text class="t" x="462" y="231" text-anchor="middle">Workflow 3 or article search</text><text class="s ai" x="462" y="247" text-anchor="middle">AI · Gemma + Google</text><text class="lbl" x="462" y="273" text-anchor="middle">with a targeted question</text></g>
-    <g><rect class="box" x="75" y="292" width="200" height="46" rx="9"/><text class="t" x="175" y="312" text-anchor="middle">Adversary pokes holes</text><text class="s ai" x="175" y="328" text-anchor="middle">AI · GPT-5.5</text></g>
+    <g><rect class="box" x="355" y="211" width="215" height="46" rx="9"/><text class="t" x="462" y="231" text-anchor="middle">Workflow 3 or article search</text><text class="s ai" x="462" y="247" text-anchor="middle">AI · GPT-6 Luna + Google</text><text class="lbl" x="462" y="273" text-anchor="middle">with a targeted question</text></g>
+    <g><rect class="box" x="75" y="292" width="200" height="46" rx="9"/><text class="t" x="175" y="312" text-anchor="middle">Adversary pokes holes</text><text class="s ai" x="175" y="328" text-anchor="middle">AI · GPT-6 Sol</text></g>
     <polygon class="dec" points="175,358 245,386 175,414 105,386"/><text class="t" x="175" y="390" text-anchor="middle">gaps found?</text>
     <g><rect class="term" x="65" y="444" width="220" height="38" rx="19"/><text class="t" x="175" y="467" text-anchor="middle">Done → Gather (workflow 2)</text></g>
   </svg>
@@ -510,7 +505,7 @@
 
   <h3 class="fch fade-in"><span class="n">5.</span> Embedding-based RAG memory <span class="em">· what past episodes already covered</span></h3>
   <p class="fcap">The embedding-based retrieval system remembers what past episodes covered. Each note is turned into a vector (a list of numbers that captures its meaning) and stored; a new story's question becomes a vector too, and the most similar past notes come back. Written each day (left), read per story (right).</p>
-  <svg class="fc wide" viewBox="0 0 640 430" role="img" aria-label="Cross-day memory flowchart: write path indexes notes into the database; read path finds similar past notes and Gemma writes a briefing">
+  <svg class="fc wide" viewBox="0 0 640 430" role="img" aria-label="Cross-day memory flowchart: write path indexes notes into the database; read path finds similar past notes and GPT-6 Luna writes a briefing">
     <defs><marker id="arR" markerWidth="9" markerHeight="9" refX="6.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="context-stroke"/></marker></defs>
     <text class="hd" x="105" y="30" text-anchor="middle">WRITE · each day</text>
     <text class="hd" x="540" y="30" text-anchor="middle">READ · per story</text>
@@ -533,7 +528,7 @@
     <g><rect class="box" x="450" y="172" width="180" height="42" rx="9"/><text class="t" x="540" y="191" text-anchor="middle">Find similar past chunks</text><text class="s py" x="540" y="206" text-anchor="middle">code · math</text></g>
     <polygon class="dec" points="540,222 615,252 540,282 465,252"/><text class="t" x="540" y="256" text-anchor="middle">similar enough?</text>
     <g><rect class="term" x="255" y="235" width="160" height="34" rx="17"/><text class="s" x="335" y="256" text-anchor="middle">no memory, start fresh</text></g>
-    <g><rect class="box" x="450" y="310" width="180" height="44" rx="9"/><text class="t" x="540" y="330" text-anchor="middle">Summarize past coverage</text><text class="s ai" x="540" y="346" text-anchor="middle">AI · Gemma</text></g>
+    <g><rect class="box" x="450" y="310" width="180" height="44" rx="9"/><text class="t" x="540" y="330" text-anchor="middle">Summarize past coverage</text><text class="s ai" x="540" y="346" text-anchor="middle">AI · GPT-6 Luna</text></g>
     <g><rect class="term acc" x="450" y="370" width="180" height="40" rx="20"/><text class="t" x="540" y="394" text-anchor="middle">Briefing → research agent</text></g>
   </svg>
   <p class="fine">The memory gives the system <b>continuity</b> (build on a running story), avoids <b>repeating</b> what it already covered, and nudges toward <b>fresh angles</b>; notes are tagged by storyline. If nothing matches, it simply starts fresh. In leakage-free chronological replay, the right prior coverage ranked first in <b>12/12</b> recurring-story tests, with <b>93%</b> of the top six results relevant.</p>
@@ -558,15 +553,15 @@
     <g><rect class="box" x="80" y="72" width="210" height="46" rx="9"/><text class="t" x="185" y="92" text-anchor="middle">Load the source excerpts</text><text class="s py" x="185" y="108" text-anchor="middle">plain code · what was fetched</text></g>
     <polygon class="dec" points="185,138 263,170 185,202 107,170"/><text class="t" x="185" y="174" text-anchor="middle">excerpts found?</text>
     <g><rect class="box" x="80" y="228" width="210" height="46" rx="9"/><text class="t" x="185" y="248" text-anchor="middle">1 Quote check</text><text class="s py" x="185" y="264" text-anchor="middle">plain code · verbatim match</text></g>
-    <g><rect class="box" x="80" y="298" width="210" height="46" rx="9"/><text class="t" x="185" y="318" text-anchor="middle">2 Faithfulness</text><text class="s ai" x="185" y="334" text-anchor="middle">AI · GLM · per-segment sources</text></g>
-    <g><rect class="box" x="80" y="368" width="210" height="46" rx="9"/><text class="t" x="185" y="388" text-anchor="middle">3 Stable facts</text><text class="s ai" x="185" y="404" text-anchor="middle">AI · Gemma → web · advisory</text></g>
+    <g><rect class="box" x="80" y="298" width="210" height="46" rx="9"/><text class="t" x="185" y="318" text-anchor="middle">2 Faithfulness</text><text class="s ai" x="185" y="334" text-anchor="middle">AI · Luna · per-segment sources</text></g>
+    <g><rect class="box" x="80" y="368" width="210" height="46" rx="9"/><text class="t" x="185" y="388" text-anchor="middle">3 Stable facts</text><text class="s ai" x="185" y="404" text-anchor="middle">AI · Luna → web · advisory</text></g>
     <g><rect class="term" x="55" y="438" width="260" height="50" rx="22"/><text class="t" x="185" y="456" text-anchor="middle">Grounded flags → editor (workflow <tspan font-size="12" font-weight="700">7</tspan>)</text><text class="s" x="185" y="474" text-anchor="middle">stable-fact stays a logged flag</text></g>
   </svg>
-  <p class="fine">Pass&nbsp;2 runs on the strong model (<b>GLM</b>) against <em>only that segment's</em> sources: the tight context is what lets it catch a subtle contradiction a long, noisy corpus would drown. In the 2026-06-23 episode it flags the script's “a crushing <b>defeat</b> in the Makerfield by-election” when the sources say Andy Burnham <b>won</b> it with 55%, a victory, not a defeat (a reversal, pass 2). Only the source-grounded flags (from passes 1 and 2) go to the editor (workflow 7). The stable-fact pass stays <b>advisory</b>: its web check is unreliable on facts newer than the model's training. In the same episode it wrongly insisted the Fed chair was still Powell, dismissing the 2026 dates as “simulated”, so it's logged but never auto-edited. Every flag is logged; it never blocks the run.</p>
+  <p class="fine">Pass&nbsp;2 runs on <b>GPT-6 Luna</b> at medium reasoning (GLM 5.2 until September 2026) against <em>only that segment's</em> sources: the tight context is what lets it catch a subtle contradiction a long, noisy corpus would drown. In the 2026-06-23 episode it flags the script's “a crushing <b>defeat</b> in the Makerfield by-election” when the sources say Andy Burnham <b>won</b> it with 55%, a victory, not a defeat (a reversal, pass 2). Only the source-grounded flags (from passes 1 and 2) go to the editor (workflow 7). The stable-fact pass stays <b>advisory</b>: its web check is unreliable on facts newer than the model's training. In the same episode it wrongly insisted the Fed chair was still Powell, dismissing the 2026 dates as “simulated”, so it's logged but never auto-edited. Every flag is logged; it never blocks the run.</p>
 
   <h3 class="fch fade-in"><span class="n">7.</span> The fact-finder editor <span class="em">· fix the confirmed errors before voicing</span></h3>
-  <p class="fcap">Runs only on scripts with a <b>source-grounded</b> flag (quote or faithfulness). Opus proposes verbatim find/replace fixes for the confirmed factual errors; a GPT-5.5 adversary signs off on each; then plain code applies it, but only where the exact phrase occurs once. Up to 3 rounds.</p>
-  <svg class="fc" viewBox="0 0 580 430" role="img" aria-label="Fact-finder editor flowchart: Opus proposes a minimal find-replace fix, a GPT-5.5 adversary approves or rejects, plain code swaps the exact words only when the span is unambiguous, looping up to three rounds into a corrected script; rejected or ambiguous cases stay logged flags">
+  <p class="fcap">Runs only on scripts with a <b>source-grounded</b> flag (quote or faithfulness). Opus proposes verbatim find/replace fixes for the confirmed factual errors; a GPT-6 Sol adversary signs off on each; then plain code applies it, but only where the exact phrase occurs once. Up to 3 rounds.</p>
+  <svg class="fc" viewBox="0 0 580 430" role="img" aria-label="Fact-finder editor flowchart: Opus proposes a minimal find-replace fix, a GPT-6 Sol adversary approves or rejects, plain code swaps the exact words only when the span is unambiguous, looping up to three rounds into a corrected script; rejected or ambiguous cases stay logged flags">
     <defs><marker id="arE" markerWidth="9" markerHeight="9" refX="6.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="context-stroke"/></marker></defs>
     <path class="edge" marker-end="url(#arE)" d="M185,60 V72"/>
     <path class="edge" marker-end="url(#arE)" d="M185,118 V140"/>
@@ -577,7 +572,7 @@
     <path class="edge loop" marker-end="url(#arE)" d="M80,315 H35 V95 H80"/><text class="lbl" x="37" y="240">↻ ≤3 rounds</text>
     <g><rect class="term" x="45" y="14" width="280" height="46" rx="23"/><text class="t" x="185" y="33" text-anchor="middle">The source-grounded flags</text><text class="s" x="185" y="49" text-anchor="middle">+ the script + its sources</text></g>
     <g><rect class="box" x="80" y="72" width="210" height="46" rx="9"/><text class="t" x="185" y="92" text-anchor="middle">Opus proposes a minimal fix</text><text class="s ai" x="185" y="108" text-anchor="middle">AI · Opus · exact find → replace</text></g>
-    <g><rect class="box" x="80" y="140" width="210" height="46" rx="9"/><text class="t" x="185" y="160" text-anchor="middle">Adversary checks it</text><text class="s ai" x="185" y="176" text-anchor="middle">AI · GPT-5.5 · reject if unsure</text></g>
+    <g><rect class="box" x="80" y="140" width="210" height="46" rx="9"/><text class="t" x="185" y="160" text-anchor="middle">Adversary checks it</text><text class="s ai" x="185" y="176" text-anchor="middle">AI · GPT-6 Sol · reject if unsure</text></g>
     <polygon class="dec" points="185,206 257,236 185,266 113,236"/><text class="t" x="185" y="240" text-anchor="middle">approved?</text>
     <g><rect class="term" x="360" y="214" width="210" height="44" rx="22"/><text class="t" x="465" y="234" text-anchor="middle">Leave it flagged</text><text class="s" x="465" y="250" text-anchor="middle">stays a logged flag</text></g>
     <g><rect class="box" x="80" y="292" width="210" height="46" rx="9"/><text class="t" x="185" y="312" text-anchor="middle">Swap the exact words</text><text class="s py" x="185" y="328" text-anchor="middle">plain code · unique span only</text></g>
@@ -587,7 +582,7 @@
 
   <hr class="rule">
   <h2 class="section-heading fade-in"><span class="section-number">3.</span> A story through the machine</h2>
-  <p class="secnote">Following one real story from the June 23, 2026 episode, the U.K. leadership shake-up. The source hunter pulls it cleanly, then the cheap rewrite model <b>inverts the outcome</b>, calling Andy Burnham's by-election <mark>landslide</mark> a <mark>crushing defeat</mark>. The faithfulness pass catches the flip, and the editor restores the win before voicing.</p>
+  <p class="secnote">Following one real story from the June 23, 2026 episode, the U.K. leadership shake-up. The source hunter pulls it cleanly, then the cheap rewrite model <b>inverts the outcome</b>, calling Andy Burnham's by-election <mark>landslide</mark> a <mark>crushing defeat</mark>. The faithfulness pass catches the flip, and the editor restores the win before voicing. The models named in this example are the ones that ran that day (Gemma, GLM 5.2 and GPT-5.5); GPT-6 Luna and GPT-6 Sol do those jobs now.</p>
 
   <div class="ex-flow">
 
@@ -648,8 +643,8 @@
 
   <footer class="fade-in">
     <span class="pill">● deployed &amp; live</span>
-    &nbsp; Running on a Raspberry Pi (a credit-card-sized computer): a three-pass fact-finder feeds an <b>Opus editor</b> (GPT-5.5-vetted) that fixes the source-grounded factual errors in place before voicing; the stable-fact pass stays advisory. Saved source excerpts ground passes 1–2 and the editor. The scheduler sleeps until 4 AM.
-    <div style="margin-top:.6rem;font-size:.78rem;">Every label, model, source, and the worked example are drawn from the actual codebase and the June 23 2026 run, not placeholders.</div>
+    &nbsp; Running on a Raspberry Pi (a credit-card-sized computer): a three-pass fact-finder feeds an <b>Opus editor</b> (GPT-6 Sol-vetted) that fixes the source-grounded factual errors in place before voicing; the stable-fact pass stays advisory. Saved source excerpts ground passes 1–2 and the editor. The scheduler sleeps until 4 AM.
+    <div style="margin-top:.6rem;font-size:.78rem;">Every label, model and source reflects the codebase as of September 23, 2026. The worked example is the real June 23, 2026 run, shown with the models that ran it.</div>
     <div class="foot-credit">
       <span>&copy; 2026 Alexander King</span>
       <span class="footer-note">Newscaster</span>

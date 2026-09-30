@@ -1,1257 +1,1876 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alexander King — Applied AI Researcher &amp; Computational Scientist</title>
-  <meta name="description" content="Applied AI researcher and neuroscience PhD who develops original methods, validates them against controlled baselines, and ships agentic AI and scientific software.">
-  <meta property="og:title" content="Alexander King — Applied AI Researcher &amp; Computational Scientist">
-  <meta property="og:description" content="Developing original methods, validating them against controlled baselines, and shipping agentic AI and scientific software.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="https://alexanderjulianking.github.io/og-image.png">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Alexander King — Applied AI Researcher &amp; Computational Scientist">
-  <meta name="twitter:description" content="Building and evaluating reliable AI and scientific data systems.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='Georgia, serif' fill='%237a2e2e'>A</text></svg>">
-  <script>document.documentElement.classList.add('js');</script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-  <style>
-    /* ===== Reset & Base ===== */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Alexander King · AI engineer and bioinformatician</title>
+<meta name="description" content="Alexander King is an AI engineer and bioinformatician. His projects include LLM evaluation, an automated daily news show, Adgrl2 splicing, and multi-omic network biology.">
+<meta property="og:title" content="Alexander King · AI engineer and bioinformatician">
+<meta property="og:description" content="Alexander King is an AI engineer and bioinformatician. His projects include LLM evaluation, an automated daily news show, Adgrl2 splicing, and multi-omic network biology.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://alexanderjulianking.github.io/">
+<meta property="og:image" content="https://alexanderjulianking.github.io/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Alexander King · AI engineer and bioinformatician">
+<meta name="twitter:description" content="Alexander King is an AI engineer and bioinformatician. His projects include LLM evaluation, an automated daily news show, Adgrl2 splicing, and multi-omic network biology.">
+<meta name="twitter:image" content="https://alexanderjulianking.github.io/og-image.jpg">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='Georgia, serif' fill='%237a2e2e'>A</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script>
+/* Start the opening's downloads before the rest of the page is parsed: the first frame of each panel, the middle
+   plate's landing image, then the rest of the shuffle in the order it plays. The opening script picks these up. */
+(() => {
+  const FILES = [
+    'fr-8XAiz-wvwjo', 'fr-Nxp_djfx3NU', 'fr-RbEeg3nPkbc', 'fr-WkDk5Dt3tk0', 'fr-jFFsk-L4Nsg', 'fr-pWjbxTtfDv0',
+    'fr-xlJqqBZTwHg', 'lo-nIEHqGSymRU', 'lo-pGVr8YRtQ80', 'lo-ziFuECDh8hc', 'nci-1PpyUZceg_I', 'nci-8jfIIrkHeII',
+    'nci-L7en7Lb-Ovc', 'nci-jFdQxuz_2fI', 'nci-mbL91Lg56zc', 'nci-sIqWYiNLiJU', 'nci-t24JyDUoJEg', 'nci-tIqa2uTE8JY'
+  ];
+  const LAND = { l: 3, c: 10, r: 8 }, landing = [LAND.l, LAND.c, LAND.r];
+  const pool = FILES.map((_, i) => i).filter(i => !landing.includes(i));
+  for (let i = pool.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const n = pool.length, offs = [0, Math.round(n / 3), Math.round(2 * n / 3)], order = [];
+  for (let k = 0; k < n; k++) offs.forEach(o => { const i = pool[(k + o) % n]; if (!order.includes(i)) order.push(i); });
+  let pending = 0, settle;
+  const B = window.__boot = { FILES, LAND, pool, first: order.slice(0, 3), t: [], f: [], subs: [], loaded: 0, total: n + 3, done: new Promise(r => { settle = r; }) };
+  const emit = () => B.subs.forEach(fn => fn());
+  const get = (src, alt, prio, put) => {
+    pending++;
+    const im = new Image(); im.decoding = 'async'; if (prio) im.fetchPriority = prio;
+    const fin = ok => { if (ok) { put(im); B.loaded++; } if (--pending === 0) settle(); emit(); };
+    im.onload = () => { im.decode ? Promise.race([im.decode(), new Promise(r => setTimeout(r, 400))]).then(() => fin(true), () => fin(true)) : fin(true); };
+    im.onerror = () => { if (alt) { pending--; get(alt, null, prio, put); } else fin(false); };
+    im.src = src;
+  };
+  const thumb = (i, prio) => get(`img/t/${FILES[i]}.webp`, `img/t/${FILES[i]}.jpg`, prio, im => { B.t[i] = im; });
+  const full = (i, prio) => get(`img/${FILES[i]}.webp`, `img/${FILES[i]}.jpg`, prio, im => { B.f[i] = im; });
+  order.slice(0, 3).forEach(i => thumb(i, 'high'));
+  full(LAND.c, 'high');
+  order.slice(3, 9).forEach(i => thumb(i, 'auto'));
+  full(LAND.l, 'auto'); full(LAND.r, 'auto');
+  order.slice(9).forEach(i => thumb(i, 'low'));
+})();
+/* The fonts load without holding up the first paint; text shows in the fallback face until they arrive. */
+(() => { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap'; document.head.appendChild(l); })();
+</script>
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
+<style>
+/* Layout: a pinned full-bleed opening (three plates that open into one graph), then a paper page: 1180px measure,
+   project rows that pair a text column with a live figure plate. */
+:root {
+  --paper: #fafaf8;
+  --paper-2: #f3f2ef;
+  --plate: #f3f2ef;
+  --ink: #1a1a1a;
+  --ink-2: #555350;
+  --ink-3: #6a6763;
+  --rule: #d4d0c8;
+  --rule-2: #e8e5de;
+  --accent: #7a2e2e;
+  --accent-2: #5c1e1e;
+  --neg: #2f5aa8;
+  --ochre: #a86f16;
+  --e-ppi: #5b4aa8; --e-rr: #a0661a; --e-dr: #1f7a70; --e-rp: #3d5a94; --e-tf: #b8497a;
+  --nav-bg: rgba(250, 250, 248, 0.86);
+  --is-dark: 0;
+  --hero-bg: #0b0a0a;
+  --hero-ink: #f1ebe3;
+  --hero-muted: #aaa298;
+  --serif: 'EB Garamond', Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #141414; --paper-2: #1c1c1c; --plate: #1a1918; --ink: #d8d4cf; --ink-2: #a09a90; --ink-3: #8a847b;
+    --rule: #3a3734; --rule-2: #262524; --accent: #d07470; --accent-2: #e09591; --neg: #86a6ea; --ochre: #e0b060;
+    --nav-bg: rgba(20, 20, 20, 0.86); --is-dark: 1; color-scheme: dark;
+    --e-ppi: #a898e8; --e-rr: #e0aa60; --e-dr: #5fbeb4; --e-rp: #8fa8dc; --e-tf: #e27fb0;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #141414; --paper-2: #1c1c1c; --plate: #1a1918; --ink: #d8d4cf; --ink-2: #a09a90; --ink-3: #8a847b;
+  --rule: #3a3734; --rule-2: #262524; --accent: #d07470; --accent-2: #e09591; --neg: #86a6ea; --ochre: #e0b060;
+  --nav-bg: rgba(20, 20, 20, 0.86); --is-dark: 1; color-scheme: dark;
+    --e-ppi: #a898e8; --e-rr: #e0aa60; --e-dr: #5fbeb4; --e-rp: #8fa8dc; --e-tf: #e27fb0;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--serif); font-size: 1.125rem; line-height: 1.64; -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
+a:hover { color: var(--accent-2); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.skip { position: absolute; left: -999px; top: 8px; z-index: 50; background: var(--paper); color: var(--ink); padding: 0.4rem 0.8rem; }
+.skip:focus { left: 8px; }
+
+/* ---------- Opening ---------- */
+.track { position: relative; height: 185vh; height: 185svh; background: var(--hero-bg); }
+.track.done { height: 100vh; height: 100svh; }
+html { overflow-anchor: none; }
+.pin {
+  --e: 0; --t: 0; --hint: 1;
+  position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
+  padding: calc((1 - var(--e)) * 10px); background: var(--hero-bg); color: var(--hero-ink);
+}
+.collage { display: flex; height: 100%; gap: calc((1 - var(--e)) * 10px); }
+.panel { position: relative; overflow: hidden; min-width: 0; border-radius: calc((1 - var(--e)) * 3px); background: #050505; }
+.panel.l { flex: 0 0 calc((1 - var(--e)) * 26%); }
+.panel.c { flex: 1 1 auto; }
+.panel.r { flex: 0 0 calc((1 - var(--e)) * 29%); }
+.panel canvas { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: block; }
+.panel.l canvas, .panel.r canvas { transform: translate(-50%, -50%) scale(calc(1 + var(--e) * 0.08)); }
+.panel.c canvas { touch-action: pan-y; }
+.title-card {
+  position: absolute; inset: 0; z-index: 0; display: grid; place-content: center; justify-items: center;
+  text-align: center; gap: 0.8rem; padding-inline: 16px; pointer-events: none;
+  opacity: var(--t); transform: translateY(calc((1 - var(--t)) * 18px));
+}
+.title-card::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: radial-gradient(ellipse 42% 30% at 50% 50%, rgba(11, 10, 10, 0.42), rgba(11, 10, 10, 0) 100%);
+}
+.kicker { font-family: var(--sans); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--hero-muted); margin: 0; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6); }
+.big { font-family: var(--serif); font-weight: 500; font-size: clamp(3rem, 9vw, 7.2rem); letter-spacing: -0.022em; line-height: 0.98; margin: 0; text-wrap: balance; text-shadow: 0 2px 28px rgba(0, 0, 0, 0.45); }
+.toc { list-style: none; margin: 1.1rem 0 0; padding: 0; width: min(340px, 80vw); font-size: 1.04rem; display: grid; gap: 0.1rem; }
+.toc a { display: flex; align-items: baseline; gap: 0.6rem; color: var(--hero-ink); text-decoration: none; padding: 0.12rem 0; pointer-events: auto; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6); }
+.pin:not(.revealed) .toc a { pointer-events: none; }
+.toc a:hover .t, .toc a:focus-visible .t { text-decoration: underline; text-underline-offset: 0.2em; }
+.toc .n { font-family: var(--mono); font-size: 0.7rem; color: var(--hero-muted); }
+.toc .dots { flex: 1; border-bottom: 1px dotted var(--hero-muted); opacity: 0.55; transform: translateY(-4px); }
+.hud { position: absolute; z-index: 2; margin: 0; font-family: var(--mono); font-size: 0.7rem; color: var(--hero-muted); font-variant-numeric: tabular-nums; }
+.counter { left: 22px; bottom: 20px; max-width: calc(100% - 44px); background: rgba(11, 10, 10, 0.55); padding: 3px 7px; border-radius: 2px; }
+.counter:empty { display: none; }
+.scroll-hint { left: 0; right: 0; bottom: 20px; text-align: center; font-family: var(--sans); letter-spacing: 0.16em; text-transform: uppercase; opacity: var(--hint); pointer-events: none; }
+.load-line { position: absolute; z-index: 3; left: 0; top: 0; height: 2px; width: 100%; background: var(--hero-muted); opacity: 0.5; transform-origin: left; transform: scaleX(0); transition: transform 0.25s ease, opacity 0.6s ease; }
+.load-line.done { opacity: 0; }
+@media (max-width: 600px) { .counter { bottom: 52px; } }
+
+/* ---------- Nav ---------- */
+.nav {
+  position: fixed; inset: 0 0 auto 0; z-index: 20; background: var(--nav-bg);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--rule-2);
+  transform: translateY(-101%); transition: transform 0.35s ease; padding-top: env(safe-area-inset-top, 0px);
+}
+.nav.on { transform: none; }
+.nav-in { max-width: 1180px; margin-inline: auto; padding: 0.7rem 16px; display: flex; align-items: baseline; gap: 1.4rem; }
+@media (min-width: 720px) { .nav-in { padding-inline: 32px; } }
+.nav-name { font-family: var(--serif); font-weight: 500; font-size: 1.08rem; color: var(--ink); text-decoration: none; margin-right: auto; white-space: nowrap; }
+.nav a.link { font-family: var(--sans); font-size: 0.78rem; color: var(--ink-2); text-decoration: none; white-space: nowrap; }
+.nav a.link:hover, .nav a.link.active { color: var(--accent); }
+.nav a.link .n { font-family: var(--mono); font-size: 0.66rem; color: var(--ink-3); margin-right: 0.25rem; }
+.nav-progress { position: absolute; left: 0; bottom: -1px; height: 1px; width: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+@media (max-width: 640px) { .nav a.link .n { display: none; } .nav-in { gap: 0.9rem; } .nav a.link { font-size: 0.74rem; } .nav-name { font-size: 1rem; } }
+
+/* ---------- Page ---------- */
+.page { padding-inline: 16px; }
+@media (min-width: 720px) { .page { padding-inline: 32px; } }
+.wide { max-width: 1180px; margin-inline: auto; }
+.sec { padding-block: clamp(5rem, 11vw, 8.5rem) 0; scroll-margin-top: 3.5rem; }
+.sec-head { display: flex; align-items: baseline; gap: 0.9rem; margin: 0 0 clamp(1.2rem, 3vw, 2rem); }
+.sec-head .n, .sec-head .r { font-family: var(--mono); font-size: 0.78rem; color: var(--ink-3); }
+.sec-head h2 { font-weight: 500; font-size: clamp(2.3rem, 5.4vw, 3.6rem); line-height: 1; letter-spacing: -0.02em; margin: 0; }
+.sec-head .dots { flex: 1; border-bottom: 1px dotted var(--ink-3); opacity: 0.6; transform-origin: left; }
+.sub { font-family: var(--sans); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin: 0 0 1rem; }
+
+/* Projects */
+.proj {
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(1.6rem, 4.5vw, 4.5rem);
+  align-items: center; padding-block: clamp(3rem, 6vw, 5rem); border-top: 1px solid var(--rule-2);
+}
+.proj:first-of-type { border-top: 0; }
+.proj:nth-of-type(even) { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
+.proj:nth-of-type(even) .proj-text { order: 2; }
+@media (max-width: 900px) { .proj, .proj:nth-of-type(even) { grid-template-columns: minmax(0, 1fr); } .proj:nth-of-type(even) .proj-text { order: 0; } }
+.proj-kicker { display: flex; gap: 0.7rem; align-items: baseline; margin: 0 0 0.7rem; font-family: var(--sans); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.proj-kicker .n { font-family: var(--mono); letter-spacing: 0; color: var(--accent); }
+.proj h3 { font-weight: 500; font-size: clamp(1.6rem, 2.7vw, 2.05rem); line-height: 1.12; letter-spacing: -0.012em; margin: 0 0 1rem; text-wrap: balance; }
+.proj-text p.desc { margin: 0 0 1.1rem; font-size: 1.04rem; line-height: 1.6; color: var(--ink-2); text-wrap: pretty; }
+.tags { list-style: none; margin: 0 0 1rem; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.tags li { font-family: var(--sans); font-size: 0.7rem; color: var(--ink-2); border: 1px solid var(--rule); border-radius: 2px; padding: 0.12rem 0.45rem; }
+.links { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; margin: 0; font-family: var(--sans); font-size: 0.82rem; font-weight: 500; }
+.links a { text-decoration: none; }
+.links a:hover { text-decoration: underline; }
+
+.plate { margin: 0; background: var(--plate); border: 1px solid var(--rule-2); border-radius: 4px; overflow: hidden; min-width: 0; }
+.plate canvas { display: block; width: 100%; touch-action: pan-y; }
+.plate figcaption { padding: 0.8rem 18px 0.2rem; font-size: 0.95rem; line-height: 1.45; color: var(--ink-2); border-top: 1px solid var(--rule-2); text-wrap: pretty; }
+.plate figcaption .fig { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); margin-right: 0.45rem; }
+.plate-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; padding: 0.55rem 18px 0.9rem; }
+.readout { margin: 0; font-family: var(--mono); font-size: 0.72rem; line-height: 1.45; color: var(--ink-3); font-variant-numeric: tabular-nums; min-width: 0; flex: 1 1 16rem; }
+.readout b { color: var(--ink); font-weight: 500; }
+.controls { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; }
+.controls .lbl { font-family: var(--sans); font-size: 0.7rem; color: var(--ink-3); margin-right: 0.2rem; }
+.controls button {
+  font-family: var(--sans); font-size: 0.72rem; font-weight: 500; color: var(--ink-2); background: transparent;
+  border: 1px solid var(--rule); border-radius: 3px; padding: 0.3rem 0.62rem; cursor: pointer;
+}
+.controls button:hover { border-color: var(--ink-3); color: var(--ink); }
+.controls button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; margin: 0; padding: 0; list-style: none; font-family: var(--sans); font-size: 0.72rem; color: var(--ink-2); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 0.4rem; vertical-align: -1px; }
+.legend .sw-ochre { background: var(--ochre); }
+.legend .sw-neg { background: var(--neg); }
+.legend .sw-acc { background: var(--accent); }
+.legend .sw-dr { background: var(--e-dr); }
+.legend .sw-ppi { background: var(--e-ppi); }
+.legend .sw-ink { background: var(--ink-2); }
+.legend .sw-out { background: transparent; border: 1.2px solid var(--ink); border-radius: 1px; }
+.legend .ln { width: 16px; height: 2px; border-radius: 0; background: var(--ink-3); vertical-align: 3px; }
+.legend .grad { width: 64px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--neg), var(--rule), var(--accent)); vertical-align: 0; }
+
+/* More projects */
+.more { margin-top: clamp(1rem, 3vw, 2rem); padding-top: clamp(2.2rem, 5vw, 3.2rem); border-top: 1px solid var(--rule-2); }
+.more-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 1.4rem clamp(1.6rem, 4vw, 3rem); }
+.more-list h4 { font-weight: 500; font-size: 1.3rem; line-height: 1.2; margin: 0 0 0.45rem; }
+.more-list p { margin: 0 0 0.6rem; font-size: 1rem; line-height: 1.55; color: var(--ink-2); }
+
+/* Publications */
+.pubs { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(1.6rem, 4vw, 2.6rem); }
+.bib { list-style: none; margin: 0; padding: 0; display: grid; }
+.bib li {
+  display: grid; grid-template-columns: 2.4rem minmax(0, 1fr); gap: 0.4rem; padding: 1rem 0.6rem 1rem 0;
+  border-top: 1px solid var(--rule-2); font-size: 1rem; line-height: 1.55; color: var(--ink-2);
+  transition: background-color 0.2s, color 0.2s; border-radius: 2px;
+}
+.bib li:last-child { border-bottom: 1px solid var(--rule-2); }
+.bib .num { font-family: var(--mono); font-size: 0.74rem; color: var(--accent); padding-top: 0.18rem; }
+.bib li strong { color: var(--ink); font-weight: 600; }
+.bib li.hl { background: var(--paper-2); color: var(--ink); }
+.bib a { font-family: var(--sans); font-size: 0.8rem; font-weight: 500; }
+.legend .ln.dash { background: repeating-linear-gradient(90deg, var(--c) 0 3px, transparent 3px 6px); }
+#fig-net canvas { cursor: grab; }
+#fig-sooth canvas { height: 450px; }
+@media (max-width: 631px) { #fig-sooth canvas { height: 620px; } }
+
+/* Contact */
+.contact-line { font-size: 1.2rem; color: var(--ink-2); margin: 0 0 1.4rem; max-width: 50ch; }
+.email-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem 1rem; margin: 0 0 1.6rem; }
+.email { font-size: clamp(1.5rem, 4.6vw, 3.2rem); line-height: 1.1; letter-spacing: -0.015em; color: var(--ink); text-decoration: none; overflow-wrap: anywhere;
+  background-image: linear-gradient(var(--accent), var(--accent)); background-size: 0% 1px; background-position: 0 100%; background-repeat: no-repeat; transition: background-size 0.45s ease; }
+.email:hover, .email:focus-visible { background-size: 100% 1px; color: var(--ink); }
+.copy { font-family: var(--sans); font-size: 0.74rem; font-weight: 500; color: var(--ink-2); background: transparent; border: 1px solid var(--rule); border-radius: 3px; padding: 0.3rem 0.65rem; cursor: pointer; }
+.copy:hover { border-color: var(--ink-3); color: var(--ink); }
+.elsewhere { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.6rem; font-family: var(--sans); font-size: 0.88rem; font-weight: 500; }
+.elsewhere a { text-decoration: none; }
+.elsewhere a:hover { text-decoration: underline; }
+footer.foot { margin-top: clamp(5rem, 10vw, 8rem); padding-block: 1.2rem 2.4rem; border-top: 1px solid var(--rule-2); font-family: var(--sans); font-size: 0.76rem; color: var(--ink-3); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.6rem 2rem; }
+footer.foot a { color: var(--ink-2); }
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rv { animation: rise linear both; animation-timeline: view(); animation-range: entry 0% entry 55%; }
+    .sec-head .dots { animation: draw linear both; animation-timeline: view(); animation-range: entry 10% entry 90%; }
+  }
+}
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+</style>
 
-    :root {
-      --bg: #fafaf8;
-      --bg-alt: #f3f2ef;
-      --text: #1a1a1a;
-      --text-muted: #555;
-      --text-light: #6a6a6a;
-      --accent: #7a2e2e;
-      --accent-hover: #5c1e1e;
-      --border: #d4d0c8;
-      --border-light: #e8e5de;
-      --card-bg: #ffffff;
-      --card-border: #e8e5de;
-      --card-hover-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      --rule: #c4c0b8;
-      --sidenote-text: #6e6e6e;
-      --tag-bg: #eee;
-      --tag-text: #555;
-      --font-serif: 'EB Garamond', 'Georgia', serif;
-      --font-sans: 'Inter', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', 'Menlo', monospace;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #141414;
-        --bg-alt: #1c1c1c;
-        --text: #d8d4cf;
-        --text-muted: #a09a90;
-        --text-light: #8a8580;
-        --accent: #c46b6b;
-        --accent-hover: #d98e8e;
-        --border: #2e2e2e;
-        --border-light: #252525;
-        --card-bg: #1a1a1a;
-        --card-border: #2a2a2a;
-        --card-hover-shadow: 0 2px 12px rgba(0,0,0,0.3);
-        --rule: #333;
-        --sidenote-text: #8a8a8a;
-        --tag-bg: #262626;
-        --tag-text: #999;
-      }
-    }
-
-    html {
-      font-size: 18px;
-      -webkit-text-size-adjust: 100%;
-    }
-
-    /* Smooth anchor scrolling is motion — gate it accordingly */
-    @media (prefers-reduced-motion: no-preference) {
-      html { scroll-behavior: smooth; }
-    }
-
-    /* Keep anchor targets clear of the sticky nav */
-    [id] { scroll-margin-top: 3.4rem; }
-
-    body {
-      font-family: var(--font-serif);
-      color: var(--text);
-      background: var(--bg);
-      line-height: 1.68;
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* Selected text gets the house burgundy, not browser blue */
-    ::selection {
-      background: color-mix(in srgb, var(--accent) 22%, transparent);
-    }
-
-    /* ===== Layout ===== */
-    .page-wrapper {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-      position: relative;
-    }
-
-    .content-column {
-      max-width: 65ch;
-    }
-
-    /* Sidenote margin area */
-    .with-sidenotes {
-      display: grid;
-      grid-template-columns: 65ch 1fr;
-      gap: 2rem;
-      max-width: 900px;
-    }
-
-    .sidenote {
-      font-size: 0.88rem;
-      color: var(--sidenote-text);
-      line-height: 1.55;
-      padding-top: 0.25rem;
-      font-family: var(--font-serif);
-      align-self: start;
-    }
-
-    .sidenote-number {
-      font-size: 0.7rem;
-      color: var(--accent);
-      vertical-align: super;
-      margin-left: 1px;
-    }
-
-    .sidenote-number::after { display: none; }
-
-    .sidenote p {
-      margin-bottom: 0.9rem;
-      text-align: left;
-      padding: 2px 4px;
-      margin-left: -4px;
-      border-radius: 2px;
-      transition: background-color 0.2s ease;
-    }
-
-    .sidenote p:last-child {
-      margin-bottom: 0;
-    }
-
-    /* Reference and margin note illuminate each other — a nod to the curious reader.
-       :has() is progressive enhancement; older browsers simply skip it */
-    .with-sidenotes:has(#fnref-1:hover) #fn-1,
-    .with-sidenotes:has(#fn-1:hover) #fn-1,
-    .with-sidenotes:has(#fnref-2:hover) #fn-2,
-    .with-sidenotes:has(#fn-2:hover) #fn-2,
-    .sidenote p:target {
-      background-color: color-mix(in srgb, var(--accent) 9%, transparent);
-    }
-
-    .with-sidenotes:has(#fn-1:hover) #fnref-1,
-    .with-sidenotes:has(#fn-2:hover) #fnref-2 {
-      color: var(--accent-hover);
-    }
-
-    /* Section number: starts at reduced opacity, inks in after the rule draws */
-    .section-heading .section-number {
-      opacity: 0.38;
-      transition: opacity 0.55s ease 0.55s;
-    }
-
-    .section-heading.visible .section-number {
-      opacity: 1;
-    }
-
-    /* Sidenote appears slightly after body text — like a typesetter adding margin notes */
-    .sidenote.fade-in {
-      transition-delay: 380ms;
-    }
-
-    @media (max-width: 860px) {
-      .with-sidenotes {
-        display: block;
-        max-width: 65ch;
-      }
-      .sidenote {
-        display: block;
-        margin: 0.5rem 0 0.5rem 1.5rem;
-        padding: 0.5rem 0 0.5rem 0.75rem;
-        border-left: 2px solid var(--border-light);
-        font-size: 0.82rem;
-      }
-    }
-
-    /* ===== Typography ===== */
-    h1, h2, h3 {
-      font-family: var(--font-serif);
-      font-weight: 500;
-      letter-spacing: -0.01em;
-    }
-
-    .section-heading {
-      font-size: 1.55rem;
-      margin-bottom: 1.25rem;
-      padding-bottom: 0.3rem;
-      position: relative;
-    }
-
-    .section-heading::after {
-      content: '';
-      display: block;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      height: 1px;
-      background: var(--border-light);
-      width: 0;
-      transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.12s;
-    }
-
-    .section-heading.visible::after {
-      width: 100%;
-    }
-
-    .section-number {
-      color: var(--accent);
-      font-variant-numeric: oldstyle-nums;
-      margin-right: 0.4em;
-      font-weight: 400;
-    }
-
-    p {
-      margin-bottom: 1rem;
-      text-align: justify;
-      hyphens: auto;
-      -webkit-hyphens: auto;
-    }
-
-    a {
-      color: var(--accent);
-      text-decoration: none;
-      position: relative;
-      transition: color 0.2s ease;
-    }
-
-    a::after {
-      content: '';
-      position: absolute;
-      bottom: -1px;
-      left: 0;
-      width: 0;
-      height: 1px;
-      background: var(--accent-hover);
-      transition: width 0.25s ease;
-    }
-
-    a:hover {
-      color: var(--accent-hover);
-    }
-
-    a:hover::after {
-      width: 100%;
-    }
-
-    a:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-      border-radius: 2px;
-    }
-
-    /* ===== Header / Hero ===== */
-    .hero {
-      padding: 5rem 0 2.5rem;
-    }
-
-    .hero-name {
-      font-family: var(--font-serif);
-      font-size: 2.8rem;
-      font-weight: 500;
-      letter-spacing: -0.02em;
-      line-height: 1.15;
-      margin-bottom: 0.6rem;
-    }
-
-    .hero-subtitle {
-      font-family: var(--font-serif);
-      font-size: 0.9rem;
-      letter-spacing: 0.06em;
-      color: var(--text-muted);
-      font-variant: small-caps;
-      margin-bottom: 1.8rem;
-    }
-
-    .hero-rule {
-      border: none;
-      height: 1px;
-      background: var(--rule);
-      margin-bottom: 2rem;
-    }
-
-    .abstract {
-      margin-bottom: 0;
-      position: relative;
-    }
-
-    /* Vertical rule: draws downward after the hero loads — editorial citation bar */
-    .abstract::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0.15em;
-      bottom: 0.15em;
-      width: 2px;
-      background: var(--accent);
-      opacity: 0;
-      transform: scaleY(0);
-      transform-origin: top center;
-      animation: drawAbstractRule 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.15s forwards;
-    }
-
-    @media (max-width: 600px) {
-      .abstract::before { display: none; }
-    }
-
-    @keyframes drawAbstractRule {
-      0%   { opacity: 0;    transform: scaleY(0); }
-      18%  { opacity: 0.45; transform: scaleY(0); }
-      100% { opacity: 0.45; transform: scaleY(1); }
-    }
-
-    .abstract-label {
-      font-family: var(--font-serif);
-      font-size: 1.1rem;
-      font-weight: 400;
-      font-style: italic;
-      display: block;
-      margin-bottom: 0.5rem;
-      color: var(--text);
-    }
-
-    .abstract p {
-      font-size: 1.3rem;
-      line-height: 1.65;
-      color: var(--text-muted);
-      margin-left: 1.5rem;
-      margin-right: 1.5rem;
-    }
-
-    /* Availability line — the one thing a 45-second reader must not miss */
-    .hero-status {
-      font-size: 0.95rem;
-      font-style: italic;
-      color: var(--text-muted);
-      margin: 1.5rem 1.5rem 0;
-      text-align: left;
-      /* Metadata, not prose: never hyphenate */
-      hyphens: none;
-      -webkit-hyphens: none;
-    }
-
-    .hero-status a {
-      white-space: nowrap;
-    }
-
-    .hero-status .contact-dot {
-      margin: 0 0.35rem;
-    }
-
-    /* ===== Sections ===== */
-    section {
-      padding: 2.5rem 0 1.5rem;
-    }
-
-    /* ===== Project Cards ===== */
-    .project-card {
-      border: 1px solid var(--card-border);
-      background: var(--card-bg);
-      padding: 1.5rem;
-      margin-bottom: 1.25rem;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      position: relative;
-    }
-
-    .project-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--card-hover-shadow);
-    }
-
-    /* Left accent bar — draws downward on hover like a bookmark */
-    .project-card::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: var(--accent);
-      transform: scaleY(0);
-      transform-origin: top center;
-      transition: transform 0.22s ease;
-    }
-
-    .project-card:hover::before {
-      transform: scaleY(1);
-    }
-
-    .project-title {
-      font-family: var(--font-serif);
-      font-size: 1.15rem;
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-      color: var(--text);
-    }
-
-    .project-desc {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-bottom: 0.75rem;
-      text-align: left;
-      /* Sits above the card's stretched-link overlay so the text stays selectable */
-      position: relative;
-      z-index: 1;
-    }
-
-    .project-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-    }
-
-    .tag {
-      font-size: 0.7rem;
-      font-family: var(--font-sans);
-      background: var(--tag-bg);
-      color: var(--tag-text);
-      padding: 0.2rem 0.6rem;
-      border-radius: 2px;
-      letter-spacing: 0.01em;
-    }
-
-    .read-more {
-      font-size: 0.85rem;
-      font-family: var(--font-serif);
-      font-style: italic;
-      white-space: nowrap;
-    }
-
-    .card-links {
-      display: flex;
-      gap: 1.25rem;
-      white-space: nowrap;
-    }
-
-    .card-link-primary {
-      position: static;
-    }
-
-    .card-link-primary::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      width: auto;
-      height: auto;
-      background: none;
-    }
-
-    .card-links a:not(.card-link-primary) {
-      position: relative;
-      z-index: 1;
-    }
-
-    /* ===== Skills Table ===== */
-    .skills-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 1rem;
-    }
-
-    .skills-table caption {
-      caption-side: bottom;
-      font-size: 0.78rem;
-      color: var(--text-light);
-      padding-top: 0.6rem;
-      text-align: left;
-      font-style: italic;
-    }
-
-    .skills-table th,
-    .skills-table td {
-      text-align: left;
-      padding: 0.55rem 0.75rem;
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    .skills-table thead th {
-      border-bottom: 2px solid var(--border);
-      font-family: var(--font-serif);
-      font-weight: 500;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
-
-    .skills-table tbody th {
-      font-weight: 500;
-      color: var(--text);
-      font-family: var(--font-serif);
-      white-space: nowrap;
-      vertical-align: top;
-      width: 30%;
-    }
-
-    .skills-table tbody td {
-      color: var(--text-muted);
-    }
-
-    .skills-table tbody tr:last-child th,
-    .skills-table tbody tr:last-child td {
-      border-bottom: 2px solid var(--border);
-    }
-
-    /* ===== Bibliography ===== */
-    .bib-list {
-      list-style: none;
-      counter-reset: bib;
-    }
-
-    .bib-item {
-      padding-left: 2.5rem;
-      text-indent: -2.5rem;
-      margin-bottom: 1rem;
-      font-size: 0.92rem;
-      line-height: 1.6;
-      text-align: left;
-      /* Citation years in oldstyle figures, like a proper journal */
-      font-variant-numeric: oldstyle-nums;
-    }
-
-    .bib-number {
-      font-family: var(--font-serif);
-      font-size: 0.82rem;
-      color: var(--accent);
-      margin-right: 0.5rem;
-    }
-
-    .bib-item em {
-      font-style: italic;
-    }
-
-    /* ===== Contact ===== */
-    .contact-preamble {
-      font-size: 1rem;
-      color: var(--text-muted);
-      margin-bottom: 1.5rem;
-      font-style: italic;
-    }
-
-    .contact-email {
-      font-size: 1.3rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .contact-email a {
-      color: var(--accent);
-    }
-
-    .contact-secondary {
-      list-style: none;
-      display: flex;
-      gap: 0.4rem;
-      align-items: center;
-      font-size: 0.95rem;
-      color: var(--text-muted);
-    }
-
-    .contact-secondary a {
-      color: var(--text-muted);
-    }
-
-    .contact-secondary a:hover {
-      color: var(--accent);
-    }
-
-    .contact-dot {
-      color: var(--text-light);
-      user-select: none;
-    }
-
-    /* ===== Footer ===== */
-    footer {
-      padding: 3rem 0 2rem;
-      border-top: 1px solid var(--border-light);
-      margin-top: 2rem;
-      font-size: 0.78rem;
-      color: var(--text-light);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .footer-note {
-      font-style: italic;
-      font-family: var(--font-serif);
-    }
-
-    .hero { position: relative; z-index: 1; }
-
-    /* ===== Scroll Animations ===== */
-    /* Hidden start state only applies when JS is running (.js set in <head>),
-       so a blocked or failed script never leaves the page blank */
-    .js .fade-in {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-    }
-
-    .js .fade-in.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .stagger-1 { transition-delay: 0ms; }
-    .stagger-2 { transition-delay: 60ms; }
-    .stagger-3 { transition-delay: 120ms; }
-    .stagger-4 { transition-delay: 180ms; }
-
-    /* Project cards enter from the left (horizontal shift) rather than rising from below */
-    .js .project-card.fade-in {
-      transform: translateX(-14px);
-    }
-
-    .js .project-card.fade-in.visible {
-      transform: translateX(0);
-    }
-
-    /* Hero load animation */
-    .hero-anim {
-      opacity: 0;
-      transform: translateY(18px);
-      animation: heroFadeIn 0.7s ease-out forwards;
-    }
-
-    .hero-anim-1 { animation-delay: 0ms; }
-    .hero-anim-2 { animation-delay: 120ms; }
-    .hero-anim-3 { animation-delay: 240ms; }
-    .hero-anim-4 { animation-delay: 400ms; }
-    .hero-anim-5 { animation-delay: 520ms; }
-
-    @keyframes heroFadeIn {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Respect reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      .js .fade-in {
-        opacity: 1;
-        transform: none;
-        transition: none;
-      }
-      .hero-anim {
-        opacity: 1;
-        transform: none;
-        animation: none;
-      }
-      .project-card {
-        transition: none;
-      }
-      .js .project-card.fade-in {
-        transform: none;
-      }
-      .project-card::before {
-        transition: none;
-      }
-      a::after {
-        transition: none;
-      }
-      .section-heading::after {
-        transition: none;
-        width: 100%;
-      }
-      .section-heading .section-number {
-        opacity: 1;
-        transition: none;
-      }
-      .abstract::before {
-        animation: none;
-        transform: scaleY(1);
-        opacity: 0.45;
-      }
-      .nav-progress {
-        animation: none;
-      }
-    }
-
-    /* ===== Reading Progress Bar ===== */
-    .nav-progress {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      height: 2px;
-      background: var(--accent);
-      width: 100%;
-      transform: scaleX(0);
-      transform-origin: left center;
-      opacity: 0.85;
-      pointer-events: none;
-    }
-
-    @supports (animation-timeline: scroll()) {
-      .nav-progress {
-        animation: nav-progress-grow linear both;
-        animation-timeline: scroll(root block);
-      }
-
-      @keyframes nav-progress-grow {
-        from { transform: scaleX(0); }
-        to   { transform: scaleX(1); }
-      }
-    }
-
-    /* ===== Skip Link ===== */
-    .skip-link {
-      position: absolute;
-      top: -100%;
-      left: 1rem;
-      padding: 0.5rem 1rem;
-      background: var(--accent);
-      color: #fff;
-      font-family: var(--font-sans);
-      font-size: 0.82rem;
-      z-index: 200;
-      border-radius: 0 0 4px 4px;
-    }
-
-    .skip-link:focus {
-      top: 0;
-    }
-
-    .skip-link::after { display: none; }
-
-    /* ===== Navigation ===== */
-    .site-nav {
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 100;
-      border-bottom: 1px solid var(--border-light);
-      padding: 0.6rem 0;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      background: color-mix(in srgb, var(--bg) 88%, transparent);
-    }
-
-    .nav-inner {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 1.75rem;
-      overflow-x: auto;
-    }
-
-    .nav-name {
-      font-family: var(--font-serif);
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--text);
-      text-decoration: none;
-      margin-right: auto;
-      white-space: nowrap;
-    }
-
-    .nav-name::after { display: none; }
-
-    .nav-link {
-      font-size: 0.82rem;
-      font-family: var(--font-serif);
-      color: var(--text-muted);
-      text-decoration: none;
-      white-space: nowrap;
-      letter-spacing: 0.01em;
-      transition: color 0.2s;
-    }
-
-    .nav-link::after { display: none; }
-
-    .nav-link:hover,
-    .nav-link.active {
-      color: var(--accent);
-    }
-
-    /* Resume link reads as the nav's one quiet call to action.
-       The underline marks it as an action, so accent can't be mistaken
-       for the scroll-spy's accent-means-active signal */
-    .nav-resume {
-      color: var(--accent);
-      text-decoration: underline;
-      text-decoration-thickness: 1px;
-      text-underline-offset: 0.2em;
-      text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent);
-    }
-
-    .nav-resume:hover {
-      color: var(--accent-hover);
-      text-decoration-color: var(--accent-hover);
-    }
-
-    /* ===== Responsive ===== */
-    @media (max-width: 600px) {
-      html { font-size: 16px; }
-
-      /* Justification is a desktop signature; at ~40ch it opens rivers */
-      p { text-align: left; }
-
-      .hero { padding: 3.5rem 0 2rem; }
-
-      .hero-name { font-size: 2.1rem; }
-
-      .hero-subtitle { font-size: 0.75rem; }
-
-      .abstract p {
-        margin-left: 0.5rem;
-        margin-right: 0.5rem;
-      }
-
-      .hero-status {
-        margin-left: 0.5rem;
-        margin-right: 0.5rem;
-      }
-
-      .section-heading { font-size: 1.35rem; }
-
-      .project-card { padding: 1.2rem; }
-
-      /* Skills table stacks: domain becomes a small label above its list */
-      .skills-table,
-      .skills-table tbody,
-      .skills-table tr,
-      .skills-table tbody th,
-      .skills-table td {
-        display: block;
-        width: 100%;
-      }
-
-      .skills-table thead,
-      .skills-table caption {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip-path: inset(50%);
-      }
-
-      .skills-table tbody th {
-        white-space: normal;
-        border-bottom: none;
-        padding: 0.9rem 0 0.15rem;
-        font-family: var(--font-sans);
-        font-weight: 500;
-        font-size: 0.72rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--text-muted);
-      }
-
-      .skills-table td {
-        padding: 0 0 0.9rem;
-        border-bottom: 1px solid var(--border-light);
-      }
-
-      .skills-table tbody tr:last-child th { border-bottom: none; }
-
-      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
-
-      .nav-inner { gap: 1rem; padding: 0 1rem; }
-
-      .nav-link { padding: 0.5rem 0; }
-
-      .nav-link .nav-number { display: none; }
-
-      /* Six links don't fit at 375px; mobile gets the resume in the hero and contact instead */
-      .nav-resume { display: none; }
-    }
-
-    /* ===== Print ===== */
-    @media print {
-      .site-nav { display: none; }
-
-      body {
-        font-size: 11pt;
-        color: #000;
-        background: #fff;
-      }
-
-      .page-wrapper { max-width: 100%; padding: 0; }
-
-      .hero { padding: 1cm 0; }
-
-      section { padding: 0.5cm 0; break-inside: avoid; }
-
-      .project-card {
-        box-shadow: none;
-        border: 1px solid #ccc;
-        break-inside: avoid;
-      }
-
-      .project-card:hover { transform: none; box-shadow: none; }
-
-      a { color: #000; }
-      a::after { display: none; }
-
-      .fade-in {
-        opacity: 1 !important;
-        transform: none !important;
-      }
-
-      footer { border-top: 1px solid #ccc; }
-    }
-  </style>
 </head>
 <body>
+<a class="skip" href="#projects">Skip to content</a>
 
-  <a href="#main" class="skip-link">Skip to content</a>
+<nav class="nav" id="nav" aria-label="Sections">
+  <div class="nav-in">
+    <a class="nav-name" href="#top">Alexander King</a>
+    <a class="link" href="#projects"><span class="n">1</span>Projects</a>
+    <a class="link" href="#publications"><span class="n">2</span>Publications</a>
+    <a class="link" href="#contact"><span class="n">3</span>Contact</a>
+  </div>
+  <div class="nav-progress" id="nav-progress"></div>
+</nav>
 
-  <!-- Navigation -->
-  <nav class="site-nav" aria-label="Primary navigation">
-    <div class="nav-progress" aria-hidden="true"></div>
-    <div class="nav-inner">
-      <a href="#top" class="nav-name">A. King</a>
-      <a href="#about" class="nav-link"><span class="nav-number">1. </span>About</a>
-      <a href="#projects" class="nav-link"><span class="nav-number">2. </span>Projects</a>
-      <a href="#skills" class="nav-link"><span class="nav-number">3. </span>Skills</a>
-      <a href="#publications" class="nav-link"><span class="nav-number">4. </span>Research</a>
-      <a href="#contact" class="nav-link"><span class="nav-number">5. </span>Contact</a>
-      <a href="Alexander_King_Resume.pdf" class="nav-link nav-resume" target="_blank" rel="noopener">Resume</a>
-    </div>
-  </nav>
-
-  <div class="page-wrapper">
-
-    <!-- Hero -->
-    <header class="hero" id="top">
-      <h1 class="hero-name hero-anim hero-anim-1">Alexander King</h1>
-      <p class="hero-subtitle hero-anim hero-anim-2">Applied AI Researcher &middot; Computational Scientist &middot; Neuroscience PhD</p>
-      <hr class="hero-rule hero-anim hero-anim-3" aria-hidden="true">
-      <div class="abstract hero-anim hero-anim-4">
-
-        <p>I develop original methods, validate them against controlled baselines, and ship agentic AI and scientific software. My work spans data-science agent failures, human-preference prediction, source-grounded research, statistical auditing, and single-cell genomics.</p>
+<section class="track" id="top" aria-label="Opening">
+  <div class="pin" id="pin">
+    <div class="load-line" id="load-line" aria-hidden="true"></div>
+    <div class="collage">
+      <div class="panel l"><canvas aria-hidden="true"></canvas></div>
+      <div class="panel c">
+        <canvas role="img" aria-label="Microscopy and silicon images shuffle across three panels. The middle one opens to fill the screen and turns into a network graph."></canvas>
+        <div class="title-card">
+          <p class="kicker">AI engineer &middot; bioinformatician</p>
+          <h1 class="big">Alexander King</h1>
+          <ol class="toc" aria-label="Sections">
+            <li><a href="#projects"><span class="n">(1)</span><span class="t">Projects</span><span class="dots"></span><span class="n">i</span></a></li>
+            <li><a href="#publications"><span class="n">(2)</span><span class="t">Publications</span><span class="dots"></span><span class="n">ii</span></a></li>
+            <li><a href="#contact"><span class="n">(3)</span><span class="t">Contact</span><span class="dots"></span><span class="n">iii</span></a></li>
+          </ol>
+        </div>
       </div>
-      <p class="hero-status hero-anim hero-anim-5">Seeking roles in AI evaluation, applied AI, scientific software, and computational biology<span class="contact-dot" aria-hidden="true">&middot;</span>based in Riverside, California<span class="contact-dot" aria-hidden="true">&middot;</span><a href="Alexander_King_Resume.pdf" target="_blank" rel="noopener">Resume (PDF)</a></p>
-    </header>
+      <div class="panel r"><canvas aria-hidden="true"></canvas></div>
+    </div>
+    <p class="hud counter" id="counter" aria-hidden="true"></p>
+    <p class="hud scroll-hint" aria-hidden="true">Scroll</p>
+  </div>
+</section>
 
-    <main id="main">
+<div class="page">
+<main>
 
-      <!-- Section 1: About -->
-      <section id="about" aria-labelledby="about-heading">
-        <div class="with-sidenotes">
-          <div>
-            <h2 class="section-heading fade-in" id="about-heading">
-              <span class="section-number">1.</span> About
-            </h2>
-            <p class="fade-in stagger-1">Across biology and AI, I work on the same problem: turning messy, incomplete evidence into conclusions and systems people can trust.</p>
-            <p class="fade-in stagger-2">During my neuroscience PhD, I discovered cell-type-specific alternative splicing across more than 100,000 single cells, then validated the result experimentally through mouse genetics, blood-brain-barrier assays, and confocal imaging. That work became a first-author paper in the <em>Journal of Neuroscience</em>.</p>
-            <p class="fade-in stagger-3">My recent AI work applies the same rigor to model behavior and scientific software. I identified and experimentally reproduced a class of silent failure modes in data-science agents across 1,000 primary runs<a class="sidenote-number" id="fnref-1" href="#fn-1" role="doc-noteref" aria-label="Sidenote 1">1</a>; built SC-Referee, a deterministic auditor that catches two of the most common statistical mistakes in bioinformatics without running the code and has never accused a correct analysis in a blind test<a class="sidenote-number" id="fnref-2" href="#fn-2" role="doc-noteref" aria-label="Sidenote 2">2</a>; and shipped systems for Arena.ai prediction, agentic research, embedding-based retrieval, fact-checking, and automated publishing.</p>
-            <p class="fade-in stagger-4">I work end to end: framing the question, gathering evidence, building the system, designing the evaluation, tracing failures, and communicating what the result does and does not support. I am most useful where technical building and judgment meet&mdash;evaluating AI systems, designing reliable workflows, or turning difficult scientific data into decisions.</p>
-          </div>
-          <aside class="sidenote fade-in" aria-label="Sidenotes">
-            <p id="fn-1" role="doc-footnote"><sup>1</sup> Two frozen 10-task batteries across 10 model-scaffold configurations; 329 of 330 answered-but-wrong runs returned the exact planted error.</p>
-            <p id="fn-2" role="doc-footnote"><sup>2</sup> Each check passed a sealed, one-attempt examination on projects it had never seen before it was allowed to report. In its original public demo, it found an error in a published study that had reported 16,289 significant genes; fixing the error reduced that number to 770.</p>
-          </aside>
-        </div>
-      </section>
+<!-- (1) Projects -->
+<section class="sec wide" id="projects" aria-labelledby="projects-h">
+  <header class="sec-head"><span class="n">(1)</span><h2 id="projects-h">Projects</h2><span class="dots" aria-hidden="true"></span><span class="r" aria-hidden="true">i</span></header>
 
-      <!-- Section 2: Projects -->
-      <section id="projects" aria-labelledby="projects-heading">
-        <h2 class="section-heading fade-in" id="projects-heading">
-          <span class="section-number">2.</span> Projects
-        </h2>
+  <article class="proj">
+    <div class="proj-text rv">
+      <p class="proj-kicker"><span class="n">01</span>LLM evaluation</p>
+      <h3>Project Soothsayer: LLM Evaluation &amp; Prediction System</h3>
+      <p class="desc">A complete system for predicting how people will rate a language model on Arena.ai. It runs four benchmarks I designed (emotional intelligence, creative writing, commonsense logic, and writing style) on every model. It fills the gaps in the benchmark data with a custom per-cell imputer. Then adaptive local regression predicts each model's human preference score. The full system’s RMSE is 29% lower than the best regularized baseline’s, and its R&sup2; in a fully refit temporal walk-forward is 0.937.</p>
+      <p class="links"><a href="soothsayer_explainer.html" target="_blank" rel="noopener">How it works &rarr;</a><a href="https://github.com/AlexanderJulianKing/project-soothsayer" target="_blank" rel="noopener">GitHub &rarr;</a></p>
+    </div>
+    <figure class="plate rv" id="fig-sooth">
+      <canvas role="img" aria-label="Benchmark matrix that fills with measured scores, then imputed scores, then collapses into a scatter of predicted against actual Arena scores."></canvas>
+      <figcaption><span class="fig">Fig. 1</span>Soothsayer end to end, on data from a recent run. Each row is a model and each column a benchmark. After imputation, each model with a known Arena score is plotted as one point, its out-of-fold prediction against its real score.</figcaption>
+      <div class="plate-bar">
+        <ul class="legend"><li><i class="sw-ochre"></i>My benchmarks</li><li><i class="sw-neg"></i>Public benchmarks</li><li><i class="sw-acc"></i>Imputed</li></ul>
+        <div class="controls" role="group" aria-label="Step"><button type="button" data-act="0" aria-pressed="true">Benchmark</button><button type="button" data-act="1" aria-pressed="false">Impute</button><button type="button" data-act="2" aria-pressed="false">Predict</button></div>
+        <p class="readout" aria-live="polite" style="flex-basis:100%"></p>
+      </div>
+    </figure>
+  </article>
 
-        <article class="project-card fade-in stagger-1">
-          <h3 class="project-title">Silent Precondition Traps in Data-Science Agents</h3>
-          <p class="project-desc">Identified and experimentally reproduced a class of agent failures in which a familiar analysis tool silently violates an uninspected data precondition, producing a confident and repeatable wrong answer. Designed two frozen benchmark batteries across 10 OpenAI and Anthropic model-scaffold configurations and 1,000 primary runs; a short data-hygiene intervention reduced failures roughly fourfold but did not eliminate them. Completed as an independent study with public code, manuscript, and permanently archived artifacts.</p>
-          <div class="project-meta">
-            <div class="tags">
-              <span class="tag">AI Evaluation</span>
-              <span class="tag">Agent Reliability</span>
-              <span class="tag">Benchmark Design</span>
-              <span class="tag">Reproducible Research</span>
-            </div>
-            <span class="card-links">
-              <a href="nullmerchant_explainer.html" class="read-more card-link-primary" aria-label="Read the interactive explainer for Silent Precondition Traps">How it works &rarr;</a>
-              <a href="https://github.com/AlexanderJulianKing/silent-precondition-traps" class="read-more" target="_blank" rel="noopener noreferrer" aria-label="View Silent Precondition Traps on GitHub">GitHub &rarr;</a>
-              <a href="https://doi.org/10.5281/zenodo.21383254" class="read-more" target="_blank" rel="noopener noreferrer" aria-label="View the permanent research archive on Zenodo">Zenodo &rarr;</a>
-            </span>
-          </div>
-        </article>
+  <article class="proj">
+    <div class="proj-text rv">
+      <p class="proj-kicker"><span class="n">02</span>Agentic systems</p>
+      <h3>Newscaster: An Automated Daily News Show</h3>
+      <p class="desc">I built a daily news show that is produced from start to finish without a person in the loop. Every morning it scours the internet and picks the most important stories. Each lead story runs through a research loop I designed myself, complete with multiple adversarial fact checkers. 525+ episodes have been published so far.</p>
+      <p class="links"><a href="newscaster_overview.html" target="_blank" rel="noopener">How it works &rarr;</a><a href="https://www.youtube.com/@NewsFromAlex" target="_blank" rel="noopener">YouTube &rarr;</a><a href="https://github.com/AlexanderJulianKing/ai-news-podcast" target="_blank" rel="noopener">GitHub &rarr;</a></p>
+    </div>
+    <figure class="plate rv" id="fig-news">
+      <canvas role="img" aria-label="Animated diagram: headlines from 34 feeds are narrowed down to two lead stories, and one story runs through a research loop of controller, researcher, article search, and adversary before scripting, fact-checking, and publishing."></canvas>
+      <figcaption><span class="fig">Fig. 2</span>One morning, schematically. Each filled square in the controller is one of its turns, and each red square in the evidence tally is one verified quote. Hover a step for details.</figcaption>
+      <div class="plate-bar"><ul class="legend"><li><i class="sw-acc"></i>verified quote</li><li><i class="sw-out"></i>article</li></ul><p class="readout" aria-live="polite" style="flex-basis:100%"></p></div>
+    </figure>
+  </article>
 
-        <article class="project-card fade-in stagger-2">
-          <h3 class="project-title">SC-Referee: A Conservative Auditor for Scientific Code</h3>
-          <p class="project-desc">SC-Referee reads the code and the exact data files behind a biology analysis and checks them, without ever running the code, for two of the field's most common statistical mistakes: pseudoreplication, and a rate reported over the wrong denominator. The verdict comes from deterministic checks rather than from a language model, so it cannot be swayed by confident prose and gives the same answer every time; a check reports an error only when it can cite the lines that prove it. Each check earned the right to report by passing a sealed, one-attempt examination on projects it had never seen, and across every blind test to date the tool has never accused a correct analysis. In its original public demo, it caught a published analysis that had treated repeated measurements from the same samples as independent evidence: rebuilt at the biological-sample level, 16,289 significant genes fell to 770. It ships as a public alpha, as a Claude Code skill and a Codex skill with the command-line tool underneath.</p>
-          <div class="project-meta">
-            <div class="tags">
-              <span class="tag">Python</span>
-              <span class="tag">Claude Code Skill</span>
-              <span class="tag">Codex Skill</span>
-              <span class="tag">Static Analysis</span>
-              <span class="tag">Deterministic Verification</span>
-              <span class="tag">Scientific Software</span>
-            </div>
-            <span class="card-links">
-              <a href="https://github.com/AlexanderJulianKing/sc-referee" class="read-more card-link-primary" target="_blank" rel="noopener noreferrer" aria-label="View SC-Referee on GitHub">GitHub &rarr;</a>
-              <a href="https://www.youtube.com/watch?v=1VGWTWFhlNI" class="read-more" target="_blank" rel="noopener noreferrer" aria-label="Watch the original SC-Referee demo">Original demo &rarr;</a>
-            </span>
-          </div>
-        </article>
+  <article class="proj">
+    <div class="proj-text rv">
+      <p class="proj-kicker"><span class="n">03</span>PhD research</p>
+      <h3>Adgrl2 Alternative Splicing in Cerebrovasculature</h3>
+      <p class="desc">I discovered that Adgrl2 is alternatively spliced in a cell-type-specific way, and that its isoforms have distinct roles in neurons (synapse assembly) and endothelial cells (blood-brain barrier integrity). To find this, I built end-to-end R/Python pipelines and analyzed single-cell RNA-seq data from 100K+ cells. I then validated the splicing patterns at the bench with conditional knockouts, isoform swap experiments, BBB permeability assays, and confocal imaging.</p>
+      <p class="links"><a href="https://www.jneurosci.org/content/46/16/e0019262026" target="_blank" rel="noopener">Paper &rarr;</a></p>
+    </div>
+    <figure class="plate rv" id="fig-splice">
+      <canvas role="img" aria-label="One Adgrl2 gene at the top; copies of each transcript drop into a neuron and an endothelial cell, where they are spliced differently. The neuron keeps four alternative exons; the endothelial cell loops them out."></canvas>
+      <figcaption><span class="fig">Fig. 3</span>One Adgrl2 gene, spliced two ways. Each simulated transcript is copied from the shared gene and spliced in both cell types. Its introns are removed as lariats, and each of the four alternative exons is included or skipped at the rate reported in the paper, shown by the ticks. Hover an exon for what it encodes.</figcaption>
+      <div class="plate-bar"><ul class="legend"><li><i class="sw-ink"></i>exon</li><li><i class="sw-acc"></i>alternative exon</li><li><i class="ln"></i>intron</li></ul><p class="readout" aria-live="polite" style="flex-basis:100%"></p></div>
+    </figure>
+  </article>
 
-        <article class="project-card fade-in stagger-3">
-          <h3 class="project-title">Project Soothsayer: LLM Evaluation &amp; Prediction System</h3>
-          <p class="project-desc">Predicts Arena.ai human-preference scores from benchmark data alone despite only 138 labeled models, 122 features, and ~40% missing data. Custom per-cell imputation, four original LLM benchmarks, PLS supervision, and adaptive local regression reduced RMSE 29% versus the best regularized baseline. A fully refit temporal walk-forward achieved R&sup2; = 0.937.</p>
-          <div class="project-meta">
-            <div class="tags">
-              <span class="tag">Python</span>
-              <span class="tag">scikit-learn</span>
-              <span class="tag">Adaptive KNN</span>
-              <span class="tag">PLS Regression</span>
-              <span class="tag">bge-small Embeddings</span>
-              <span class="tag">pytest</span>
-            </div>
-            <span class="card-links">
-              <a href="soothsayer_explainer.html" class="read-more card-link-primary" aria-label="Read the Soothsayer deep dive">How it works &rarr;</a>
-              <a href="https://github.com/AlexanderJulianKing/project-soothsayer" class="read-more" target="_blank" rel="noopener noreferrer" aria-label="View Soothsayer on GitHub">GitHub &rarr;</a>
-            </span>
-          </div>
-        </article>
-
-        <article class="project-card fade-in stagger-4">
-          <h3 class="project-title">Newscaster: Agentic AI Research &amp; Automated Publishing</h3>
-          <p class="project-desc">Built and operate a daily multi-provider system that discovers stories across seven sources, uses a LangGraph controller to pursue and validate evidence, demands counter-evidence, fact-checks scripts, synthesizes speech, and publishes to YouTube &mdash; 525+ episodes. Its embedding-based RAG memory retrieves relevant reporting from earlier episodes; the right prior coverage ranked first in 12/12 recurring-story tests, with 93% of the top six results relevant.</p>
-          <div class="project-meta">
-            <div class="tags">
-              <span class="tag">Python</span>
-              <span class="tag">Gemini API</span>
-              <span class="tag">Claude API</span>
-              <span class="tag">LangGraph</span>
-              <span class="tag">RAG</span>
-              <span class="tag">Google Cloud TTS</span>
-              <span class="tag">YouTube API</span>
-            </div>
-            <span class="card-links">
-              <a href="newscaster_overview.html" class="read-more card-link-primary" aria-label="Read the Newscaster deep dive">How it works &rarr;</a>
-              <a href="https://www.youtube.com/@NewsFromAlex" class="read-more" target="_blank" rel="noopener noreferrer" aria-label="View Newscaster on YouTube">YouTube &rarr;</a>
-              <a href="https://github.com/AlexanderJulianKing/ai-news-podcast" class="read-more" target="_blank" rel="noopener noreferrer" aria-label="View Newscaster on GitHub">GitHub &rarr;</a>
-            </span>
-          </div>
-        </article>
-
-        <article class="project-card fade-in stagger-1">
-          <h3 class="project-title">PhD Research: Adgrl2 Alternative Splicing in Cerebrovasculature</h3>
-          <p class="project-desc">Discovered that Adgrl2 uses cell-type-specific alternative splicing to serve distinct roles in neurons (synapse assembly) versus endothelial cells (blood-brain barrier integrity). Built end-to-end R/Python pipelines for single-cell RNA-seq analysis across 100K+ cells, then validated computationally identified splicing patterns at the bench through conditional knockouts, isoform swap experiments, BBB permeability assays, and confocal imaging.</p>
-          <div class="project-meta">
-            <div class="tags">
-              <span class="tag">Python</span>
-              <span class="tag">R</span>
-              <span class="tag">scRNA-seq</span>
-              <span class="tag">Scanpy</span>
-              <span class="tag">Seurat</span>
-              <span class="tag">Confocal</span>
-            </div>
-            <a href="https://www.jneurosci.org/content/46/16/e0019262026" class="read-more card-link-primary" target="_blank" rel="noopener noreferrer" aria-label="Read the paper in the Journal of Neuroscience">Paper &rarr;</a>
-          </div>
-        </article>
-
-        <article class="project-card fade-in stagger-2">
-          <h3 class="project-title">Polygenic Disease Gene Prediction</h3>
-          <p class="project-desc">Built multi-omic networks (~65K nodes, ~7.3M edges) linking DNA, RNA, and protein layers to predict how disease-associated genes converge on common processes. Graph-based semi-supervised learning traced GWAS risk loci to microglial activation and synaptic signaling. Co-first-author paper in <em>BMC Bioinformatics</em>.</p>
-          <div class="project-meta">
-            <div class="tags">
-              <span class="tag">Python</span>
-              <span class="tag">Graph Theory</span>
-              <span class="tag">Machine Learning</span>
-              <span class="tag">GWAS</span>
-              <span class="tag">Network Biology</span>
-            </div>
-            <a href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2834-1" class="read-more card-link-primary" target="_blank" rel="noopener noreferrer" aria-label="Read the BMC Bioinformatics paper">Paper &rarr;</a>
-          </div>
-        </article>
-      </section>
-
-      <!-- Section 3: Skills & Tools -->
-      <section id="skills" aria-labelledby="skills-heading">
-        <h2 class="section-heading fade-in" id="skills-heading">
-          <span class="section-number">3.</span> Skills &amp; Tools
-        </h2>
-        <div class="fade-in stagger-1">
-          <table class="skills-table">
-            <caption>Tools in regular use, grouped by domain.</caption>
-            <thead>
-              <tr>
-                <th scope="col">Domain</th>
-                <th scope="col">Technologies</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th scope="row">Languages</th>
-                <td>Python, R, Bash</td>
-              </tr>
-              <tr>
-                <th scope="row">Modeling &amp; Stats</th>
-                <td>scikit-learn, pandas, NumPy, SciPy, Bayesian regression, adaptive KNN/local Ridge, PLS/PCA/SVD, controlled experiments and ablations, cross-validation, temporal walk-forward validation, conformal intervals, effect-size reporting</td>
-              </tr>
-              <tr>
-                <th scope="row">Bioinformatics</th>
-                <td>single-cell and single-nucleus RNA-seq, bulk RNA-seq, Seurat, Scanpy, Bioconductor, Trimmomatic, STAR, DESeq2, differential expression, alternative splicing, GEO validation</td>
-              </tr>
-              <tr>
-                <th scope="row">AI &amp; LLM Systems</th>
-                <td>agent evaluation and failure analysis; benchmark and rubric design; controlled multi-model experiments; Claude, Gemini, and OpenRouter APIs; LangGraph; RAG and embeddings; LLM-as-judge; human-in-the-loop verification; source-grounded QA</td>
-              </tr>
-              <tr>
-                <th scope="row">Pipelines &amp; Tools</th>
-                <td>end-to-end data pipelines, scientific audit software, evidence-linked reporting, data provenance, API integration, retryable/idempotent automation, pytest, Git, HPC/SLURM, Google Cloud Platform, RMarkdown, Jupyter</td>
-              </tr>
-              <tr>
-                <th scope="row">Imaging &amp; Wet Lab</th>
-                <td>confocal microscopy (Zeiss 880), smFISH/RNAscope, QuPath, Imaris, scikit-image/Shapely morphology analysis, BBB permeability assays, Cre-lox genetics, IHC, multiplex PCR</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Section 4: Publications & Research -->
-      <section id="publications" aria-labelledby="pub-heading">
-        <h2 class="section-heading fade-in" id="pub-heading">
-          <span class="section-number">4.</span> Publications &amp; Research
-        </h2>
-        <ol class="bib-list">
-          <li class="bib-item fade-in stagger-1">
-            <span class="bib-number">[1]</span>
-            <strong>King, A.</strong> (2026). &ldquo;The NULL Merchant and Other Silent Precondition Traps for Data-Science Agents.&rdquo; <em>Independent research study; public manuscript and permanently archived artifacts</em>. <a href="https://doi.org/10.5281/zenodo.21383254" target="_blank" rel="noopener noreferrer">Zenodo</a> · <a href="https://github.com/AlexanderJulianKing/silent-precondition-traps" target="_blank" rel="noopener noreferrer">GitHub</a>
-          </li>
-          <li class="bib-item fade-in stagger-2">
-            <span class="bib-number">[2]</span>
-            <strong>King, A.</strong>, Garcia, C., Blanton, C., Chen, A., Ahmad, A., Lukacsovich, D., F&ouml;ldy, C., Makita, T., &amp; Anderson, G.R. (2026). &ldquo;Endothelial Adgrl2 expression and alternative splicing controls the cerebrovasculature.&rdquo; <em>Journal of Neuroscience</em>. <a href="https://www.jneurosci.org/content/46/16/e0019262026" target="_blank" rel="noopener noreferrer">DOI</a>
-          </li>
-          <li class="bib-item fade-in stagger-3">
-            <span class="bib-number">[3]</span>
-            Donohue, J.D., Amidon, R.F., Murphy, T.R., Wong, A.J., Liu, E.D., Saab, L., <strong>King, A.J.</strong>, Pae, H., Ajayi, M.T., &amp; Anderson, G.R. (2021). &ldquo;Parahippocampal latrophilin-2 (ADGRL2) expression controls topographical presubiculum to entorhinal cortex circuit connectivity.&rdquo; <em>Cell Reports</em>. <a href="https://www.cell.com/cell-reports/fulltext/S2211-1247(21)01513-8" target="_blank" rel="noopener noreferrer">DOI</a>
-          </li>
-          <li class="bib-item fade-in stagger-4">
-            <span class="bib-number">[4]</span>
-Bern, M.*, <strong>King, A.</strong>* (co-first), Applewhite, D.A., &amp; Ritz, A. (2019). &ldquo;Network-based prediction of polygenic disease genes involved in cell motility.&rdquo; <em>BMC Bioinformatics</em>. <a href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2834-1" target="_blank" rel="noopener noreferrer">DOI</a>
-          </li>
-        </ol>
-      </section>
-
-      <!-- Section 5: Contact -->
-      <section id="contact" aria-labelledby="contact-heading">
-        <h2 class="section-heading fade-in" id="contact-heading">
-          <span class="section-number">5.</span> Contact
-        </h2>
-        <p class="contact-preamble fade-in stagger-1">I'm actively looking for roles in AI evaluation, applied AI, scientific software, and computational biology. Happy to chat about research, collaboration, or opportunities:</p>
-        <p class="contact-email fade-in stagger-2"><a href="mailto:alexander.julian.king@gmail.com">alexander.julian.king@gmail.com</a></p>
-        <ul class="contact-secondary fade-in stagger-3">
-          <li><a href="https://github.com/AlexanderJulianKing" target="_blank" rel="noopener noreferrer">GitHub</a></li>
-          <li><span class="contact-dot" aria-hidden="true">&middot;</span></li>
-          <li><a href="https://www.linkedin.com/in/alexander-julian-king/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
-          <li><span class="contact-dot" aria-hidden="true">&middot;</span></li>
-          <li><a href="Alexander_King_Resume.pdf" target="_blank" rel="noopener">Resume (PDF)</a></li>
+  <article class="proj">
+    <div class="proj-text rv">
+      <p class="proj-kicker"><span class="n">04</span>Network biology</p>
+      <h3>Polygenic Disease Gene Prediction</h3>
+      <p class="desc">I built multi-omic networks (~65K nodes, ~7.3M edges) by linking DNA, RNA, and protein layers and their interaction networks, to predict how disease-associated genes converge on common processes. Using graph-based semi-supervised learning, I traced GWAS risk loci to microglial activation and synaptic signaling. I am co-first author of a paper on this approach in <em>BMC Bioinformatics</em>.</p>
+      <p class="links"><a href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2834-1" target="_blank" rel="noopener">Paper &rarr;</a></p>
+    </div>
+    <figure class="plate rv" id="fig-net">
+      <canvas role="img" aria-label="A slowly rotating multi-omic network: DNA risk loci, an RNA interaction network, and a protein interaction network, joined by regulatory, RNA-protein, and transcription-factor links, with heat spreading from the risk loci."></canvas>
+      <figcaption><span class="fig">Fig. 4</span>An illustrative multi-omic network: DNA risk loci at the bottom, an RNA interaction network in the middle, and a protein interaction network on top. Each gene's DNA, RNA, and protein sit in one vertical column. With the risk loci as seeds, every node’s score is updated from its neighbors by SinkSource+ label propagation, from the <em>BMC Bioinformatics</em> paper, until the total change is below 0.001. Drag to rotate; click a node to seed it.</figcaption>
+      <div class="plate-bar">
+        <ul class="legend">
+          <li><i class="ln" style="background:var(--e-ppi)"></i>protein&ndash;protein</li>
+          <li><i class="ln" style="background:var(--e-rr)"></i>RNA&ndash;RNA</li>
+          <li><i class="ln" style="background:var(--e-dr)"></i>DNA &rarr; RNA</li>
+          <li><i class="ln" style="background:var(--e-rp)"></i>RNA &harr; protein</li>
+          <li><i class="ln dash" style="--c:var(--e-tf)"></i>protein &rarr; DNA</li>
         </ul>
-      </section>
+        <p class="readout" aria-live="polite" style="flex-basis:100%"></p>
+      </div>
+    </figure>
+  </article>
 
-    </main>
+  <div class="more">
+    <h3 class="sub">More projects</h3>
+    <ul class="more-list">
+      <li class="rv">
+        <h4>Silent Precondition Traps in Data-Science Agents</h4>
+        <p>An independent study of data-science agents that give a confident, repeatable wrong answer when their usual tool depends on an assumption that is false for the data and is never checked. Two frozen benchmark batteries, 10 model-scaffold configurations, and 1,000 primary runs.</p>
+        <p class="links"><a href="nullmerchant_explainer.html" target="_blank" rel="noopener">How it works &rarr;</a><a href="https://github.com/AlexanderJulianKing/silent-precondition-traps" target="_blank" rel="noopener">GitHub &rarr;</a><a href="https://doi.org/10.5281/zenodo.21383254" target="_blank" rel="noopener">Zenodo &rarr;</a></p>
+      </li>
+      <li class="rv">
+        <h4>SC-Referee</h4>
+        <p>A deterministic auditor that checks biology analysis code for pseudoreplication and wrong-denominator rates without running it. Released as a public alpha, with Claude Code and Codex skills over a command-line tool.</p>
+        <p class="links"><a href="https://github.com/AlexanderJulianKing/sc-referee" target="_blank" rel="noopener">GitHub &rarr;</a><a href="https://www.youtube.com/watch?v=1VGWTWFhlNI" target="_blank" rel="noopener">Original demo &rarr;</a></p>
+      </li>
+    </ul>
+  </div>
+</section>
 
-    <footer>
-      <span>&copy; 2026 Alexander King</span>
-      <span class="footer-note">Typeset with care</span>
-    </footer>
+<!-- (2) Publications -->
+<section class="sec wide" id="publications" aria-labelledby="pub-h">
+  <header class="sec-head" style="margin-bottom:clamp(2rem,5vw,3.2rem)"><span class="n">(2)</span><h2 id="pub-h">Publications</h2><span class="dots" aria-hidden="true"></span><span class="r" aria-hidden="true">ii</span></header>
+  <div class="pubs">
+    <ol class="bib">
+      <li class="rv" data-paper="1"><span class="num">[1]</span><span><strong>King, A.</strong> (2026). &ldquo;The NULL Merchant and Other Silent Precondition Traps for Data-Science Agents.&rdquo; <em>Independent research study; public manuscript and permanently archived artifacts.</em> <a href="https://doi.org/10.5281/zenodo.21383254" target="_blank" rel="noopener">Zenodo</a> &middot; <a href="https://github.com/AlexanderJulianKing/silent-precondition-traps" target="_blank" rel="noopener">GitHub</a></span></li>
+      <li class="rv" data-paper="2"><span class="num">[2]</span><span><strong>King, A.</strong>, Garcia, C., Blanton, C., Chen, A., Ahmad, A., Lukacsovich, D., F&ouml;ldy, C., Makita, T., &amp; Anderson, G.R. (2026). &ldquo;Endothelial Adgrl2 expression and alternative splicing controls the cerebrovasculature.&rdquo; <em>Journal of Neuroscience</em>. <a href="https://www.jneurosci.org/content/46/16/e0019262026" target="_blank" rel="noopener">DOI</a></span></li>
+      <li class="rv" data-paper="3"><span class="num">[3]</span><span>Donohue, J.D., Amidon, R.F., Murphy, T.R., Wong, A.J., Liu, E.D., Saab, L., <strong>King, A.J.</strong>, Pae, H., Ajayi, M.T., &amp; Anderson, G.R. (2021). &ldquo;Parahippocampal latrophilin-2 (ADGRL2) expression controls topographical presubiculum to entorhinal cortex circuit connectivity.&rdquo; <em>Cell Reports</em>. <a href="https://www.cell.com/cell-reports/fulltext/S2211-1247(21)01513-8" target="_blank" rel="noopener">DOI</a></span></li>
+      <li class="rv" data-paper="4"><span class="num">[4]</span><span>Bern, M.*, <strong>King, A.</strong>* (co-first), Applewhite, D.A., &amp; Ritz, A. (2019). &ldquo;Network-based prediction of polygenic disease genes involved in cell motility.&rdquo; <em>BMC Bioinformatics</em>. <a href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2834-1" target="_blank" rel="noopener">DOI</a></span></li>
+    </ol>
 
   </div>
+</section>
 
-  <script>
-    // Intersection Observer for scroll-triggered fade-ins
-    (function() {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+<!-- (3) Contact -->
+<section class="sec wide" id="contact" aria-labelledby="contact-h">
+  <header class="sec-head" style="margin-bottom:clamp(2rem,5vw,3.2rem)"><span class="n">(3)</span><h2 id="contact-h">Contact</h2><span class="dots" aria-hidden="true"></span><span class="r" aria-hidden="true">iii</span></header>
+  <p class="contact-line rv">Write to me about research, tools, or anything on this page.</p>
+  <div class="email-row rv">
+    <a class="email" id="email" href="mailto:alexander.julian.king@gmail.com">alexander.julian.king@gmail.com</a>
+    <button type="button" class="copy" id="copy">Copy</button>
+  </div>
+  <ul class="elsewhere rv">
+    <li><a href="https://github.com/AlexanderJulianKing" target="_blank" rel="noopener">GitHub</a></li>
+    <li><a href="https://www.linkedin.com/in/alexander-julian-king/" target="_blank" rel="noopener">LinkedIn</a></li>
+    <li><a href="Alexander_King_Resume.pdf" target="_blank" rel="noopener">Resume (PDF)</a></li>
+  </ul>
+</section>
 
-      const observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, {
-        threshold: 0.1,
-        rootMargin: '0px 0px -40px 0px'
-      });
+</main>
+<footer class="foot wide">
+  <span>&copy; 2026 Alexander King</span>
+  <span>Opening images from Unsplash by <a href="https://unsplash.com/@berkshirecommunitycollege" target="_blank" rel="noopener">Bioscience Image Library by Fayette Reynolds</a>, the <a href="https://unsplash.com/@nci" target="_blank" rel="noopener">National Cancer Institute</a>, and <a href="https://unsplash.com/@viazavier" target="_blank" rel="noopener">Laura Ockel</a>.</span>
+</footer>
+</div>
 
-      document.querySelectorAll('.fade-in').forEach(function(el) {
-        observer.observe(el);
-      });
-    })();
+<script>
+(() => {
+'use strict';
+const root = document.documentElement;
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const easeIO = q => (q < 0.5 ? 4 * q * q * q : 1 - Math.pow(-2 * q + 2, 3) / 2);
+const easeOut = q => 1 - Math.pow(1 - q, 3);
+const TAU = Math.PI * 2;
+const fmt = n => n.toLocaleString('en-US');
+const hex = h => { h = (h || '#000000').trim(); return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; };
+const rgba = (c, a) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+const mix = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
+const pack = c => ((255 << 24) | ((c[2] | 0) << 16) | ((c[1] | 0) << 8) | (c[0] | 0)) >>> 0;
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function gauss() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * v); }
+const $ = s => document.querySelector(s);
 
-    // Scroll-spy for active nav state
-    (function() {
-      var sections = document.querySelectorAll('section[id]');
-      var navLinks = document.querySelectorAll('.nav-link');
-      var navMap = {};
-      navLinks.forEach(function(link) {
-        var id = link.getAttribute('href').replace('#', '');
-        navMap[id] = link;
-      });
+/* Theme colors for the figures, read from the page tokens so both themes stay in sync. */
+const TC = {};
+const onTheme = [];
+function readTheme() {
+  const cs = getComputedStyle(root), g = n => hex(cs.getPropertyValue(n));
+  Object.assign(TC, {
+    ink: g('--ink'), ink2: g('--ink-2'), ink3: g('--ink-3'), rule: g('--rule'), rule2: g('--rule-2'),
+    accent: g('--accent'), neg: g('--neg'), ochre: g('--ochre'), plate: g('--plate'), paper: g('--paper'),
+    dark: cs.getPropertyValue('--is-dark').trim() === '1'
+  });
+}
+readTheme();
+const themeChanged = () => { readTheme(); onTheme.forEach(f => f()); };
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', themeChanged);
+new MutationObserver(themeChanged).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
 
-      var spy = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting) {
-            navLinks.forEach(function(l) { l.classList.remove('active'); });
-            var link = navMap[entry.target.id];
-            if (link) link.classList.add('active');
-          }
-        });
-      }, {
-        threshold: 0,
-        rootMargin: '-20% 0px -60% 0px'
-      });
+/* Shared figure loop: sizing, visibility, pointer, and a rAF that sleeps offscreen. */
+function figLoop(canvas, o) {
+  const ctx = canvas.getContext('2d');
+  const s = { canvas, ctx, w: 0, h: 0, dpr: 1, t: 0, visible: false, busy: 0, m: { x: -9999, y: -9999, in: false } };
+  let raf = 0, last = 0, lastW = -1, lastH = -1;
+  const resize = () => {
+    const r = canvas.getBoundingClientRect();
+    if (r.width < 2) return;
+    if (o.sizeSelf) { if (Math.abs(r.width - lastW) < 0.5) return; }
+    else if (Math.abs(r.width - lastW) < 0.5 && Math.abs(r.height - lastH) < 0.5) return;
+    lastW = r.width; lastH = r.height;
+    s.dpr = Math.min(2, window.devicePixelRatio || 1);
+    s.w = r.width; s.h = r.height;
+    if (o.sizeSelf) o.sizeSelf(s);
+    else {
+      canvas.width = Math.round(s.w * s.dpr); canvas.height = Math.round(s.h * s.dpr);
+      ctx.setTransform(s.dpr, 0, 0, s.dpr, 0, 0);
+    }
+    o.resize && o.resize(s);
+    s.busy = Math.max(s.busy, 400); kick();
+  };
+  const pos = e => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  canvas.addEventListener('pointermove', e => { [s.m.x, s.m.y] = pos(e); s.m.in = true; o.move && o.move(s, e); kick(); });
+  canvas.addEventListener('pointerleave', e => { s.m.in = false; s.m.x = s.m.y = -9999; o.leave && o.leave(s, e); kick(); });
+  canvas.addEventListener('pointerdown', e => { [s.m.x, s.m.y] = pos(e); o.down && o.down(s, e); s.busy = Math.max(s.busy, 2000); kick(); });
+  canvas.addEventListener('pointerup', e => { o.up && o.up(s, e); });
+  canvas.addEventListener('pointercancel', () => { s.m.in = false; s.m.x = s.m.y = -9999; o.up && o.up(s, null); });
+  const frame = now => {
+    raf = 0;
+    if (!s.visible || !s.w) return;
+    const dt = last ? Math.min(48, now - last) : 16.7;
+    last = now; s.t = now;
+    o.draw(s, dt);
+    if (s.busy > 0) s.busy -= dt;
+    if (!RM || s.m.in || s.busy > 0) raf = requestAnimationFrame(frame); else last = 0;
+  };
+  function kick() { if (!raf && s.visible) raf = requestAnimationFrame(frame); }
+  s.kick = kick;
+  new ResizeObserver(resize).observe(canvas);
+  new IntersectionObserver(es => { s.visible = es[es.length - 1].isIntersecting; if (s.visible) { last = 0; kick(); } }, { rootMargin: '60px' }).observe(canvas);
+  onTheme.push(() => { o.theme && o.theme(s); s.busy = Math.max(s.busy, 600); kick(); });
+  return s;
+}
 
-      sections.forEach(function(s) { spy.observe(s); });
-    })();
 
-    // Reading progress bar — JS fallback for browsers without CSS scroll-driven animations
-    (function() {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      if (CSS && CSS.supports && CSS.supports('animation-timeline: scroll()')) return;
-      var bar = document.querySelector('.nav-progress');
-      if (!bar) return;
-      function updateProgress() {
-        var scrolled = window.scrollY;
-        var total = document.documentElement.scrollHeight - window.innerHeight;
-        bar.style.transform = 'scaleX(' + (total > 0 ? (scrolled / total) : 0) + ')';
+const roundRect = (g, x, y, w, h, r) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); };
+const inView = c => { const r = c.getBoundingClientRect(); return r.top < innerHeight * 0.72 && r.bottom > innerHeight * 0.28; };
+function sizeTo(s, canvas, h) {
+  s.h = h; canvas.style.height = h + 'px';
+  canvas.width = Math.round(s.w * s.dpr); canvas.height = Math.round(h * s.dpr);
+  s.ctx.setTransform(s.dpr, 0, 0, s.dpr, 0, 0);
+}
+
+/* ================= Opening: shuffle, open, image becomes a graph ================= */
+(function opening() {
+  const B = window.__boot, FILES = B.FILES, LAND = B.LAND;
+  const IM = FILES.map(() => ({ t: null, f: null }));
+  const T = { shuf: 260, land: { r: 2050, l: 2300, c: 2650 }, open0: 2950, open1: 4150, wave0: 3900, name0: 5000, name1: 5900, end: 5900 };
+  const BG = [11, 10, 10], PULSE_MS = 55;
+  const track = $('#top'), pin = $('#pin'), nav = $('#nav'), navProg = $('#nav-progress'), loadLine = $('#load-line');
+  const cv = { l: $('.panel.l canvas'), c: $('.panel.c canvas'), r: $('.panel.r canvas') };
+  const cx = { l: cv.l.getContext('2d'), c: cv.c.getContext('2d'), r: cv.r.getContext('2d') };
+  const counter = $('#counter');
+  const T0 = performance.now();
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  if (!location.hash) window.scrollTo(0, 0);
+  let W = 0, H = 0, dpr = 1, clock = 0, rate = 1, started = false, visible = true, last = 0, raf = 0;
+  let sched = {}, lastKey = {}, G = null, gSrc = null, pulses = [], nextAmbient = 0, hover = -1, counterText = '', synth = null;
+  const mouse = { x: -9999, y: -9999, in: false };
+  const best = i => IM[i].f || IM[i].t;
+  const thumb = i => IM[i].t || IM[i].f;
+
+  function drawCover(g, im, w, h, z) {
+    const iw = im.naturalWidth || im.width, ih = im.naturalHeight || im.height;
+    const sc = Math.max(w / iw, h / ih) * z, dw = iw * sc, dh = ih * sc;
+    g.drawImage(im, (w - dw) / 2, (h - dh) / 2, dw, dh);
+  }
+  function sizeCanvas(k, cw) {
+    const c = cv[k];
+    c.style.width = cw + 'px'; c.style.height = H + 'px';
+    c.width = Math.round(cw * dpr); c.height = Math.round(H * dpr);
+    cx[k].setTransform(dpr, 0, 0, dpr, 0, 0);
+    c._w = cw;
+  }
+  // Shuffle slots are resolved to images at draw time, so thumbnails that arrive late still join the shuffle.
+  // Each image gets a fixed turn in the shuffle; a panel whose next thumbnail has not arrived simply holds its current frame.
+  function makeSchedules() {
+    const pool = B.pool;
+    const n = pool.length;
+    sched = {};
+    ['l', 'c', 'r'].forEach((p, pi) => {
+      const off = Math.round(pi * n / 3);
+      const land = T.land[p], s = [{ t: 0, i: pool[off % n] }];
+      let t = T.shuf + pi * 45, k = 0;
+      while (t < land - 60) {
+        const f = (t - T.shuf) / (land - T.shuf);
+        s.push({ t, i: pool[(k + 1 + off) % n] });
+        t += 80 + 190 * f * f; k++;
       }
-      window.addEventListener('scroll', updateProgress, { passive: true });
-      updateProgress();
-    })();
+      s.push({ t: land, i: LAND[p], land: true });
+      sched[p] = s;
+    });
+  }
+  const slotIdx = s => s.i;
+  let lastCenterIm = null;
+  function imgAt(p, time) { const s = sched[p]; let j = 0; while (j + 1 < s.length && s[j + 1].t <= time) j++; return s[j]; }
+  function synthetic() {
+    if (synth) return synth;
+    const c = document.createElement('canvas'); c.width = 900; c.height = 600;
+    const g = c.getContext('2d'); g.fillStyle = '#0a0f1c'; g.fillRect(0, 0, 900, 600);
+    for (let k = 0; k < 26; k++) {
+      const x = Math.random() * 900, y = Math.random() * 600, r = 30 + Math.random() * 90;
+      const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, 'rgba(120,220,230,0.9)'); gr.addColorStop(1, 'rgba(120,220,230,0)');
+      g.fillStyle = gr; g.fillRect(x - r, y - r, 2 * r, 2 * r);
+    }
+    return (synth = c);
+  }
 
-    // A note for the reader who opens the console
-    console.log('%cTypeset with care.', "font-family: Georgia, serif; font-style: italic; font-size: 14px; color: #7a2e2e;");
-    console.log('No frameworks, no build step, one HTML file. View source is the documentation.');
-  </script>
+  /* Turn an image into a graph: sample nodes where the picture has structure, link each to its nearest neighbors. */
+  function buildGraph(im) {
+    const sc = 1 / 3, sw = Math.max(80, Math.round(W * sc)), sh = Math.max(60, Math.round(H * sc));
+    const oc = document.createElement('canvas'); oc.width = sw; oc.height = sh;
+    const og = oc.getContext('2d', { willReadFrequently: true });
+    drawCover(og, im, sw, sh, 1);
+    const px = og.getImageData(0, 0, sw, sh).data, n = sw * sh;
+    const L = new Float32Array(n), hist = new Uint32Array(64);
+    for (let i = 0; i < n; i++) { const l = (0.2126 * px[4 * i] + 0.7152 * px[4 * i + 1] + 0.0722 * px[4 * i + 2]) / 255; L[i] = l; hist[Math.min(63, (l * 64) | 0)]++; }
+    let acc = 0, med = 0.5;
+    for (let b = 0; b < 64; b++) { acc += hist[b]; if (acc >= n / 2) { med = (b + 0.5) / 64; break; } }
+    const I = new Float32Array(n); let imax = 0;
+    for (let y = 1; y < sh - 1; y++) for (let x = 1; x < sw - 1; x++) {
+      const i = y * sw + x;
+      const gx = (L[i - sw + 1] + 2 * L[i + 1] + L[i + sw + 1]) - (L[i - sw - 1] + 2 * L[i - 1] + L[i + sw - 1]);
+      const gy = (L[i + sw - 1] + 2 * L[i + sw] + L[i + sw + 1]) - (L[i - sw - 1] + 2 * L[i - sw] + L[i - sw + 1]);
+      const v = 0.6 * Math.min(1, Math.hypot(gx, gy) * 1.6) + 0.4 * Math.min(1, Math.abs(L[i] - med) * 2.4) + 0.004;
+      I[i] = v; if (v > imax) imax = v;
+    }
+    const target = Math.round(clamp(W * H / 800, 420, 1800));
+    const rmin = clamp(Math.sqrt(W * H / target) * 0.6, 8, 24);
+    const cell = rmin / Math.SQRT2, gw = Math.ceil(W / cell) + 1, gh = Math.ceil(H / cell) + 1;
+    const grid = new Int32Array(gw * gh).fill(-1);
+    const nodes = [];
+    // A clearing around the name: nodes there are drawn fainter so the title reads without a heavy shadow.
+    const ecx = W / 2, ecy = H * 0.52, erx = Math.min(W * 0.34, 520), ery = Math.min(H * 0.25, 230);
+    for (let tries = 0; tries < target * 30 && nodes.length < target; tries++) {
+      const sx = 1 + Math.random() * (sw - 2), sy = 1 + Math.random() * (sh - 2), si = (sy | 0) * sw + (sx | 0);
+      const v = I[si];
+      const q = v / imax;
+      if (Math.random() > Math.max(0.006, q * q)) continue;
+      const x = sx / sc, y = sy / sc, gx = (x / cell) | 0, gy = (y / cell) | 0;
+      let ok = true;
+      for (let yy = gy - 2; yy <= gy + 2 && ok; yy++) for (let xx = gx - 2; xx <= gx + 2; xx++) {
+        if (xx < 0 || yy < 0 || xx >= gw || yy >= gh) continue;
+        const j = grid[yy * gw + xx];
+        if (j >= 0 && (nodes[j].hx - x) ** 2 + (nodes[j].hy - y) ** 2 < rmin * rmin) { ok = false; break; }
+      }
+      if (!ok) continue;
+      let r = px[4 * si], g = px[4 * si + 1], b = px[4 * si + 2];
+      const mx = Math.max(r, g, b, 1), k = mx < 200 ? Math.min(3.2, 200 / mx) : 1;
+      r = Math.min(255, r * k); g = Math.min(255, g * k); b = Math.min(255, b * k);
+      r = lerp(r, 255, 0.14); g = lerp(g, 246, 0.14); b = lerp(b, 236, 0.14);
+      const ed = ((x - ecx) / erx) ** 2 + ((y - ecy) / ery) ** 2;
+      grid[gy * gw + gx] = nodes.length;
+      nodes.push({ hx: x, hy: y, x, y, vx: 0, vy: 0, c: [r, g, b], cs: `rgb(${r | 0},${g | 0},${b | 0})`, r: 1.05 + (v / imax) * 1.7, ph: Math.random() * TAU, k: 0.2 + 0.8 * smooth(0.5, 1.2, ed) });
+    }
+    const N = nodes.length, K = 3, maxL = rmin * 3.1, maxL2 = maxL * maxL, reach = Math.ceil(maxL / cell);
+    const seen = new Set(), E = [], adj = nodes.map(() => []);
+    const bd = new Float64Array(K), bi = new Int32Array(K);
+    for (let i = 0; i < N; i++) {
+      const a = nodes[i], gx = (a.hx / cell) | 0, gy = (a.hy / cell) | 0;
+      bd.fill(Infinity); bi.fill(-1);
+      for (let yy = gy - reach; yy <= gy + reach; yy++) for (let xx = gx - reach; xx <= gx + reach; xx++) {
+        if (xx < 0 || yy < 0 || xx >= gw || yy >= gh) continue;
+        const j = grid[yy * gw + xx]; if (j < 0 || j === i) continue;
+        const d = (nodes[j].hx - a.hx) ** 2 + (nodes[j].hy - a.hy) ** 2;
+        if (d > maxL2 || d >= bd[K - 1]) continue;
+        let q = K - 1; while (q > 0 && bd[q - 1] > d) { bd[q] = bd[q - 1]; bi[q] = bi[q - 1]; q--; }
+        bd[q] = d; bi[q] = j;
+      }
+      for (let q = 0; q < K; q++) {
+        const j = bi[q]; if (j < 0) continue;
+        const key = i < j ? i * 4096 + j : j * 4096 + i;
+        if (seen.has(key)) continue; seen.add(key);
+        E.push(i, j); adj[i].push(j); adj[j].push(i);
+      }
+    }
+    let sumL = 0; for (let e = 0; e < E.length; e += 2) sumL += Math.hypot(nodes[E[e]].hx - nodes[E[e + 1]].hx, nodes[E[e]].hy - nodes[E[e + 1]].hy);
+    const avgE = E.length ? sumL / (E.length / 2) : rmin * 1.5;
+    let seed = 0, sd = Infinity;
+    for (let i = 0; i < N; i++) { const d = (nodes[i].hx - W / 2) ** 2 + (nodes[i].hy - H / 2) ** 2; if (d < sd) { sd = d; seed = i; } }
+    const comp = new Int32Array(N).fill(-1), comps = [];
+    for (let i = 0; i < N; i++) {
+      if (comp[i] >= 0) continue;
+      const id = comps.length, list = [i]; comp[i] = id;
+      for (let q = 0; q < list.length; q++) for (const j of adj[list[q]]) if (comp[j] < 0) { comp[j] = id; list.push(j); }
+      comps.push(list);
+    }
+    const hop = new Float32Array(N).fill(Infinity);
+    const sxs = nodes[seed] ? nodes[seed].hx : W / 2, sys = nodes[seed] ? nodes[seed].hy : H / 2;
+    for (const list of comps) {
+      let entry = list[0], ed = Infinity;
+      for (const i of list) { const d = Math.hypot(nodes[i].hx - sxs, nodes[i].hy - sys); if (d < ed) { ed = d; entry = i; } }
+      hop[entry] = ed / avgE;
+      const q = [entry];
+      for (let h = 0; h < q.length; h++) { const u = q[h]; for (const v of adj[u]) if (hop[v] === Infinity) { hop[v] = hop[u] + 1; q.push(v); } }
+    }
+    let maxHop = 1; for (let i = 0; i < N; i++) if (hop[i] > maxHop) maxHop = hop[i];
+    const hopMs = clamp(1500 / maxHop, 10, 60);
+    return { nodes, E, adj, hop, hopMs, maxHop, seed, avgE, vis: new Float32Array(N), flash: new Float32Array(N), edges: E.length / 2 };
+  }
+  function ensureGraph() {
+    const src = best(LAND.c) || (performance.now() - T0 > 5000 ? synthetic() : null);
+    if (!src) return;
+    if (!G || (src !== gSrc && clock < T.wave0)) { G = buildGraph(src); gSrc = src; }
+  }
+  function bfsFrom(src) {
+    const N = G.nodes.length, hop = new Int16Array(N).fill(-1);
+    hop[src] = 0; const q = [src]; let maxH = 0;
+    for (let h = 0; h < q.length; h++) { const u = q[h]; for (const v of G.adj[u]) if (hop[v] < 0) { hop[v] = hop[u] + 1; if (hop[v] > maxH) maxH = hop[v]; q.push(v); } }
+    return { hop, maxH };
+  }
+  function pulse(src, now) {
+    if (!G || src < 0) return;
+    const b = bfsFrom(src);
+    pulses.push({ t0: now, hop: b.hop, life: b.maxH * PULSE_MS + 900 });
+    if (pulses.length > 4) pulses.shift();
+  }
+  function nearest(x, y, r) {
+    if (!G) return -1;
+    let best = -1, bd = r * r;
+    const ns = G.nodes;
+    for (let i = 0; i < ns.length; i++) { const d = (ns[i].x - x) ** 2 + (ns[i].y - y) ** 2; if (d < bd) { bd = d; best = i; } }
+    return best;
+  }
+  function layout() {
+    const w = pin.clientWidth, h = pin.clientHeight;
+    if (w < 10 || h < 10) return;
+    W = w; H = h; dpr = Math.min(2, window.devicePixelRatio || 1);
+    sizeCanvas('l', Math.ceil(W * 0.3)); sizeCanvas('r', Math.ceil(W * 0.33)); sizeCanvas('c', W);
+    lastKey = {};
+    if (gSrc) G = buildGraph(gSrc);
+  }
+  function drawSide(p, e) {
+    if (e >= 0.999) return;
+    const s = imgAt(p, clock), i = slotIdx(s);
+    if (i < 0) return;
+    const im = s.land ? best(i) : thumb(i);
+    if (!im) return;
+    const z = s.land ? 1 + 0.07 * (1 - smooth(s.t, s.t + 700, clock)) : 1.02;
+    const key = i + (im === IM[i].f ? 'f' : 't') + ':' + z.toFixed(3);
+    if (lastKey[p] === key) return;
+    lastKey[p] = key;
+    const g = cx[p], w = cv[p]._w;
+    g.fillStyle = '#050505'; g.fillRect(0, 0, w, H);
+    drawCover(g, im, w, H, z);
+  }
+  function drawCenter(now, dt) {
+    const g = cx.c;
+    const landed = clock >= T.land.c;
+    const idx = landed ? LAND.c : slotIdx(imgAt('c', clock));
+    let im = landed ? (best(LAND.c) || gSrc) : thumb(idx);
+    if (im) lastCenterIm = im; else im = lastCenterIm;
+    g.globalCompositeOperation = 'source-over';
+    g.fillStyle = '#050505'; g.fillRect(0, 0, W, H);
+    if (im) drawCover(g, im, W, H, landed ? 1 + 0.07 * (1 - smooth(T.land.c, T.land.c + 700, clock)) : 1.02);
+    const tau = clock - T.wave0;
+    let text = landed && tau > 0 ? '' : `specimen ${String(Math.max(1, idx + 1)).padStart(2, '0')} / ${IM.length}`;
+    if (G && landed && tau > 0) {
+      const frontPx = (tau / G.hopMs) * G.avgE;
+      const dim = smooth(0, 1500, tau);
+      g.fillStyle = `rgba(${BG},${0.45 * dim})`; g.fillRect(0, 0, W, H);
+      const sN = G.nodes[G.seed], R = Math.hypot(W, H) * 1.05;
+      if (!sN || frontPx >= R) { g.fillStyle = `rgba(${BG},0.62)`; g.fillRect(0, 0, W, H); }
+      else {
+        const gr = g.createRadialGradient(sN.hx, sN.hy, 0, sN.hx, sN.hy, R);
+        const f0 = clamp(frontPx / R, 0, 0.999), f1 = clamp((frontPx + 200) / R, f0 + 0.0005, 1);
+        gr.addColorStop(0, `rgba(${BG},0.62)`); gr.addColorStop(f0, `rgba(${BG},0.62)`);
+        gr.addColorStop(f1, `rgba(${BG},0)`); gr.addColorStop(1, `rgba(${BG},0)`);
+        g.fillStyle = gr; g.fillRect(0, 0, W, H);
+      }
+      drawGraph(g, tau, now, dt);
+    }
+    if (text !== counterText) { counter.textContent = text; counterText = text; }
+  }
+  function drawGraph(g, tau, now, dt) {
+    const { nodes, E, hop, hopMs, vis, flash } = G;
+    const N = nodes.length, f = dt / 16.7;
+    const R = W < 600 ? 80 : 120, R2 = R * R, mx = mouse.x, my = mouse.y, damp = Math.pow(0.8, f);
+    for (let i = 0; i < N; i++) {
+      const n = nodes[i];
+      const since = tau - hop[i] * hopMs;
+      vis[i] = since <= 0 ? 0 : Math.min(1, since / 260);
+      flash[i] = since > 0 && since < 520 ? (1 - since / 520) ** 2 : 0;
+      if (RM) { n.x = n.hx; n.y = n.hy; continue; }
+      const tx = n.hx + Math.sin(now * 0.0006 + n.ph) * 1.3, ty = n.hy + Math.cos(now * 0.0005 + n.ph * 1.3) * 1.3;
+      let ax = (tx - n.x) * 0.05, ay = (ty - n.y) * 0.05;
+      if (mouse.in) {
+        const dx = n.x - mx, dy = n.y - my, d2 = dx * dx + dy * dy;
+        if (d2 < R2 && d2 > 0.01) { const d = Math.sqrt(d2), q = 1 - d / R; ax += dx / d * q * q * 3.4; ay += dy / d * q * q * 3.4; }
+      }
+      n.vx = (n.vx + ax * f) * damp; n.vy = (n.vy + ay * f) * damp;
+      n.x += n.vx * f; n.y += n.vy * f;
+    }
+    pulses = pulses.filter(p => now - p.t0 < p.life);
+    for (const p of pulses) {
+      const pt = now - p.t0;
+      for (let i = 0; i < N; i++) {
+        const h = p.hop[i]; if (h < 0) continue;
+        const s = pt - h * PULSE_MS;
+        if (s >= 0 && s < 700) { const v = (1 - s / 700) ** 2 * 0.95; if (v > flash[i]) flash[i] = v; }
+      }
+    }
+    g.globalCompositeOperation = 'lighter';
+    const base = new Path2D(), faint = new Path2D(), fade = [new Path2D(), new Path2D(), new Path2D()], lit = [new Path2D(), new Path2D(), new Path2D()];
+    for (let e = 0; e < E.length; e += 2) {
+      const a = E[e], b = E[e + 1];
+      const v = Math.min(vis[a], vis[b]); if (v <= 0) continue;
+      const A = nodes[a], B = nodes[b];
+      const fl = Math.min(flash[a], flash[b]);
+      const quiet = Math.min(A.k, B.k) < 0.6;
+      if (fl > 0.06 && !quiet) { const k = fl > 0.6 ? 2 : fl > 0.3 ? 1 : 0; lit[k].moveTo(A.x, A.y); lit[k].lineTo(B.x, B.y); }
+      else if (v >= 1) { const p = quiet ? faint : base; p.moveTo(A.x, A.y); p.lineTo(B.x, B.y); }
+      else { const k = v > 0.66 ? 2 : v > 0.33 ? 1 : 0; fade[k].moveTo(A.x, A.y); fade[k].lineTo(B.x, B.y); }
+    }
+    g.lineWidth = 0.7;
+    g.strokeStyle = 'rgba(241,235,227,0.16)'; g.stroke(base);
+    g.strokeStyle = 'rgba(241,235,227,0.06)'; g.stroke(faint);
+    fade.forEach((p, k) => { g.strokeStyle = `rgba(241,235,227,${0.05 + k * 0.045})`; g.stroke(p); });
+    g.lineWidth = 1.1;
+    lit.forEach((p, k) => { g.strokeStyle = `rgba(255,214,192,${0.25 + k * 0.22})`; g.stroke(p); });
+    if (hover >= 0) {
+      const hp = new Path2D(), H0 = nodes[hover];
+      for (const j of G.adj[hover]) { hp.moveTo(H0.x, H0.y); hp.lineTo(nodes[j].x, nodes[j].y); }
+      g.lineWidth = 1.3; g.strokeStyle = 'rgba(255,240,228,0.8)'; g.stroke(hp);
+    }
+    for (let i = 0; i < N; i++) {
+      const v = vis[i]; if (v <= 0) continue;
+      const n = nodes[i], fl = flash[i], a = Math.min(1, v * n.k * (1 + fl * 0.9));
+      const r = n.r * (0.55 + 0.45 * v) * (1 + 1.4 * fl) + (i === hover ? 1.6 : 0);
+      if (fl > 0.02) { const c = n.c; g.fillStyle = `rgba(${lerp(c[0], 255, fl * 0.8) | 0},${lerp(c[1], 244, fl * 0.8) | 0},${lerp(c[2], 232, fl * 0.8) | 0},${0.92 * a})`; }
+      else { g.globalAlpha = 0.9 * a; g.fillStyle = n.cs; }
+      g.beginPath(); g.arc(n.x, n.y, r, 0, TAU); g.fill();
+      g.globalAlpha = 1;
+    }
+    if (hover >= 0) {
+      const n = nodes[hover];
+      g.globalCompositeOperation = 'source-over';
+      g.beginPath(); g.arc(n.x, n.y, n.r + 7, 0, TAU); g.strokeStyle = 'rgba(241,235,227,0.75)'; g.lineWidth = 1; g.stroke();
+    }
+    g.globalCompositeOperation = 'source-over';
+    const revealed = tau > G.maxHop * hopMs + 900;
+    if (revealed && !RM && now > nextAmbient) {
+      if (nextAmbient) {
+        let src = -1;
+        for (let k = 0; k < 20 && src < 0; k++) { const i = (Math.random() * N) | 0; if (G.adj[i].length >= 2) src = i; }
+        pulse(src, now);
+      }
+      nextAmbient = now + 3600 + Math.random() * 2600;
+    }
+  }
+  function scrollP() {
+    const r = track.getBoundingClientRect();
+    const span = track.offsetHeight - pin.offsetHeight;
+    return clamp(-r.top / Math.max(1, span), 0, 1);
+  }
+  function apply(now, dt) {
+    const p = scrollP();
+    if (started) {
+      if (p > 0.01 && clock < T.end) {
+        if (!skipped && clock < T.land.c - 500) { clock = T.land.c - 500; lastKey = {}; }
+        skipped = true; rate = 2.2;
+      }
+      clock = Math.max(clock + dt * rate, clamp(p / 0.55, 0, 1) * T.end);
+      // Hold just before the middle plate lands until its image (or the fallback) is ready.
+      if (!best(LAND.c) && now - T0 < 5000) clock = Math.min(clock, T.land.c - 20);
+      if (clock >= T.end) { rate = 1; if (!collapsed) collapse(); }
+      ensureGraph();
+    }
+    const e = easeIO(clamp((clock - T.open0) / (T.open1 - T.open0), 0, 1));
+    const t = smooth(T.name0, T.name1, clock);
+    pin.style.setProperty('--e', e.toFixed(4));
+    pin.style.setProperty('--t', t.toFixed(4));
+    pin.style.setProperty('--hint', (1 - smooth(0.7, 0.95, p)).toFixed(3));
+    pin.classList.toggle('revealed', clock >= T.name0);
+    if (!started) return;
+    drawSide('l', e); drawSide('r', e);
+    drawCenter(now, dt);
+  }
+  // Once the opening has played, drop the extra scroll length so the page scrolls straight into the content.
+  let collapsed = false, skipped = false;
+  function collapse() {
+    collapsed = true;
+    const before = track.offsetHeight, y = window.scrollY;
+    track.classList.add('done');
+    const delta = before - track.offsetHeight;
+    if (delta > 0 && y > 0) window.scrollTo({ top: Math.max(0, y - delta), behavior: 'instant' });
+  }
+  function frame(now) {
+    raf = 0;
+    if (!visible) return;
+    const dt = last ? Math.min(50, now - last) : 16.7;
+    last = now;
+    apply(now, dt);
+    raf = requestAnimationFrame(frame);
+  }
+  function kick() { if (!raf && visible) { last = 0; raf = requestAnimationFrame(frame); } }
+  function start() {
+    if (started) return;
+    started = true;
+    makeSchedules();
+    layout();
+    loadLine.classList.add('done');
+    if (RM) clock = T.end + 1e6;
+    kick();
+  }
+  // Images arrive from the early loader in the page head; the shuffle starts as soon as each panel has its first frame.
+  function syncBoot() {
+    B.t.forEach((im, i) => { if (im) IM[i].t = im; });
+    B.f.forEach((im, i) => { if (im) IM[i].f = im; });
+    loadLine.style.transform = `scaleX(${B.loaded / B.total})`;
+    maybeStart();
+  }
+  function maybeStart() {
+    if (started || document.visibilityState !== 'visible') return;
+    const el = performance.now() - T0, nt = IM.filter(o => o.t).length;
+    if (B.first.every(i => IM[i].t) || (el > 900 && nt >= 2) || el > 3000) start();
+  }
+  B.subs.push(syncBoot);
+  syncBoot();
+  const poll = setInterval(() => { maybeStart(); if (started) clearInterval(poll); }, 250);
 
+  let lw = -1, lh = -1;
+  new ResizeObserver(() => {
+    const w = pin.clientWidth, h = pin.clientHeight;
+    if (Math.abs(w - lw) < 1 && Math.abs(h - lh) < 1) return;
+    lw = w; lh = h; if (started) layout(); kick();
+  }).observe(pin);
+  new IntersectionObserver(es => { visible = es[es.length - 1].isIntersecting; if (visible) kick(); }).observe(track);
+  kick();
+
+  /* Nav: appears once the opening has scrolled away; tracks reading progress and the current section. */
+  const links = [...document.querySelectorAll('.nav a.link')];
+  const secs = links.map(a => document.querySelector(a.getAttribute('href')));
+  let navRaf = 0;
+  function onScroll() {
+    navRaf = 0;
+    nav.classList.toggle('on', track.getBoundingClientRect().bottom < 60);
+    const total = document.documentElement.scrollHeight - innerHeight;
+    navProg.style.transform = `scaleX(${total > 0 ? clamp(scrollY / total, 0, 1) : 0})`;
+    let cur = -1;
+    secs.forEach((s, i) => { if (s && s.getBoundingClientRect().top < innerHeight * 0.35) cur = i; });
+    links.forEach((a, i) => a.classList.toggle('active', i === cur));
+  }
+  const queueNav = () => { if (!navRaf) navRaf = requestAnimationFrame(onScroll); };
+  window.addEventListener('scroll', queueNav, { passive: true });
+  window.addEventListener('resize', queueNav);
+  onScroll();
+})();
+
+/* ================= Fig. 1 · Soothsayer: benchmark, impute, predict ================= */
+function soothFigure(D) {
+  const fig = $('#fig-sooth'); if (!fig) return;
+  const canvas = fig.querySelector('canvas'), out = fig.querySelector('.readout'), segs = [...fig.querySelectorAll('[data-act]')];
+  const NR = D.nr, NC = D.nc, NCU = D.nCustom;
+  const vb = atob(D.vals), val = new Uint8Array(vb.length); for (let i = 0; i < vb.length; i++) val[i] = vb.charCodeAt(i);
+  const mbs = atob(D.mask), miss = new Uint8Array(NR * NC); for (let k = 0; k < NR * NC; k++) miss[k] = (mbs.charCodeAt(k >> 3) >> (k & 7)) & 1;
+  const PTS = D.pts, NAMES = D.names;
+  const rowPt = new Int16Array(NR).fill(-1); PTS.forEach((p, k) => { rowPt[p[0]] = k; });
+  const ptOrder = PTS.map((_, k) => k).sort(() => Math.random() - 0.5), ptRank = new Int16Array(PTS.length); ptOrder.forEach((k, r) => { ptRank[k] = r; });
+  const jit = new Float32Array(NR * NC); for (let i = 0; i < jit.length; i++) jit[i] = Math.random();
+  // The measured scores are on screen from the start; imputation begins once the figure has been centered briefly, then prediction.
+  const ACT = [[-1e9, 0], [0, 2800], [2800, 6000]];
+  const LO = 1200, HI = 1520;
+  let t0 = -1, L = null, img = null, buf = null, hoverPt = -1, hoverRow = -1, act = -1, lastText = '';
+  let ramps = null;
+  let lastMKey = null, themeStamp = 0, centeredSince = -1;
+  function mkRamp(a, b) { const A = hex(a), B = hex(b), r = new Uint8Array(768); for (let v = 0; v < 256; v++) { const c = mix(A, B, 0.12 + 0.88 * v / 255); r[v * 3] = c[0]; r[v * 3 + 1] = c[1]; r[v * 3 + 2] = c[2]; } return r; }
+  function buildRamps() {
+    ramps = TC.dark
+      ? { cus: mkRamp('#3d2f16', '#f2c46e'), pub: mkRamp('#1b2436', '#9ab8f0'), imp: mkRamp('#3d1716', '#f28b80') }
+      : { cus: mkRamp('#f3e6c8', '#8f5a0c'), pub: mkRamp('#dde6f3', '#1d4687'), imp: mkRamp('#f6d6d1', '#9c1c1c') };
+  }
+  buildRamps();
+  function sizeSelf(s) {
+    const narrow = s.w < 600, h = narrow ? 620 : 450;
+    sizeTo(s, canvas, h);
+    if (!narrow) {
+      const top = 40, bot = 22, mh = h - top - bot, mw = Math.min(s.w * 0.42, NC * 5.2);
+      L = { narrow, mx: 18, my: top, mw, mh, sx: 18 + mw + 64, sy: top + 4, sw: s.w - (18 + mw + 64) - 22, sh: mh - 40 };
+    } else {
+      const top = 40, mh = 250, mw = s.w - 36;
+      L = { narrow, mx: 18, my: top, mw, mh, sx: 60, sy: top + mh + 44, sw: s.w - 82, sh: h - (top + mh + 44) - 46 };
+    }
+    L.dx = Math.round(L.mx * s.dpr); L.dy = Math.round(L.my * s.dpr);
+    L.dw = Math.round(L.mw * s.dpr); L.dh = Math.round(L.mh * s.dpr);
+    img = s.ctx.createImageData(L.dw, L.dh); buf = new Uint32Array(img.data.buffer);
+  }
+  const colX = c => Math.round(c * L.dw / NC), rowY = r => Math.round(r * L.dh / NR);
+  const SX = v => L.sx + (v - LO) / (HI - LO) * L.sw, SY = v => L.sy + L.sh - (v - LO) / (HI - LO) * L.sh;
+  function cellTimes(r, c, i) {
+    const custom = c < NCU;
+    if (!miss[i]) return -1e9;
+    return ACT[1][0] + 150 + ((c - NCU + NC) % NC / NC) * 1700 + jit[i] * 700;
+  }
+  function draw(s) {
+    const g = s.ctx;
+    if (t0 < 0) {
+      const r = canvas.getBoundingClientRect(), mid = (r.top + r.bottom) / 2;
+      if (RM) t0 = s.t;
+      else if (Math.abs(mid - innerHeight / 2) < innerHeight * 0.16) { if (centeredSince < 0) centeredSince = s.t; else if (s.t - centeredSince > 700) t0 = s.t; }
+      else centeredSince = -1;
+    }
+    const el = RM ? 1e9 : t0 < 0 ? -1 : s.t - t0;
+    const a = el < ACT[1][0] ? 0 : el < ACT[2][0] ? 1 : 2;
+    if (a !== act) { act = a; segs.forEach((b, k) => b.setAttribute('aria-pressed', String(k === a))); }
+    g.clearRect(0, 0, s.w, s.h);
+    // matrix: recomputed only while animating or when the highlighted row changes
+    const hlRow = hoverRow >= 0 ? hoverRow : hoverPt >= 0 ? PTS[hoverPt][0] : -1;
+    const settled = el > ACT[2][1] + 1600;
+    const mkey = settled ? hlRow + ':' + themeStamp + ':' + L.dw : '';
+    if (!s._oc || s._oc.width !== L.dw || s._oc.height !== L.dh) { s._oc = document.createElement('canvas'); s._oc.width = L.dw; s._oc.height = L.dh; lastMKey = null; }
+    if (!settled || mkey !== lastMKey) {
+      lastMKey = mkey;
+      const pr = TC.plate[0], pg = TC.plate[1], pb = TC.plate[2], dimAll = smooth(ACT[2][0] + 200, ACT[2][0] + 1200, el);
+      const FL = TC.dark ? [255, 236, 226] : [220, 60, 50];
+      const gapX = L.dw / NC > 3 ? 1 : 0, gapY = L.dh / NR > 2.5 ? 1 : 0;
+      buf.fill(0);
+      for (let r = 0; r < NR; r++) {
+        const y0 = rowY(r), y1 = Math.max(y0 + 1, rowY(r + 1) - gapY);
+        const labeled = rowPt[r] >= 0, hl = r === hlRow;
+        for (let c = 0; c < NC; c++) {
+          const i = r * NC + c, since = el - cellTimes(r, c, i);
+          if (since <= 0) continue;
+          const R = miss[i] ? ramps.imp : c < NCU ? ramps.cus : ramps.pub, v3 = val[i] * 3;
+          let cr = R[v3], cg = R[v3 + 1], cb = R[v3 + 2];
+          if (miss[i] && since < 520) { const q = (1 - since / 520) * 0.7; cr += (FL[0] - cr) * q; cg += (FL[1] - cg) * q; cb += (FL[2] - cb) * q; }
+          const alpha = hl ? 1 : Math.min(1, since / 240) * (1 - dimAll * (labeled ? 0.55 : 0.75));
+          const packed = ((255 << 24) | (((pb + (cb - pb) * alpha) | 0) << 16) | (((pg + (cg - pg) * alpha) | 0) << 8) | ((pr + (cr - pr) * alpha) | 0)) >>> 0;
+          const x0 = colX(c), x1 = Math.max(x0 + 1, colX(c + 1) - gapX);
+          for (let y = y0; y < y1; y++) buf.fill(packed, y * L.dw + x0, y * L.dw + x1);
+        }
+      }
+      s._oc.getContext('2d').putImageData(img, 0, 0);
+    }
+    g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(s._oc, L.dx, L.dy); g.restore();
+    // labels over the matrix
+    g.font = '500 10.5px Inter, system-ui, sans-serif'; g.textBaseline = 'bottom'; g.textAlign = 'left';
+    const xc0 = L.mx, xc1 = L.mx + NCU * L.mw / NC, xp1 = L.mx + L.mw;
+    g.strokeStyle = rgba(TC.ochre, 0.9); g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(xc0, L.my - 6); g.lineTo(xc1 - 2, L.my - 6); g.stroke();
+    g.strokeStyle = rgba(TC.neg, 0.9); g.beginPath(); g.moveTo(xc1 + 2, L.my - 6); g.lineTo(xp1, L.my - 6); g.stroke();
+    g.fillStyle = rgba(TC.ink2, 1);
+    g.fillText('mine', xc0, L.my - 10);
+    g.textAlign = 'right'; g.fillText('public benchmarks', xp1, L.my - 10);
+    g.save(); g.translate(L.mx - 6, L.my + L.mh / 2); g.rotate(-Math.PI / 2); g.textAlign = 'center'; g.textBaseline = 'bottom'; g.fillStyle = rgba(TC.ink3, 1); g.fillText(`${NR} models`, 0, 0); g.restore();
+    // scatter
+    const axA = smooth(ACT[2][0], ACT[2][0] + 600, el);
+    if (axA > 0) {
+      g.globalAlpha = axA;
+      g.strokeStyle = rgba(TC.rule, 1); g.lineWidth = 1;
+      g.beginPath(); g.moveTo(L.sx, L.sy); g.lineTo(L.sx, L.sy + L.sh); g.lineTo(L.sx + L.sw, L.sy + L.sh); g.stroke();
+      g.strokeStyle = rgba(TC.rule2, 1);
+      for (let v = 1250; v <= 1500; v += 50) { g.beginPath(); g.moveTo(SX(v), L.sy); g.lineTo(SX(v), L.sy + L.sh); g.moveTo(L.sx, SY(v)); g.lineTo(L.sx + L.sw, SY(v)); g.stroke(); }
+      g.setLineDash([3, 4]); g.strokeStyle = rgba(TC.ink3, 0.8);
+      g.beginPath(); g.moveTo(SX(LO), SY(LO)); g.lineTo(SX(HI), SY(HI)); g.stroke(); g.setLineDash([]);
+
+      g.font = '10px "JetBrains Mono", Menlo, monospace'; g.fillStyle = rgba(TC.ink3, 1);
+      for (let v = 1250; v <= 1500; v += 50) {
+        g.textAlign = 'center'; g.textBaseline = 'top'; g.fillText(String(v), SX(v), L.sy + L.sh + 5);
+        g.textAlign = 'right'; g.textBaseline = 'middle'; g.fillText(String(v), L.sx - 6, SY(v));
+      }
+      g.font = '500 10.5px Inter, system-ui, sans-serif'; g.fillStyle = rgba(TC.ink2, 1);
+      g.textAlign = 'center'; g.textBaseline = 'top'; g.fillText('Actual Arena score', L.sx + L.sw / 2, L.sy + L.sh + 20);
+      g.save(); g.translate(L.sx - 42, L.sy + L.sh / 2); g.rotate(-Math.PI / 2); g.textBaseline = 'bottom'; g.fillText('Predicted', 0, 0); g.restore();
+      g.globalAlpha = 1;
+    }
+    // points flying out of their rows into the scatter
+    const per = 2200 / PTS.length;
+    for (let k = 0; k < PTS.length; k++) {
+      const [r, act_, pred] = PTS[k];
+      const since = el - (ACT[2][0] + 300 + ptRank[k] * per);
+      if (since <= 0) continue;
+      const p = easeIO(Math.min(1, since / 700));
+      const x0 = L.mx + L.mw, y0 = L.my + (r + 0.5) * L.mh / NR, x1 = SX(act_), y1 = SY(pred);
+      const x = lerp(x0, x1, p), y = lerp(y0, y1, p) - Math.sin(p * Math.PI) * 18;
+      if (p < 1) { g.strokeStyle = rgba(TC.ink3, 0.18 * (1 - p)); g.lineWidth = 1; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x, y); g.stroke(); }
+      const on = k === hoverPt, miss = pred - act_;
+      const col = miss > 0 ? mix(TC.ink3, TC.accent, Math.min(1, miss / 30)) : mix(TC.ink3, TC.neg, Math.min(1, -miss / 30));
+      g.beginPath(); g.arc(x, y, on ? 4.8 : 3.1, 0, TAU);
+      g.fillStyle = rgba(col, on ? 1 : 0.9); g.fill();
+      g.strokeStyle = rgba(TC.plate, 1); g.lineWidth = 1; g.stroke();
+      if (on) { g.strokeStyle = rgba(TC.ink, 0.6); g.lineWidth = 1; g.beginPath(); g.arc(x, y, 8.5, 0, TAU); g.stroke(); }
+    }
+    // labels go on top of the points, each with a halo in the plate color
+    const halo = (txt, x, y) => { g.strokeStyle = rgba(TC.plate, 0.95); g.lineWidth = 4; g.lineJoin = 'round'; g.strokeText(txt, x, y); g.fillText(txt, x, y); };
+    if (axA > 0) {
+      g.save(); g.globalAlpha = axA; g.translate(SX(1235), SY(1235)); g.rotate(Math.atan2(SY(HI) - SY(LO), SX(HI) - SX(LO)));
+      g.font = 'italic 12px "EB Garamond", Georgia, serif'; g.fillStyle = rgba(TC.ink3, 1); g.textAlign = 'left'; g.textBaseline = 'top'; halo('perfect prediction', 0, 5); g.restore();
+    }
+    // readout
+    let text;
+    if (hoverPt >= 0) { const [, aa, pp] = PTS[hoverPt]; text = `<b>${NAMES[hoverPt]}</b> · actual ${fmt(Math.round(aa))} · predicted ${fmt(Math.round(pp))}`; }
+    else if (hoverRow >= 0) {
+      let m = 0; for (let c = 0; c < NC; c++) m += miss[hoverRow * NC + c];
+      text = rowPt[hoverRow] >= 0 ? `<b>${NAMES[rowPt[hoverRow]]}</b> · ${NC - m} measured, ${m} imputed` : `A model with no Arena score yet · ${NC - m} measured, ${m} imputed`;
+    } else text = ['Measured benchmark scores, with gaps wherever a model has no result', 'Imputing: every gap is filled cell by cell', `Out-of-fold predictions for <b>${PTS.length}</b> models against their real Arena scores · red points were predicted too high, blue too low · hover a point`][act];
+    if (text !== lastText) { out.innerHTML = text; lastText = text; }
+    if (el < ACT[2][1] + 400) s.busy = Math.max(s.busy, 200);
+  }
+  figLoop(canvas, {
+    sizeSelf, draw,
+    move: s => {
+      hoverPt = -1; hoverRow = -1;
+      const el = t0 < 0 ? -1 : s.t - t0;
+      if (el > ACT[2][0] + 300) {
+        let bd = 12 * 12;
+        PTS.forEach(([, aa, pp], k) => { const d = (SX(aa) - s.m.x) ** 2 + (SY(pp) - s.m.y) ** 2; if (d < bd) { bd = d; hoverPt = k; } });
+      }
+      if (hoverPt < 0 && s.m.x >= L.mx && s.m.x <= L.mx + L.mw && s.m.y >= L.my && s.m.y <= L.my + L.mh) hoverRow = Math.floor((s.m.y - L.my) / L.mh * NR);
+    },
+    leave: () => { hoverPt = -1; hoverRow = -1; },
+    theme: () => { buildRamps(); themeStamp++; }
+  });
+  segs.forEach((b, k) => b.addEventListener('click', () => { t0 = k === 0 ? performance.now() + 1200 : performance.now() - ACT[k][0] - 1; canvas.dispatchEvent(new PointerEvent('pointerleave')); }));
+}
+// The benchmark data (about 23 KB compressed) is fetched once the opening's images are in, or as soon as the figure is near.
+(() => {
+  const fig = $('#fig-sooth'); if (!fig) return;
+  let asked = false;
+  const go = () => {
+    if (asked) return; asked = true;
+    fetch('data/sooth.json').then(r => r.json()).then(soothFigure).catch(() => { fig.querySelector('.readout').textContent = 'The benchmark data did not load; refresh to try again.'; });
+  };
+  new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) go(); }, { rootMargin: '150% 0px' }).observe(fig);
+  if (window.__boot) window.__boot.done.then(go);
+  setTimeout(go, 4000);
+})();
+
+/* ================= Fig. 2 · Newscaster: selection, the research loop, production ================= */
+/* Newscaster facts, checked against newscaster3.5 */
+const NEWS = (() => {
+  const SECTIONS = [1, 1, 1, 1, 1, 1, 1, 6, 2, 2, 2, 1, 3, 5, 4, 2];
+  const QTYPES = ['premise challenge', 'scale check', 'source check', 'timeline check', 'mechanism check', 'counter-evidence check', 'freshness check'];
+  const TIP = {
+    memory: 'Before the loop starts, related past episodes are retrieved and turned into a dated background note. The controller may take questions from it, but only facts found in today’s sources count as verified.',
+    controller: 'A controller model reads the evidence so far and the open gaps. Each turn it either sends the researcher a question (tagged with one of seven question types), asks for an article search, or stops. It gets at most 8 turns and must take at least 2.',
+    research: 'Answers a question with a tool-using model that searches the web, opens pages, and searches within them. A fact is kept only if its exact quote appears on a page it fetched. It reports what it found and the gaps that remain.',
+    article: 'Runs a news search for the controller’s query and adds the first new relevant article, after a relevance check and a summary. It adds a whole article to the evidence, not individual verified quotes.',
+    adversary: 'The first time the controller tries to stop, a second model looks for the one question most likely to weaken the story’s central claim. If it finds one, the question is sent straight to the researcher, and the answer is sent back to the controller.',
+    summary: 'When the loop ends, the evidence is condensed into a story summary, checked for off-topic material, and saved. The script is written from it.',
+    script: 'Each lead story is written as a conversation between the host and a reporter, and drafts are scored for length, balance, and attribution.',
+    check: 'Every quote is checked word for word against the saved source pages, and a second model checks each script for contradictions. Fixes are proposed by one model, approved by another, and applied only if the text matches exactly.',
+    audio: 'Text-to-speech voices for the host and reporters, loudness-matched line by line.',
+    yt: 'The finished episode is rendered and uploaded to YouTube.'
+  };
+  const SAY = {
+    summary: 'The loop ends; the evidence is condensed into a summary and checked for off-topic material',
+    script: 'Writing the host and reporter conversation from the summary',
+    check: 'Checking every quote word for word against the source pages',
+    audio: 'Voicing the script',
+    yt: 'Published'
+  };
+  function feedY(f) { let k = 0, gap = 0; for (let s = 0; s < SECTIONS.length; s++) { if (f < k + SECTIONS[s]) return f + gap; k += SECTIONS[s]; gap += 0.8; } return f + gap; }
+  const FEEDSPAN = feedY(33);
+  // One plausible morning: 2 to 4 rounds (article searches only after the first), then the adversary's question.
+  function plan() {
+    const rounds = 2 + ((Math.random() * 3) | 0), turns = [];
+    for (let k = 0; k < rounds; k++) {
+      const art = k > 0 && Math.random() < 0.35;
+      turns.push({ tool: art ? 'article' : 'research', q: art ? null : QTYPES[(Math.random() * QTYPES.length) | 0], n: art ? 1 : 2 + ((Math.random() * 3) | 0) });
+    }
+    return { rounds, turns, advN: 1 + ((Math.random() * 3) | 0) };
+  }
+  function heads() { const h = []; for (let k = 0; k < 64; k++) h.push({ f: (Math.random() * 34) | 0, py: Math.random(), px: Math.random(), keep: k < 15, lead: k < 2, li: k }); return h; }
+  const FUNNEL_TEXT = el => (el < 1000 ? 'Collecting today’s headlines from 34 news feeds'
+    : el < 1600 ? 'Shortlist: every headline is scored twice, for national newsworthiness and for relevance to Californians. The top 10 and the top 5 each get a short research brief'
+    : 'From those briefs, two lead stories: the most important one for the country and the most important one for Californians. Each gets its own research loop; one is followed here');
+  // The label under the headlines follows the stage the animation is in.
+  const STAGE = el => (el < 1000 ? 'today’s headlines' : el < 1600 ? 'shortlist: 10 national + 5 California' : '2 lead stories');
+  // A horizontal selection strip: feed ticks, a gate, the kept stories, and two leads that travel to (tx, ty).
+  function strip(g, el, B, hs, tx, ty) {
+    g.font = '500 10.5px Inter, system-ui, sans-serif'; g.fillStyle = rgba(TC.ink2, 1); g.textAlign = 'left'; g.textBaseline = 'top';
+    g.fillText('34 news feeds', B.x, B.y);
+    const fx0 = B.x, fx1 = B.x + B.w * 0.5, gateX = B.x + B.w * 0.58, y0 = B.y + 18;
+    for (let f = 0; f < 34; f++) { const x = fx0 + feedY(f) / FEEDSPAN * (fx1 - fx0); g.fillStyle = rgba(TC.ink3, 0.7); g.fillRect(x - 0.75, y0, 1.5, 7); }
+    g.strokeStyle = rgba(TC.rule, 1); g.lineWidth = 1; g.setLineDash([2, 3]); g.beginPath(); g.moveTo(gateX, y0 - 2); g.lineTo(gateX, B.y + B.h); g.stroke(); g.setLineDash([]);
+    g.fillStyle = rgba(TC.ink3, 1); g.textAlign = 'right'; g.fillText(STAGE(el), B.x + B.w, B.y);
+    const cy0 = y0 + 13, ch = Math.max(6, B.y + B.h - cy0 - 2);
+    for (const hd of hs) {
+      const x0 = fx0 + feedY(hd.f) / FEEDSPAN * (fx1 - fx0);
+      const p1 = smooth(0, 900, el - hd.py * 300);
+      let x = lerp(x0, fx0 + 4 + (fx1 - fx0 - 8) * hd.px, p1), y = lerp(y0 + 8, cy0 + ch * hd.py, p1), a = p1;
+      const p2 = smooth(1000, 1500, el);
+      if (!hd.keep) a *= 1 - p2; else x = lerp(x, gateX + 12 + hd.px * (B.x + B.w - gateX - 24), p2);
+      const p3 = smooth(1600, 2250, el);
+      if (hd.keep && !hd.lead) a *= 1 - p3 * 0.75;
+      if (hd.lead) { x = lerp(x, tx, easeIO(p3)); y = lerp(y, ty, easeIO(p3)); if (hd.li === 1) a *= 1 - smooth(1900, 2250, el); }
+      if (a <= 0.01) continue;
+      g.fillStyle = rgba(hd.lead ? TC.accent : TC.ink3, a * (hd.keep ? 0.95 : 0.55));
+      g.fillRect(x - (hd.lead ? 4 : 3), y - 0.9, hd.lead ? 8 : 6, 1.8);
+    }
+  }
+  // Pill in the site's style: paper fill, thin stroke, Inter label, optional sub-label.
+  function pillBox(g, x, y, w1, sub, big, small) {
+    g.font = big ? '600 12.5px Inter, system-ui, sans-serif' : small ? '500 10.5px Inter, system-ui, sans-serif' : '500 11.5px Inter, system-ui, sans-serif';
+    const tw = g.measureText(w1).width;
+    g.font = '10px Inter, system-ui, sans-serif';
+    const sw = sub ? g.measureText(sub).width : 0;
+    const w = Math.max(tw, sw) + (small ? 16 : 28), h = sub ? 42 : small ? 22 : 24;
+    return [x - w / 2, y - h / 2, w, h];
+  }
+  function drawPill(g, box, w1, sub, o) {
+    const [bx, by, w, h] = box, x = bx + w / 2, y = by + h / 2, act = o.active || 0;
+    if (act > 0) { g.fillStyle = rgba(TC.accent, 0.1 * act); roundRect(g, bx - 6 * act, by - 6 * act, w + 12 * act, h + 12 * act, 9); g.fill(); }
+    roundRect(g, bx, by, w, h, 6); g.fillStyle = rgba(TC.paper, 1); g.fill();
+    const hot = act > 0.3 || o.hover;
+    g.strokeStyle = rgba(hot ? TC.accent : o.used ? TC.ink2 : TC.ink3, hot ? 1 : o.used ? 0.95 : 0.6); g.lineWidth = o.big ? 1.6 : 1.1; g.stroke();
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = rgba(act > 0.3 ? TC.accent : TC.ink, 1);
+    g.font = o.big ? '600 12.5px Inter, system-ui, sans-serif' : o.small ? '500 10.5px Inter, system-ui, sans-serif' : '500 11.5px Inter, system-ui, sans-serif';
+    g.fillText(w1, x, y - (sub ? 7.5 : 0) + (o.lift || 0));
+    if (sub) { g.font = '10px Inter, system-ui, sans-serif'; g.fillStyle = rgba(TC.ink3, 1); g.fillText(sub, x, y + 8.5 + (o.lift || 0)); }
+  }
+  // Italic annotation with a halo in the plate color, as in Fig. 1.
+  function tag(g, txt, x, y, align, col) {
+    g.font = 'italic 12px "EB Garamond", Georgia, serif'; g.textAlign = align || 'left'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+    g.strokeStyle = rgba(TC.plate, 0.95); g.lineWidth = 4; g.strokeText(txt, x, y);
+    g.fillStyle = rgba(col || TC.ink3, 1); g.fillText(txt, x, y);
+  }
+  function arrowHead(g, x2, y2, ang, size) {
+    const s = size || 6; g.beginPath(); g.moveTo(x2 - s * Math.cos(ang - 0.42), y2 - s * Math.sin(ang - 0.42)); g.lineTo(x2, y2); g.lineTo(x2 - s * Math.cos(ang + 0.42), y2 - s * Math.sin(ang + 0.42)); g.stroke();
+  }
+  function trail(g, f, p) {
+    for (let tr = 3; tr >= 0; tr--) {
+      const [x, y] = f(Math.max(0, p - tr * 0.06));
+      g.beginPath(); g.arc(x, y, tr ? 2.2 : 4, 0, TAU); g.fillStyle = rgba(TC.accent, tr ? 0.25 - tr * 0.05 : 1); g.fill();
+    }
+  }
+  return { SECTIONS, QTYPES, TIP, SAY, feedY, FEEDSPAN, plan, heads, FUNNEL_TEXT, STAGE, strip, pillBox, drawPill, tag, arrowHead, trail };
+})();
+
+(function news2B() {
+  const fig = $('#fig-news'); if (!fig) return;
+  const canvas = fig.querySelector('canvas'), out = fig.querySelector('.readout');
+  const { feedY, FEEDSPAN, TIP } = NEWS;
+  const N = {
+    memory: { p: [0.07, 0.4], w: 'Memory', sub: 'past episodes' },
+    controller: { p: [0.36, 0.4], w: 'Controller', sub: 'picks the next step', big: true },
+    research: { p: [0.72, 0.13], w: 'Researcher', sub: 'answers a question' },
+    article: { p: [0.74, 0.64], w: 'Article search', sub: 'adds an article' },
+    adversary: { p: [0.33, 0.05], w: 'Adversary' },
+    summary: { p: [0.1, 0.92], w: 'Summary' },
+    script: { p: [0.32, 0.92], w: 'Script' },
+    check: { p: [0.54, 0.92], w: 'Fact-check' },
+    audio: { p: [0.75, 0.92], w: 'Voices' },
+    yt: { p: [0.94, 0.92], w: 'YouTube' }
+  };
+  const NP = { memory: [0.78, 0.04], adversary: [0.22, 0.04], controller: [0.5, 0.27], research: [0.2, 0.52], article: [0.8, 0.52], summary: [0.5, 0.7], script: [0.2, 0.86], check: [0.78, 0.86], audio: [0.2, 1], yt: [0.78, 1] };
+  const EDGES = [['memory', 'controller'], ['controller', 'research', 'loop'], ['controller', 'article', 'loop'], ['controller', 'adversary', 'stop'], ['adversary', 'research', 'challenge'], ['controller', 'summary', 'done'], ['summary', 'script'], ['script', 'check'], ['check', 'audio'], ['audio', 'yt']];
+  const LABEL = { stop: 'tries to stop', challenge: 'one question', done: 'done' };
+  const BEND = { 'controller>research': 0.12, 'research>controller': 0.12, 'controller>article': -0.12, 'article>controller': -0.12, 'adversary>research': -0.08 };
+  const bendOf = (a, b) => BEND[a + '>' + b] ?? 0;
+  let FUN = null, LOOP = null, narrow = false, hover = null, run = null, quotes = [], lastText = '';
+  function sizeSelf(s) {
+    narrow = s.w < 640;
+    const h = narrow ? 670 : 430;
+    sizeTo(s, canvas, h);
+    if (!narrow) { FUN = { x: 14, y: 26, w: s.w * 0.24, h: h - 60 }; LOOP = { x: s.w * 0.28 + 10, y: 36, w: s.w * 0.72 - 36, h: h - 70 }; }
+    else { FUN = { x: 14, y: 22, w: s.w - 28, h: 130 }; LOOP = { x: 20, y: 212, w: s.w - 40, h: h - 254 }; }
+  }
+  const P = id => { const [u, v] = narrow ? NP[id] : N[id].p; return [LOOP.x + u * LOOP.w, LOOP.y + v * LOOP.h]; };
+  function newRun(t) {
+    const p = NEWS.plan(), steps = [{ n: 'memory', say: 'Memory: past episodes about this story are retrieved and given to the controller as a dated note' }];
+    let turn = 0;
+    p.turns.forEach(tu => { steps.push({ n: 'controller', turn: ++turn }); steps.push({ n: tu.tool, q: tu.q, nq: tu.n }); });
+    steps.push({ n: 'controller', turn: ++turn, stop: true });
+    steps.push({ n: 'adversary', say: 'The controller tries to stop, so the adversary looks for the one question most likely to weaken the story' });
+    steps.push({ n: 'research', adv: true, nq: p.advN });
+    steps.push({ n: 'controller', turn: ++turn, say: `Turn ${turn}: done, the story has enough verified evidence` });
+    ['summary', 'script', 'check', 'audio', 'yt'].forEach(n => steps.push({ n, say: NEWS.SAY[n] }));
+    return { t0: t, steps, heads: NEWS.heads(), SEG: 620, funnel: 2300, verified: 0, articles: 0 };
+  }
+  function drawFunnel(g, el) {
+    const F = FUN;
+    g.font = '500 10.5px Inter, system-ui, sans-serif'; g.fillStyle = rgba(TC.ink2, 1); g.textBaseline = 'bottom';
+    const [mx, my] = P('controller');
+    if (!narrow) {
+      g.textAlign = 'left'; g.fillText('34 news feeds', F.x, F.y - 6);
+      for (let f = 0; f < 34; f++) { const y = F.y + feedY(f) / FEEDSPAN * F.h; g.fillStyle = rgba(TC.ink3, 0.7); g.fillRect(F.x, y - 0.75, 8, 1.5); }
+      const gateX = F.x + F.w * 0.66;
+      g.strokeStyle = rgba(TC.rule, 1); g.lineWidth = 1; g.setLineDash([2, 3]); g.beginPath(); g.moveTo(gateX, F.y); g.lineTo(gateX, F.y + F.h); g.stroke(); g.setLineDash([]);
+      g.textBaseline = 'top'; g.fillStyle = rgba(TC.ink3, 1); g.textAlign = 'left'; g.fillText(NEWS.STAGE(el), F.x, F.y + F.h + 6);
+      for (const hd of run.heads) {
+        const y0 = F.y + feedY(hd.f) / FEEDSPAN * F.h;
+        const p1 = smooth(0, 900, el - hd.py * 300), px = F.x + 14 + (F.w * 0.48) * (0.25 + 0.75 * hd.px), py = F.y + F.h * (0.08 + 0.84 * hd.py);
+        let x = lerp(F.x + 12, px, p1), y = lerp(y0, py, p1), a = p1;
+        const p2 = smooth(1000, 1500, el);
+        if (!hd.keep) a *= 1 - p2; else x = lerp(x, gateX + 12 + hd.px * (F.w * 0.22), p2);
+        const p3 = smooth(1600, 2200, el);
+        if (hd.keep && !hd.lead) a *= 1 - p3 * 0.8;
+        // the two lead stories rise to the top of the column, then cross above Memory into the Controller
+        if (hd.lead) {
+          const qa = easeIO(smooth(1600, 1900, el)), qb = easeIO(smooth(1900, 2300, el));
+          x = lerp(lerp(x, gateX + 16, qa), mx, qb); y = lerp(lerp(y, my - 90 + hd.li * 7, qa), my, qb);
+          if (hd.li === 1) a *= 1 - smooth(2000, 2250, el);
+        }
+        if (a <= 0.01) continue;
+        g.fillStyle = rgba(hd.lead ? TC.accent : TC.ink3, a * (hd.keep ? 0.95 : 0.55));
+        g.fillRect(x - (hd.lead ? 4 : 3), y - 0.9, hd.lead ? 8 : 6, 1.8);
+      }
+    } else {
+      NEWS.strip(g, el, { x: F.x, y: F.y - 12, w: F.w, h: F.h - 10 }, run.heads, mx, my);
+    }
+  }
+  function measure(g) { for (const id in N) { const n = N[id], [x, y] = P(id); const b = NEWS.pillBox(g, x, y, n.w, n.sub, n.big); if (id === 'controller') { b[1] -= 6; b[3] += 12; } n.box = b; } }
+  function curve(a, b, bend) {
+    const [x1, y1] = P(a), [x2, y2] = P(b), mx = (x1 + x2) / 2, my = (y1 + y2) / 2, dx = x2 - x1, dy = y2 - y1;
+    const cx = mx - dy * bend, cy = my + dx * bend;
+    return t => { const it = 1 - t; return [it * it * x1 + 2 * it * t * cx + t * t * x2, it * it * y1 + 2 * it * t * cy + t * t * y2]; };
+  }
+  const inBox = (p, b) => p[0] > b[0] - 3 && p[0] < b[0] + b[2] + 3 && p[1] > b[1] - 3 && p[1] < b[1] + b[3] + 3;
+  function clipped(a, b, bend) {
+    const f = curve(a, b, bend), A = N[a].box, B = N[b].box; let t0 = 0, t1 = 1;
+    for (let i = 0; i <= 80; i++) { const t = i / 80; if (!inBox(f(t), A)) { t0 = t; break; } }
+    for (let i = 80; i >= 0; i--) { const t = i / 80; if (!inBox(f(t), B)) { t1 = t; break; } }
+    return { f, t0, t1 };
+  }
+  function strokeSeg(g, e) {
+    g.beginPath(); for (let i = 0; i <= 28; i++) { const [x, y] = e.f(lerp(e.t0, e.t1, i / 28)); i ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke();
+    const [x2, y2] = e.f(e.t1), [x1, y1] = e.f(e.t1 - 0.02); const d = g.getLineDash(); g.setLineDash([]); NEWS.arrowHead(g, x2, y2, Math.atan2(y2 - y1, x2 - x1), 5.5); g.setLineDash(d);
+  }
+  function ledger() {
+    if (!narrow) return { x: LOOP.x + 6, y: LOOP.y + 42, per: 10, rows: 2 };
+    return { x: LOOP.x + LOOP.w - 96, y: LOOP.y + 66, per: 8, rows: 3 };
+  }
+  function draw(s) {
+    const g = s.ctx, t = s.t;
+    if (!run || (!RM && t - run.t0 > run.funnel + run.steps.length * run.SEG + 2600)) { run = newRun(t); quotes = []; }
+    const el = RM ? 1e9 : t - run.t0;
+    g.clearRect(0, 0, s.w, s.h);
+    drawFunnel(g, el);
+    measure(g);
+    const le = el - run.funnel;
+    const k = RM ? run.steps.length - 1 : clamp(Math.floor(le / run.SEG), -1, run.steps.length - 1);
+    const f = RM ? 1 : clamp((le - k * run.SEG) / run.SEG, 0, 1);
+    const seen = new Set(), used = new Set();
+    let turns = 0;
+    for (let i = 0; i <= k; i++) {
+      const done = i < k || f > 0.8, st = run.steps[i];
+      if (!done) continue;
+      used.add(st.n); if (st.n === 'controller') turns++;
+      if (i >= 1) seen.add(run.steps[i - 1].n + '>' + st.n);
+    }
+    // edges: the route taken this run darkens; hovered edges turn red
+    g.lineWidth = 1.1; g.lineCap = 'round';
+    const col = (a, b, dir) => (hover && (hover === a || hover === b) ? rgba(TC.accent, 0.85) : seen.has(dir) ? rgba(TC.ink2, 0.85) : rgba(TC.ink3, 0.4));
+    for (const [a, b, kind] of EDGES) {
+      g.lineWidth = 1.1; g.strokeStyle = col(a, b, a + '>' + b);
+      if (kind === 'challenge') g.setLineDash([4, 3]);
+      const e = clipped(a, b, bendOf(a, b)); strokeSeg(g, e); g.setLineDash([]);
+      if (kind === 'loop') { g.lineWidth = 1.1; g.strokeStyle = col(a, b, b + '>' + a); g.setLineDash([2, 3]); strokeSeg(g, clipped(b, a, bendOf(b, a))); g.setLineDash([]); }
+      if (LABEL[kind] && !narrow) {
+        const [mx, my] = e.f((e.t0 + e.t1) / 2);
+        if (kind === 'stop') NEWS.tag(g, LABEL[kind], mx + 8, my, 'left');
+        else if (kind === 'challenge') NEWS.tag(g, LABEL[kind], mx, my + 13, 'center');
+        else NEWS.tag(g, LABEL[kind], mx + 9, my, 'left');
+      }
+    }
+    // nodes
+    const activeOf = id => { let v = 0; if (k >= 0) { const st = run.steps[k]; if (st.n === id) v = Math.max(v, smooth(0.62, 0.86, f)); const pv = run.steps[k - 1]; if (pv && pv.n === id) v = Math.max(v, 1 - smooth(0.08, 0.34, f)); } return v; };
+    // the dot runs from the middle of one box to the middle of the next the whole step long, under the boxes,
+    // so it slides into a box and out the other side instead of stopping at the edge and jumping
+    if (k >= 1 && !RM) {
+      const a = run.steps[k - 1].n, b = run.steps[k].n, fc = curve(a, b, bendOf(a, b));
+      NEWS.trail(g, fc, easeIO(f));
+      const st = run.steps[k];
+      if (st.n === 'research' && f > 0.8 && !st.done) { st.done = true; for (let q = 0; q < st.nq; q++) quotes.push({ t: t + q * 90, from: P('research') }); run.verified += st.nq; }
+      if (st.n === 'article' && f > 0.8 && !st.done) { st.done = true; quotes.push({ t, from: P('article'), art: true }); run.articles++; }
+    }
+    for (const id in N) {
+      const n = N[id];
+      NEWS.drawPill(g, n.box, n.w, n.sub, { active: activeOf(id), used: used.has(id), hover: hover === id, big: n.big, lift: id === 'controller' ? -5 : 0 });
+    }
+    // the controller's turn meter: 8 squares, filled as turns are used
+    {
+      const [cx, cy] = P('controller'), y = cy + 12;
+      for (let i = 0; i < 8; i++) {
+        const x = cx - 28 + i * 7.5;
+        if (i < turns) { g.fillStyle = rgba(TC.accent, 0.9); g.fillRect(x, y, 5, 5); }
+        else { g.strokeStyle = rgba(TC.ink3, i < 2 ? 0.8 : 0.45); g.lineWidth = 1; g.strokeRect(x + 0.5, y + 0.5, 4, 4); }
+      }
+    }
+    // evidence ledger
+    const L = ledger(), ay = L.y + L.rows * 7 + 6;
+    g.font = '9.5px "JetBrains Mono", Menlo, monospace'; g.fillStyle = rgba(TC.ink3, 1); g.textAlign = 'left'; g.textBaseline = 'bottom';
+    g.fillText('evidence', L.x, L.y - 5);
+    let qi = 0, ai = 0;
+    for (const q of quotes) {
+      const p = easeIO(clamp((t - q.t) / 500, 0, 1)); if (p <= 0) continue;
+      let tx, ty;
+      if (q.art) { tx = L.x + ai * 7; ty = ay; ai++; } else { tx = L.x + (qi % L.per) * 7; ty = L.y + Math.floor(qi / L.per) * 7; qi++; }
+      const x = lerp(q.from[0], tx + 2.5, p), y = lerp(q.from[1], ty + 2.5, p);
+      if (q.art) { g.strokeStyle = rgba(TC.ink, 0.85); g.lineWidth = 1.1; g.strokeRect(x - 2, y - 2, 4.5, 4.5); }
+      else { g.fillStyle = rgba(TC.accent, 0.9); g.fillRect(x - 2.5, y - 2.5, 5, 5); }
+    }
+    g.textBaseline = 'middle'; g.fillStyle = rgba(TC.ink3, 1);
+    const cx = L.x + L.per * 7 + 6;
+    if (run.verified) g.fillText(`${run.verified} quote${run.verified > 1 ? 's' : ''}`, cx, L.y + 2.5);
+    if (run.articles) g.fillText(`${run.articles} article${run.articles > 1 ? 's' : ''}`, Math.max(cx, L.x + run.articles * 7 + 6), ay + 2.5);
+    // readout
+    let text = 'Hover a step for details';
+    if (hover) text = TIP[hover];
+    else if (el < run.funnel) text = NEWS.FUNNEL_TEXT(el);
+    else if (k >= 0) {
+      const st = run.steps[k];
+      if (st.say) text = st.say;
+      else if (st.n === 'controller' && st.stop) text = `Turn <b>${st.turn}</b> of up to 8: the controller decides the story is covered and tries to stop`;
+      else if (st.n === 'controller') text = `Turn <b>${st.turn}</b> of up to 8: the controller reads the evidence and the open gaps · <b>${run.verified}</b> verified quotes${run.articles ? `, <b>${run.articles}</b> article${run.articles > 1 ? 's' : ''}` : ''}`;
+      else if (st.n === 'research') text = st.adv ? 'The adversary’s question is sent straight to the researcher, and the answer is sent back to the controller' : `Researcher: a <b>${st.q}</b>, keeping only quotes found word for word on fetched pages`;
+      else if (st.n === 'article') text = 'Article search: adding the first new relevant news article';
+    }
+    if (text !== lastText) { out.innerHTML = text; lastText = text; }
+  }
+  figLoop(canvas, {
+    sizeSelf, draw,
+    move: s => {
+      hover = null;
+      for (const id in N) { const b = N[id].box; if (b && s.m.x >= b[0] - 4 && s.m.x <= b[0] + b[2] + 4 && s.m.y >= b[1] - 4 && s.m.y <= b[1] + b[3] + 4) hover = id; }
+      canvas.style.cursor = hover ? 'help' : 'default';
+    },
+    leave: () => { hover = null; }
+  });
+})();
+
+/* ================= Fig. 3 · Adgrl2 splicing: one gene, two cells ================= */
+/* Adgrl2 facts from the JNeurosci 2026 paper */
+const SPLICE = (() => {
+  // Exon inclusion (EIP) per cell type and what each alternative exon adds to the protein, as reported in the paper.
+  const ALT = [
+    { n: 9, len: 0.4, aa: 4, where: 'between the extracellular lectin and olfactomedin domains' },
+    { n: 14, len: 0.62, aa: 13, where: 'in the extracellular GAIN domain' },
+    { n: 23, len: 0.68, aa: 15, where: 'in the third intracellular loop of the receptor' },
+    { n: 28, len: 1.15, aa: 43, where: 'in the intracellular C-terminal region' }
+  ];
+  const CELLS = {
+    glut: { label: 'Glutamatergic neuron', short: 'Glutamatergic', sub: 'neuron', eip: [96, 99, 74, 92] },
+    gaba: { label: 'GABAergic neuron', short: 'GABAergic', sub: 'neuron', eip: [84, 99, 49, 62] },
+    endo: { label: 'Endothelial cell', short: 'Endothelial', sub: 'cell', eip: [0, 10, 7, 3] }
+  };
+  const EL = [{ k: 'c', len: 1 }];
+  ALT.forEach((a, j) => { EL.push({ k: 'i', len: 1.25 }, { k: 'a', len: a.len, j }, { k: 'i', len: 1.25 }, { k: 'c', len: 1 }); });
+  const UNITS = EL.reduce((s, e) => s + e.len, 0);
+  const SEGS = [];
+  { let x = 0, ci = 0; EL.forEach(e => { if (e.k === 'c') SEGS.push({ s: x, e: x + e.len, k: 'c', ci: ci++ }); else if (e.k === 'a') SEGS.push({ s: x, e: x + e.len, k: 'a', j: e.j }); x += e.len; }); }
+  function geneModel(g, x0, w, y, o) {
+    const sc = w / UNITS, h = (o && o.h) || 10, centers = [];
+    g.strokeStyle = rgba(TC.ink3, 0.9); g.lineWidth = 1.4; g.beginPath(); g.moveTo(x0, y); g.lineTo(x0 + w, y); g.stroke();
+    SEGS.forEach(sg => {
+      const a = x0 + sg.s * sc, b = x0 + sg.e * sc;
+      g.fillStyle = rgba(sg.k === 'a' ? TC.accent : TC.ink2, 1); roundRect(g, a, y - h / 2, b - a, h, Math.min(3, (b - a) / 2)); g.fill();
+      if (sg.k === 'a') { centers[sg.j] = (a + b) / 2; if (o && o.hl === sg.j) { g.strokeStyle = rgba(TC.ink, 0.9); g.lineWidth = 1.2; roundRect(g, a - 2.5, y - h / 2 - 2.5, b - a + 5, h + 5, 3); g.stroke(); } }
+    });
+    return centers;
+  }
+  const tipOf = j => `Exon ${ALT[j].n} · ${ALT[j].aa} amino acids ${ALT[j].where}`;
+  return { ALT, CELLS, EL, UNITS, SEGS, geneModel, tipOf };
+})();
+
+(function splice3B() {
+  const fig = $('#fig-splice'); if (!fig) return;
+  const canvas = fig.querySelector('canvas'), out = fig.querySelector('.readout');
+  const { ALT, EL, UNITS } = SPLICE;
+  const CELLS = [SPLICE.CELLS.glut, SPLICE.CELLS.endo];
+  const state = CELLS.map(() => ({ tx: [], pile: [], inc: [0, 0, 0, 0], n: 0 }));
+  let nextSpawn = -1, first = true, panels = [], lastText = '', W = 0, H = 0, side = true, gene = null, hoverJ = -1, centers = [], tallies = [];
+  function sizeSelf(s) {
+    side = s.w >= 600; H = side ? 388 : 690; sizeTo(s, canvas, H); W = s.w;
+    const top = 86;
+    panels = side ? [{ x: 0, y: top, w: W / 2, h: H - top }, { x: W / 2, y: top, w: W / 2, h: H - top }] : [{ x: 0, y: top, w: W, h: (H - top) / 2 }, { x: 0, y: top + (H - top) / 2, w: W, h: (H - top) / 2 }];
+    gene = { x: 22, w: W - 44, y: 50 };
+  }
+  function spawn(t) {
+    const dur = first ? 3600 : 2000; first = false;
+    const incs = CELLS.map(c => c.eip.map(e => Math.random() * 100 < e));
+    CELLS.forEach((c, ci) => { state[ci].tx.push({ t0: t, dur, inc: incs[ci] }); });
+    nextSpawn = t + dur * 0.72;
+  }
+  function items(tx) {
+    const it = [];
+    for (let k = 0; k < EL.length; k++) {
+      const e = EL[k];
+      if (e.k === 'c') { it.push({ t: 'exon', len: e.len }); continue; }
+      if (e.k === 'i') {
+        const nx = EL[k + 1];
+        if (nx && nx.k === 'a' && !tx.inc[nx.j]) { it.push({ t: 'loop', len: e.len + nx.len + EL[k + 2].len, exon: nx }); k += 2; continue; }
+        it.push({ t: 'loop', len: e.len }); continue;
+      }
+      it.push({ t: 'exon', len: e.len, alt: e.j });
+    }
+    return it;
+  }
+  function drawTranscript(g, P, tx, u, sc, y, alpha) {
+    const it = items(tx), nLoops = it.filter(x => x.t === 'loop').length;
+    let li = 0;
+    const prog = it.map(x => { if (x.t !== 'loop') return 0; const st = 0.2 + 0.2 * (li++ / Math.max(1, nLoops - 1)); return easeIO(clamp((u - st) / 0.28, 0, 1)); });
+    const total = it.reduce((s, x, k) => s + (x.t === 'loop' ? x.len * (1 - prog[k]) : x.len), 0) * sc;
+    let x = P.x + (P.w - total) / 2;
+    const HH = 11;
+    g.lineWidth = 1.4;
+    it.forEach((m, k) => {
+      if (m.t === 'exon') { const w = m.len * sc, pw = Math.max(1, w - 1); g.fillStyle = rgba(m.alt !== undefined ? TC.accent : TC.ink2, alpha); roundRect(g, x + 0.5, y - HH / 2, pw, HH, Math.min(3, pw / 2)); g.fill(); x += w; return; }
+      const p = prog[k], L = m.len * sc, chord = L * (1 - p), la = alpha * (1 - smooth(0.72, 1, p));
+      if (la > 0.01) {
+        const h = L * 0.42 * easeOut(p), bulge = h * 0.55 * p;
+        g.strokeStyle = rgba(TC.ink3, 0.9 * la);
+        g.beginPath(); g.moveTo(x, y); g.bezierCurveTo(x - bulge, y - h, x + chord + bulge, y - h, x + chord, y); g.stroke();
+        if (m.exon) { const ax = x + chord / 2, ay = y - h * 0.75, w = m.exon.len * sc * (1 - 0.35 * p); g.fillStyle = rgba(TC.accent, 0.85 * la); roundRect(g, ax - w / 2, ay - HH / 2, w, HH, Math.min(3, w / 2)); g.fill(); }
+      }
+      x += chord;
+    });
+  }
+  function drawMRNA(g, cx, y, inc, sc, alpha) {
+    const segs = [];
+    EL.forEach(e => { if (e.k === 'c') segs.push([e.len, null]); else if (e.k === 'a' && inc[e.j]) segs.push([e.len, e.j]); });
+    const total = segs.reduce((s, q) => s + q[0], 0) * sc;
+    let x = cx - total / 2;
+    segs.forEach(([len, j]) => { const w = len * sc, pw = Math.max(1, w - 0.8); g.fillStyle = rgba(j !== null ? TC.accent : TC.ink2, alpha); roundRect(g, x, y - 3, pw, 6, Math.min(2, pw / 2)); g.fill(); x += w; });
+  }
+  function draw(s) {
+    const g = s.ctx, t = s.t;
+    if ((nextSpawn < 0 && (RM || inView(canvas))) || (nextSpawn >= 0 && !RM && t >= nextSpawn)) spawn(t);
+    g.clearRect(0, 0, W, H);
+    // the shared gene
+    g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+    g.font = 'italic 15px "EB Garamond", Georgia, serif'; g.fillStyle = rgba(TC.ink, 1); g.fillText('Adgrl2', gene.x, 22);
+    const gw = g.measureText('Adgrl2').width;
+    g.font = '10px Inter, system-ui, sans-serif'; g.fillStyle = rgba(TC.ink3, 1); g.fillText('pre-mRNA · one gene, spliced in two cell types', gene.x + gw + 8, 21);
+    centers = SPLICE.geneModel(g, gene.x, gene.w, gene.y, { h: 11, hl: hoverJ });
+    g.font = '9.5px "JetBrains Mono", Menlo, monospace'; g.textAlign = 'center'; g.textBaseline = 'bottom';
+    ALT.forEach((a, j) => { g.fillStyle = rgba(hoverJ === j ? TC.accent : TC.ink2, 1); g.fillText(String(a.n), centers[j], gene.y - 9); });
+    g.strokeStyle = rgba(TC.rule2, 1); g.lineWidth = 1; g.beginPath(); g.moveTo(22, 74); g.lineTo(W - 22, 74); g.stroke();
+    tallies = [];
+    CELLS.forEach((cell, ci) => {
+      const P = panels[ci], st = state[ci], pad = 22, inner = { x: P.x + pad, w: P.w - pad * 2 };
+      const sc = inner.w / UNITS, base = P.y + 64, pileY = P.y + 108, tallyY = P.y + P.h - 86;
+      g.font = '600 10.5px Inter, system-ui, sans-serif'; g.fillStyle = rgba(TC.ink2, 1); g.textAlign = 'left'; g.textBaseline = 'top';
+      g.fillText(cell.label.toUpperCase(), inner.x, P.y + 10);
+      g.font = '10px "JetBrains Mono", Menlo, monospace'; g.fillStyle = rgba(TC.ink3, 1); g.textAlign = 'right';
+      g.fillText(`${fmt(st.n)} transcripts`, inner.x + inner.w, P.y + 10);
+      g.textAlign = 'left'; g.fillText('mRNA', inner.x, pileY - 16);
+      if (ci === 1 && side) { g.strokeStyle = rgba(TC.rule2, 1); g.lineWidth = 1; g.beginPath(); g.moveTo(P.x, P.y + 8); g.lineTo(P.x, H - 14); g.stroke(); }
+      if (ci === 1 && !side) { g.strokeStyle = rgba(TC.rule2, 1); g.lineWidth = 1; g.beginPath(); g.moveTo(22, P.y); g.lineTo(W - 22, P.y); g.stroke(); }
+      const pileSc = sc * 0.62;
+      // finished mRNAs stack up; when one lands, the stack glides down a row instead of jumping, and the oldest fades out
+      const recent = st.pile.slice(-6).reverse(), glide = recent.length && !RM ? easeIO(clamp((t - recent[0].t) / 400, 0, 1)) : 1;
+      recent.forEach((p, k) => {
+        const row = k - 1 + glide, a = clamp(0.9 - row * 0.14, 0, 1) * (1 - smooth(4, 5, row));
+        if (a > 0.01) drawMRNA(g, inner.x + inner.w / 2, pileY + row * 10, p.inc, pileSc, a);
+      });
+      st.tx = st.tx.filter(tx => {
+        const u = RM ? 1 : (t - tx.t0) / tx.dur;
+        if (u >= 1) { st.pile.push({ inc: tx.inc, t }); st.n++; tx.inc.forEach((v, j) => { if (v) st.inc[j]++; }); if (st.pile.length > 40) st.pile.shift(); return false; }
+        // side by side, each copy drops from the shared gene; stacked, it fades in where it is spliced
+        const a = side ? smooth(0, 0.05, u) : smooth(0, 0.1, u), dp = side ? easeIO(smooth(0.02, 0.16, u)) : 1, d = smooth(0.7, 0.93, u);
+        const Pi = { x: lerp(gene.x, inner.x, dp), w: lerp(gene.w, inner.w, dp) };
+        if (d <= 0) drawTranscript(g, Pi, tx, u, Pi.w / UNITS, lerp(gene.y, base, dp), a * (0.55 + 0.45 * dp));
+        else drawMRNA(g, inner.x + inner.w / 2, lerp(base, pileY - 10, d), tx.inc, lerp(sc, pileSc, d), 1);
+        return true;
+      });
+      const bw = inner.w - 112;
+      ALT.forEach((a, j) => {
+        const y = tallyY + j * 20, obs = st.n ? st.inc[j] / st.n : 0, hl = hoverJ === j;
+        tallies.push({ j, ci, x0: inner.x, x1: inner.x + inner.w, y });
+        g.font = '10px "JetBrains Mono", Menlo, monospace'; g.fillStyle = rgba(hl ? TC.accent : TC.ink2, 1); g.textAlign = 'left'; g.textBaseline = 'middle';
+        g.fillText(`exon ${a.n}`, inner.x, y);
+        const bx = inner.x + 56;
+        g.fillStyle = rgba(TC.rule2, 1); roundRect(g, bx, y - 3.5, bw, 7, 2); g.fill();
+        if (obs > 0) { const fw = bw * obs; g.fillStyle = rgba(TC.accent, hl ? 1 : 0.85); roundRect(g, bx, y - 3.5, fw, 7, Math.min(2, fw / 2)); g.fill(); }
+        const tx = bx + bw * cell.eip[j] / 100;
+        g.fillStyle = rgba(TC.ink, 1); g.fillRect(tx - 0.75, y - 7, 1.5, 14);
+        g.textAlign = 'right'; g.fillStyle = rgba(TC.ink2, 1);
+        g.fillText(st.n ? `${Math.round(obs * 100)}%` : '', inner.x + inner.w, y);
+      });
+    });
+    let text;
+    if (hoverJ >= 0) text = `${SPLICE.tipOf(hoverJ)} · kept in <b>${CELLS[0].eip[hoverJ]}%</b> of glutamatergic transcripts and <b>${CELLS[1].eip[hoverJ]}%</b> of endothelial ones in the paper`;
+    else text = `Each bar is the share of transcripts so far that contain that exon, and the black tick is the paper's value · <b>${fmt(state[0].n)}</b> transcripts per cell · hover an exon`;
+    if (text !== lastText) { out.innerHTML = text; lastText = text; }
+    s.busy = Math.max(s.busy, 100);
+  }
+  figLoop(canvas, {
+    sizeSelf, draw,
+    move: s => {
+      const m = s.m; hoverJ = -1;
+      if (Math.abs(m.y - gene.y) < 18) centers.forEach((c, j) => { if (Math.abs(m.x - c) < 12) hoverJ = j; });
+      tallies.forEach(r => { if (m.x >= r.x0 && m.x <= r.x1 && Math.abs(m.y - r.y) < 10) hoverJ = r.j; });
+      canvas.style.cursor = hoverJ >= 0 ? 'help' : 'default';
+    },
+    leave: () => { hoverJ = -1; }
+  });
+})();
+
+/* ================= Fig. 4 · a multi-omic network and label propagation ================= */
+(function multilayer() {
+  const fig = $('#fig-net'); if (!fig) return;
+  const canvas = fig.querySelector('canvas'), out = fig.querySelector('.readout');
+  let rs = 20260929;
+  const rnd = () => { rs = (rs * 1664525 + 1013904223) >>> 0; return rs / 4294967296; };
+  const gn = () => { let u = 0, v = 0; while (!u) u = rnd(); while (!v) v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * v); };
+  // Two palettes: a dark plate for dark mode, ink on paper for light mode.
+  const PAL = {
+    dark: {
+      bg: ['#1a1513', '#090807'], line: [232, 224, 214],
+      layer: [[95, 190, 180], [224, 170, 96], [168, 152, 232]],
+      type: { dr: [95, 190, 180], rr: [224, 170, 96], ppi: [168, 152, 232], rp: [143, 168, 220], tf: [226, 127, 176] },
+      warm: [255, 150, 112], hot: [255, 236, 214], label: [255, 240, 226], halo: [20, 16, 14], glow: 'lighter', base: 0.11
+    },
+    light: {
+      bg: ['#fbfaf7', '#ece8e1'], line: [60, 52, 46],
+      layer: [[31, 122, 112], [160, 102, 26], [91, 74, 168]],
+      type: { dr: [31, 122, 112], rr: [160, 102, 26], ppi: [91, 74, 168], rp: [61, 90, 148], tf: [184, 73, 122] },
+      warm: [214, 96, 58], hot: [150, 24, 30], label: [40, 30, 26], halo: [247, 245, 240], glow: 'source-over', base: 0.15
+    }
+  };
+  const LAYERS = [
+    { name: 'DNA', sub: 'risk loci', n: 96, y: 0.74 },
+    { name: 'RNA', sub: 'RNA–RNA interactions', n: 124, y: 0 },
+    { name: 'Protein', sub: 'protein–protein interactions', n: 156, y: -0.74 }
+  ];
+  const NC = 7;
+  const cPos = k => (k === 0 ? [0, 0] : [Math.cos((k - 1) / (NC - 1) * TAU) * 0.58, Math.sin((k - 1) / (NC - 1) * TAU) * 0.58]);
+  const TARGET = { 2: 'synaptic signaling', 3: 'microglial activation' };
+  // In the protein layer the two target modules sit side by side, so converging heat reads as one neighborhood.
+  const pPos = k => (k === 2 || k === 3 ? [Math.cos(Math.PI / 2 + (k === 2 ? -0.34 : 0.34)) * 0.5, Math.sin(Math.PI / 2 + (k === 2 ? -0.34 : 0.34)) * 0.5] : cPos(k));
+  const nodes = [], edges = [];
+  LAYERS.forEach((L, li) => {
+    for (let i = 0; i < L.n; i++) {
+      const c = (rnd() * NC) | 0, [cx, cz] = li === 2 ? pPos(c) : cPos(c), sp = c === 0 ? 0.19 : li === 2 && (c === 2 || c === 3) ? 0.1 : 0.13;
+      let x = cx + gn() * sp, z = cz + gn() * sp; const d = Math.hypot(x, z);
+      if (d > 0.97) { x *= 0.97 / d; z *= 0.97 / d; }
+      nodes.push({ l: li, c, x, z, adj: [], deg: 0, ph: rnd() * TAU });
+    }
+  });
+  const N = nodes.length;
+  const seen = new Set(), key = (a, b) => (a < b ? a * 4096 + b : b * 4096 + a);
+  const link = (a, b, w, type) => {
+    const k = key(a, b); if (a === b || seen.has(k)) return; seen.add(k);
+    edges.push({ a, b, w, type }); nodes[a].adj.push([b, w]); nodes[b].adj.push([a, w]); nodes[a].deg++; nodes[b].deg++;
+  };
+  const byLayer = LAYERS.map((_, li) => nodes.map((n, i) => i).filter(i => nodes[i].l === li));
+  const near = (i, ids, k, sameC) => ids.filter(j => j !== i && (!sameC || nodes[j].c === nodes[i].c))
+    .map(j => [j, (nodes[j].x - nodes[i].x) ** 2 + (nodes[j].z - nodes[i].z) ** 2]).sort((p, q) => p[1] - q[1]).slice(0, k).map(p => p[0]);
+  const [DNA, RNA, PRO] = byLayer;
+  // Risk loci: scattered across every region of the DNA plane. Each is one gene, so its transcript and its protein sit directly above it.
+  const LOCI = [];
+  for (let c = 0; c < NC; c++) shuffle(DNA.filter(i => nodes[i].c === c)).slice(0, 4).forEach(d => LOCI.push(d));
+  const isLocus = new Set(LOCI), colR = new Map(), colP = new Map(), inCol = new Uint8Array(N);
+  const d2 = (j, D) => (nodes[j].x - D.x) ** 2 + (nodes[j].z - D.z) ** 2;
+  LOCI.forEach(d => {
+    const D = nodes[d];
+    const r = RNA.filter(j => !inCol[j]).sort((p, q) => d2(p, D) - d2(q, D))[0];
+    const p = PRO.filter(j => !inCol[j] && (D.c === 2 || D.c === 3 || (nodes[j].c !== 2 && nodes[j].c !== 3))).sort((p1, q) => d2(p1, D) - d2(q, D))[0];
+    [r, p].forEach(j => { Object.assign(nodes[j], { x: D.x, z: D.z, c: D.c }); inCol[j] = 1; });
+    inCol[d] = 1; colR.set(d, r); colP.set(d, p);
+  });
+  // Protein-protein: modules with hubs, plus a few links between modules.
+  for (let c = 0; c < NC; c++) {
+    const mod = PRO.filter(i => nodes[i].c === c); if (!mod.length) continue;
+    mod.forEach(i => near(i, mod, 2, true).forEach(j => link(i, j, 0.8, 'ppi')));
+    const hubs = shuffle(mod.slice()).slice(0, 1);
+    hubs.forEach(h => { nodes[h].hub = true; shuffle(mod.slice()).slice(0, 6).forEach(j => link(h, j, 0.8, 'ppi')); });
+  }
+  for (let k = 0; k < 8; k++) { const a = PRO[(rnd() * PRO.length) | 0], b = PRO[(rnd() * PRO.length) | 0]; if (nodes[a].c !== nodes[b].c) link(a, b, 0.5, 'ppi'); }
+  const TGT = PRO.filter(i => (nodes[i].c === 2 || nodes[i].c === 3) && !inCol[i]);
+  const tg = () => TGT[(rnd() * TGT.length) | 0];
+  for (let c = 0; c < NC; c++) { if (c === 2 || c === 3) continue; const mod = PRO.filter(i => nodes[i].c === c && !inCol[i]); for (let k = 0; k < 4 && mod.length; k++) link(mod[(rnd() * mod.length) | 0], tg(), 0.85, 'ppi'); }
+  TGT.forEach(i => near(i, TGT, 2, false).forEach(j => link(i, j, 1.8, 'ppi')));
+  // RNA-RNA: sparser co-regulation within modules.
+  RNA.forEach(i => near(i, RNA, 2, true).forEach(j => link(i, j, 0.7, 'rr')));
+  // Between layers, links join one gene's own forms: the locus regulates its transcript, and the transcript is translated into its protein.
+  LOCI.forEach(d => { link(d, colR.get(d), 0.9, 'dr'); link(colR.get(d), colP.get(d), 0.9, 'rp'); });
+  const freeR = RNA.filter(j => !inCol[j]), freeP = PRO.filter(j => !inCol[j]);
+  DNA.forEach(i => { if (!isLocus.has(i) && rnd() < 0.3) near(i, freeR, 1, false).forEach(j => link(i, j, 0.9, 'dr')); });
+  freeR.forEach(i => { if (rnd() < 0.45) near(i, freeP, 1, false).forEach(j => link(i, j, 0.55, 'rp')); });
+  // Convergence happens inside the protein layer: each risk gene's protein interacts with the shared neighborhood.
+  const CONV = [];
+  LOCI.forEach(d => { const p = colP.get(d); for (let k = 0; k < 2; k++) { const q = tg(); link(p, q, 2.2, 'ppi'); CONV.push([d, p, q, Math.random()]); } near(p, PRO.filter(j => nodes[j].c === nodes[p].c), 1, false).forEach(j => link(p, j, 0.2, 'ppi')); });
+  // Protein -> DNA: transcription factors binding back down at the loci.
+  const tfs = PRO.filter(i => nodes[i].hub);
+  tfs.forEach(p => { const cand = DNA.filter(j => nodes[j].c === nodes[p].c); shuffle(cand.slice()).slice(0, 1).forEach(d => link(p, d, 0.6, 'tf')); });
+  const TYPES = ['dr', 'rr', 'rp', 'ppi', 'tf'];
+
+  const LAMBDA = 0.6, EPS = 0.001;
+  let f = new Float32Array(N), g = new Float32Array(N), seed = new Uint8Array(N), it = 0, done = true, lastDelta = 0;
+  let theta = 0.7, tilt = 0.46, drag = null, W = 0, H = 0, lastText = '';
+  let cyc = null, stepAcc = 0, labelsA = { 2: 0, 3: 0 }, poolA = 0;
+  const POOL = { x: TGT.reduce((s, i) => s + nodes[i].x, 0) / TGT.length, z: TGT.reduce((s, i) => s + nodes[i].z, 0) / TGT.length };
+  const PX = new Float32Array(N), PY = new Float32Array(N), PZ = new Float32Array(N), PS = new Float32Array(N);
+  const order = new Int32Array(N);
+  function stepOnce() {
+    const nf = new Float32Array(N); let delta = 0;
+    for (let v = 0; v < N; v++) {
+      if (seed[v]) { nf[v] = 1; continue; }
+      let num = 0, den = LAMBDA;
+      for (const [u, w] of nodes[v].adj) { num += w * f[u]; den += w; }
+      nf[v] = num / den; delta += Math.abs(nf[v] - f[v]);
+    }
+    f = nf; it++; lastDelta = delta;
+    if (delta <= EPS || it > 600) done = true;
+  }
+  function newCycle(t) {
+    seed.fill(0);
+    let q = [];
+    for (let c = 0; c < NC; c++) q = q.concat(shuffle(LOCI.filter(i => nodes[i].c === c)).slice(0, 2));
+    cyc = { t0: t, queue: shuffle(q).slice(0, 12), added: 0, phase: 'seed', holdT: -1 };
+    it = 0; done = false;
+  }
+  function addSeed(i) { seed[i] = 1; f[i] = 1; it = 0; done = false; }
+  let P = null;
+  function project() {
+    const ct = Math.cos(theta), st = Math.sin(theta), cp = Math.cos(tilt), sp = Math.sin(tilt);
+    P = { ct, st, cp, sp, scale: Math.min(W * 0.38, H * 0.39), cx: W / 2, cy: H * 0.5, d: 3.6 };
+    for (let i = 0; i < N; i++) { const n = nodes[i], q = proj(n.x, LAYERS[n.l].y, n.z); PX[i] = q[0]; PY[i] = q[1]; PZ[i] = q[2]; PS[i] = q[3]; }
+  }
+  function proj(x, Y, z) {
+    const x1 = x * P.ct - z * P.st, z1 = x * P.st + z * P.ct, y2 = Y * P.cp - z1 * P.sp, z2 = Y * P.sp + z1 * P.cp, s = P.d / (P.d + z2);
+    return [P.cx + x1 * s * P.scale, P.cy + y2 * s * P.scale, z2, s];
+  }
+  // Transcription-factor links bow outward around the stack instead of cutting through the RNA layer.
+  function tfCtrl(e) {
+    const A = nodes[e.a], B = nodes[e.b], mx = (A.x + B.x) / 2, mz = (A.z + B.z) / 2, r = Math.hypot(mx, mz) || 1;
+    return proj(mx / r * 1.32, 0, mz / r * 1.32);
+  }
+  function addEdge(path, e) {
+    path.moveTo(PX[e.a], PY[e.a]);
+    if (e.type === 'tf') { const c = tfCtrl(e); path.quadraticCurveTo(c[0], c[1], PX[e.b], PY[e.b]); }
+    else path.lineTo(PX[e.b], PY[e.b]);
+  }
+  function draw(s, dt) {
+    const ctx = s.ctx, t = s.t, C = TC.dark ? PAL.dark : PAL.light;
+    if (!cyc) newCycle(t);
+    if (!drag && !RM) theta += dt * 0.0001;
+    if (cyc.phase === 'seed' && t - cyc.t0 > 500 + cyc.added * 380 && cyc.added < cyc.queue.length) { addSeed(cyc.queue[cyc.added]); cyc.added++; }
+    if (cyc.phase === 'seed' && cyc.added >= cyc.queue.length && done) { cyc.phase = 'hold'; cyc.holdT = t; }
+    if (cyc.phase === 'hold' && t - cyc.holdT > 6500) { cyc.phase = 'cool'; cyc.holdT = t; seed.fill(0); }
+    if (cyc.phase === 'cool') { for (let i = 0; i < N; i++) f[i] *= 0.9; if (t - cyc.holdT > 1600) newCycle(t); }
+    if (!done && cyc.phase !== 'cool') {
+      if (stepAcc <= 0) stepAcc = t;
+      let guard = 0;
+      while (t - stepAcc > 55 && !done && guard++ < 30) { stepAcc += 55; stepOnce(); }
+      if (guard >= 30) stepAcc = t;
+    }
+    // heat is shown relative to each layer's hottest node, so the neighborhood where it pools in the protein layer reads clearly
+    const maxF = [0.02, 0.02, 0.02];
+    for (let i = 0; i < N; i++) { g[i] += (f[i] - g[i]) * Math.min(1, 0.16 * dt / 16.7); const l = nodes[i].l; if (!seed[i] && !inCol[i] && g[i] > maxF[l]) maxF[l] = g[i]; }
+    // once the heat settles, the risk genes' own columns step back so the neighborhood it pooled in reads first
+    const colDim = cyc.phase === 'hold' ? 1 - 0.4 * smooth(0, 1800, t - cyc.holdT) : 1;
+    const heat = i => (seed[i] ? 1 : Math.pow(clamp(g[i] / (maxF[nodes[i].l] * 0.85), 0, 1), 0.8) * (inCol[i] ? colDim : 1));
+    project();
+    const bg = ctx.createRadialGradient(W / 2, H * 0.48, 0, W / 2, H * 0.48, Math.max(W, H) * 0.75);
+    bg.addColorStop(0, C.bg[0]); bg.addColorStop(1, C.bg[1]);
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    // layer planes and their labels
+    let planeTop = H;
+    LAYERS.forEach((L, li) => {
+      ctx.beginPath();
+      for (let k = 0; k <= 64; k++) {
+        const a = k / 64 * TAU, q = proj(Math.cos(a) * 1.04, L.y, Math.sin(a) * 1.04);
+        if (k) ctx.lineTo(q[0], q[1]); else ctx.moveTo(q[0], q[1]);
+        if (li === 2 && q[1] < planeTop) planeTop = q[1];
+      }
+      // the plane's left edge in view space does not depend on the rotation angle
+      const ys = L.y * P.cp, zs = L.y * P.sp, ss = P.d / (P.d + zs), lx = P.cx - 1.04 * ss * P.scale, ly = P.cy + ys * ss * P.scale;
+      ctx.fillStyle = rgba(C.layer[li], TC.dark ? 0.035 : 0.05); ctx.fill();
+      ctx.strokeStyle = rgba(C.layer[li], TC.dark ? 0.22 : 0.32); ctx.lineWidth = 1; ctx.stroke();
+      ctx.font = '10px Inter, system-ui, sans-serif'; const tw = Math.max(ctx.measureText(L.sub).width, 44), tx = Math.max(12, lx - 10 - tw);
+      ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.font = '600 10.5px Inter, system-ui, sans-serif'; ctx.fillStyle = rgba(C.layer[li], 0.95); ctx.fillText(L.name, tx, ly - 6);
+      ctx.font = '10px Inter, system-ui, sans-serif'; ctx.fillStyle = rgba(C.layer[li], TC.dark ? 0.65 : 0.8); ctx.fillText(L.sub, tx, ly + 7);
+    });
+    // edges by interaction type, then the heated ones on top
+    const base = {}; TYPES.forEach(k => { base[k] = new Path2D(); });
+    const hot = [new Path2D(), new Path2D(), new Path2D(), new Path2D()];
+    for (const e of edges) {
+      addEdge(base[e.type], e);
+      const h = Math.min(heat(e.a), heat(e.b));
+      if (h > 0.32 && e.type !== 'tf') addEdge(hot[Math.min(3, ((h - 0.32) / 0.68 * 4) | 0)], e);
+    }
+    TYPES.forEach(k => {
+      ctx.strokeStyle = rgba(C.type[k], C.base * (k === 'ppi' ? 1.5 : 1));
+      ctx.lineWidth = k === 'ppi' ? 1 : 0.8;
+      if (k === 'tf') ctx.setLineDash([3, 3]);
+      ctx.stroke(base[k]); ctx.setLineDash([]);
+    });
+    ctx.globalCompositeOperation = C.glow;
+    hot.forEach((p, k) => { ctx.strokeStyle = rgba(mix(C.warm, C.hot, k / 3), (TC.dark ? 0.12 : 0.13) + k * 0.1); ctx.lineWidth = 0.7 + k * 0.25; ctx.stroke(p); });
+    ctx.globalCompositeOperation = 'source-over';
+    // Convergence: a glow pools on the protein plane where the heat collects, and dots stream along each risk protein's interactions into it.
+    let tsum = 0; TGT.forEach(i => { tsum += heat(i); });
+    poolA += (clamp((tsum / TGT.length - 0.12) / 0.3, 0, 1) * (cyc.phase === 'cool' ? 0 : 1) - poolA) * Math.min(1, 0.05 * dt / 16.7);
+    if (poolA > 0.01) {
+      const q = proj(POOL.x, LAYERS[2].y, POOL.z), R = 0.38 * P.scale * q[3];
+      ctx.save(); ctx.globalCompositeOperation = C.glow; ctx.translate(q[0], q[1]); ctx.scale(1, Math.max(0.2, P.sp));
+      const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
+      gr.addColorStop(0, rgba(C.warm, (TC.dark ? 0.32 : 0.3) * poolA)); gr.addColorStop(0.55, rgba(C.warm, (TC.dark ? 0.12 : 0.11) * poolA)); gr.addColorStop(1, rgba(C.warm, 0));
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(0, 0, R, 0, TAU); ctx.fill(); ctx.restore();
+    }
+    if (!RM && cyc.phase !== 'cool') {
+      for (const [d, p, q, ph] of CONV) {
+        if (!seed[d]) continue;
+        const h = Math.max(heat(p), 0.5 * heat(d)); if (h < 0.25) continue;
+        for (let m = 0; m < 2; m++) {
+          const u = (t * 0.00055 + ph + m * 0.5) % 1;
+          ctx.beginPath(); ctx.arc(lerp(PX[p], PX[q], u), lerp(PY[p], PY[q], u), 1.5 * PS[p] + 0.3, 0, TAU);
+          ctx.fillStyle = rgba(mix(C.warm, C.hot, u), (0.35 + 0.5 * h) * Math.sin(Math.PI * u)); ctx.fill();
+        }
+      }
+    }
+    // nodes, far to near
+    for (let i = 0; i < N; i++) order[i] = i;
+    order.sort((a, b) => PZ[b] - PZ[a]);
+    for (let k = 0; k < N; k++) {
+      const i = order[k], n = nodes[i], h = heat(i), tint = C.layer[n.l];
+      const depth = clamp(0.5 - PZ[i] * 0.45, 0.3, 1);
+      const r = (1.1 + (n.hub ? 1.2 : 0) + 1.5 * h + (seed[i] ? 1.4 : 0)) * PS[i];
+      if (h > 0.45) {
+        ctx.globalCompositeOperation = C.glow;
+        const gr = ctx.createRadialGradient(PX[i], PY[i], 0, PX[i], PY[i], r * 5);
+        gr.addColorStop(0, rgba(mix(C.warm, C.hot, h), (TC.dark ? 0.28 : 0.15) * h)); gr.addColorStop(1, rgba(C.warm, 0));
+        ctx.fillStyle = gr; ctx.fillRect(PX[i] - r * 5, PY[i] - r * 5, r * 10, r * 10);
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      ctx.beginPath(); ctx.arc(PX[i], PY[i], r, 0, TAU);
+      ctx.fillStyle = rgba(mix(TC.dark ? mix(tint, [40, 36, 34], 0.25) : tint, mix(C.warm, C.hot, h), h), (TC.dark ? (0.55 + 0.45 * h) * depth + 0.1 : 0.5 + 0.5 * Math.max(h, depth * 0.8)));
+      ctx.fill();
+      if (!TC.dark) { ctx.strokeStyle = rgba([251, 250, 247], 0.9); ctx.lineWidth = 0.8; ctx.stroke(); }
+      if (seed[i]) {
+        const pr = (t * 0.001 + n.ph) % 1;
+        ctx.strokeStyle = rgba(C.hot, 0.7 * (1 - pr)); ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(PX[i], PY[i], r + 3 + pr * 12, 0, TAU); ctx.stroke();
+      }
+    }
+    // name the two protein modules once the heat has settled in them; the one further left on screen is labeled to the left
+    const cent = {};
+    for (const c of [2, 3]) {
+      const ids = PRO.filter(i => nodes[i].c === c);
+      let hs = 0, sx = 0, sy = 0; ids.forEach(i => { hs += heat(i); sx += PX[i]; sy += PY[i]; });
+      cent[c] = { x: sx / ids.length, y: sy / ids.length, on: hs / ids.length > 0.16 && cyc.phase !== 'cool' };
+    }
+    const leftC = cent[2].x <= cent[3].x ? 2 : 3;
+    for (const c of [2, 3]) {
+      labelsA[c] += ((cent[c].on ? 1 : 0) - labelsA[c]) * Math.min(1, 0.06 * dt / 16.7);
+      if (labelsA[c] < 0.02) continue;
+      const { x, y } = cent[c], left = c === leftC;
+      ctx.font = 'italic 15px "EB Garamond", Georgia, serif';
+      const lw = ctx.measureText(TARGET[c]).width;
+      const lx = left ? Math.max(12 + lw, x - 34) : Math.min(W - 12 - lw, x + 34), ly = Math.max(22, Math.min(y - 40, planeTop - 8));
+      ctx.globalAlpha = labelsA[c];
+      ctx.strokeStyle = rgba(C.label, 0.55); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, y - 6); ctx.lineTo(lx, ly + 6); ctx.stroke();
+      ctx.textAlign = left ? 'right' : 'left'; ctx.textBaseline = 'bottom';
+      ctx.strokeStyle = rgba(C.halo, 0.9); ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.strokeText(TARGET[c], lx, ly + 4);
+      ctx.fillStyle = rgba(C.label, 0.95); ctx.fillText(TARGET[c], lx, ly + 4);
+      ctx.globalAlpha = 1;
+    }
+    const ns = seed.reduce((a, v) => a + v, 0);
+    let text;
+    if (cyc.phase === 'cool') text = 'Cooling down before the next set of risk loci';
+    else if (!done || (cyc.phase === 'seed' && cyc.added < cyc.queue.length)) text = `<b>${ns}</b> risk loci seeded · iteration ${it} · total change ${lastDelta.toFixed(3)}`;
+    else text = `Settled after <b>${it}</b> iterations · <b>${ns}</b> risk loci were seeded across the DNA layer, and the hottest proteins are in two neighboring modules`;
+    if (text !== lastText) { out.innerHTML = text; lastText = text; }
+  }
+  function pick(s) { let best = -1, bd = 14 * 14; for (let i = 0; i < N; i++) { const d = (PX[i] - s.m.x) ** 2 + (PY[i] - s.m.y) ** 2; if (d < bd) { bd = d; best = i; } } return best; }
+  figLoop(canvas, {
+    sizeSelf: s => { const h = s.w < 600 ? 440 : 500; sizeTo(s, canvas, h); W = s.w; H = h; },
+    draw,
+    move: s => { if (drag) { const dx = s.m.x - drag.x, dy = s.m.y - drag.y; if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true; theta += dx * 0.008; tilt = clamp(tilt + dy * 0.004, 0.15, 1.0); drag.x = s.m.x; drag.y = s.m.y; } },
+    down: (s, e) => { drag = { x: s.m.x, y: s.m.y, moved: false }; if (e.pointerType === 'mouse') { canvas.style.cursor = 'grabbing'; try { canvas.setPointerCapture(e.pointerId); } catch (err) {} } },
+    up: (s, e) => {
+      if (!drag) return; const d = drag; drag = null; canvas.style.cursor = 'grab';
+      if (e && !d.moved) { const i = pick(s); if (i >= 0) { if (cyc.phase !== 'seed') { cyc.phase = 'seed'; cyc.added = cyc.queue.length; } addSeed(i); } }
+    }
+  });
+})();
+
+/* ================= Contact ================= */
+(function contact() {
+  const btn = $('#copy'), email = $('#email');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const text = email.textContent.trim();
+    const ok = () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy'; }, 1600); };
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents(email); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); btn.textContent = 'Selected'; setTimeout(() => { btn.textContent = 'Copy'; }, 1600); };
+    try { navigator.clipboard.writeText(text).then(ok, fallback); } catch (e) { fallback(); }
+  });
+})();
+
+})();
+</script>
 </body>
 </html>

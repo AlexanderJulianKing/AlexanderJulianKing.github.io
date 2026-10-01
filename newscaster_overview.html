@@ -1,394 +1,136 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Newscaster: Agentic AI Research and Publishing System</title>
 <meta name="description" content="How Newscaster uses agentic source-grounded research, adversarial review, embedding-based RAG memory, fact-checking, and automated production to publish a daily news episode.">
 <meta property="og:title" content="Newscaster: Agentic AI Research and Publishing System">
 <meta property="og:description" content="A self-running pipeline that scrapes the day's news, grounds it against real sources, scripts an anchor and two reporters, fact-checks, and publishes an episode to YouTube.">
 <meta property="og:type" content="article">
+<meta property="og:url" content="https://alexanderjulianking.github.io/newscaster_overview.html">
 <meta property="og:image" content="https://alexanderjulianking.github.io/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://alexanderjulianking.github.io/og-image.jpg">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='Georgia, serif' fill='%237a2e2e'>A</text></svg>">
-<script>document.documentElement.classList.add('js');</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script>(() => { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap'; document.head.appendChild(l); })();</script>
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"></noscript>
+<link rel="stylesheet" href="site.css">
 <style>
-  :root{
-    /* Portfolio palette, light (default). Warm off-white + burgundy. */
-    --bg:#fafaf8; --card-bg:#ffffff; --bg-alt:#f3f2ef; --text:#1a1a1a; --text-muted:#555;
-    --border:#d4d0c8; --border-light:#e8e5de; --rule:#c4c0b8;
-    --accent:#7a2e2e; --accent-hover:#5c1e1e; --accent-soft:rgba(122,46,46,.08);
-    --ok:#2e7d32; --ok-soft:rgba(46,125,50,.10);
-    --flag:#b23a2e; --flag-soft:rgba(178,58,46,.10);
-    --warn:#a9762a;
-    --on-acc:#ffffff;
-    --font-serif:'EB Garamond',Georgia,serif;
-    --font-mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    --font-sans:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{
-      --bg:#141414; --card-bg:#1a1a1a; --bg-alt:#1c1c1c; --text:#d8d4cf; --text-muted:#a09a90;
-      --border:#2e2e2e; --border-light:#252525; --rule:#333;
-      --accent:#c46b6b; --accent-hover:#d98e8e; --accent-soft:rgba(196,107,107,.14);
-      --ok:#7fc47f; --ok-soft:rgba(127,196,127,.14);
-      --flag:#df8a7d; --flag-soft:rgba(223,138,125,.16);
-      --warn:#d6a85a;
-      --on-acc:#1a1212;
-    }
-  }
-  *{box-sizing:border-box;}
-  html{font-size:18px;-webkit-text-size-adjust:100%;}
-  @media (prefers-reduced-motion: no-preference){
-    html{scroll-behavior:smooth;}
-  }
-  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);line-height:1.68;
-       -webkit-font-smoothing:antialiased;}
-  /* Selected text gets the house burgundy, not browser blue */
-  ::selection{background:color-mix(in srgb, var(--accent) 22%, transparent);}
-  .wrap{max-width:900px;margin:0 auto;padding:0 1.5rem 3rem;}
-  a{color:var(--accent);}
-  code,.mono{font-family:var(--font-mono);}
-  h1{font-size:1.9rem;margin:.1rem 0 .4rem;letter-spacing:-.02em;font-weight:720;}
-  h1 .sub{color:var(--text-muted);font-weight:460;}
-  h2{font-size:1.25rem;margin:2.6rem 0 .2rem;letter-spacing:-.01em;}
-  .kicker{font:600 .68rem/1.4 var(--font-mono);letter-spacing:.16em;color:var(--accent);text-transform:uppercase;}
-  .lede{color:var(--text-muted);font-size:.97rem;max-width:62ch;margin:.3rem 0 0;}
-  .rule{height:1px;background:var(--border-light);border:0;margin:2.2rem 0 0;}
-  .secnote{color:var(--text-muted);font-size:.9rem;margin:.25rem 0 1rem;max-width:64ch;}
-
-  /* legend */
-  .legend{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center;border:1px solid var(--border);
-          border-radius:2px;padding:.7rem .8rem;margin-top:1.4rem;background:var(--card-bg);}
-  .legend .lt{font:600 .68rem var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-right:.15rem;}
-  .chip{font-size:.74rem;border:1px solid var(--border);border-radius:2px;padding:.2rem .58rem;white-space:nowrap;background:var(--bg-alt);}
-  .chip em{color:var(--text-muted);font-style:normal;}
-
-  /* pipeline */
-  .flow{margin-top:1rem;}
-  .stage{display:grid;grid-template-columns:40px 1fr;gap:.8rem;}
-  .rail{display:flex;flex-direction:column;align-items:center;}
-  .stage:not(:last-child) .rail::after{content:"";flex:1;width:2px;background:var(--border);margin:.3rem 0;}
-  .num{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;
-       border:1.5px solid var(--border);font:600 .85rem var(--font-mono);background:var(--card-bg);flex:0 0 auto;}
-  .card{border:1px solid var(--border);border-radius:2px;padding:.75rem .9rem;margin-bottom:.8rem;background:var(--card-bg);}
-  .card .ch{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
-  .ch .nm{font-weight:660;font-size:1rem;}
-  .ch code{font-size:.76rem;background:var(--accent-soft);color:var(--accent);padding:.08em .42em;border-radius:2px;}
-  .card p{margin:.35rem 0 0;color:var(--text-muted);font-size:.88rem;}
-  .tag{font:600 .6rem var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--accent);
-       border:1px solid var(--accent);border-radius:2px;padding:.12rem .45rem;}
-  .out{margin-top:.55rem;font:.72rem/1.5 var(--font-mono);color:var(--text-muted);}
-  .stage.hl .num{border-color:var(--accent);color:var(--accent);}
-  .stage.hl .card{border-color:var(--accent);background:var(--accent-soft);}
-
-  .subbox{border:1px dashed var(--border);border-radius:2px;padding:.6rem .7rem;margin-top:.6rem;background:var(--bg-alt);}
-  .sub-h{font-weight:620;font-size:.84rem;}
-  .sub-h span{color:var(--text-muted);font-weight:400;}
-  .pipe{display:flex;flex-wrap:wrap;align-items:center;gap:.32rem;margin-top:.5rem;}
-  .pipe span{font:.69rem var(--font-mono);border:1px solid var(--border);border-radius:2px;padding:.13rem .4rem;background:var(--card-bg);}
-  .pipe i{color:var(--accent);font-style:normal;font-weight:700;}
-  .fine{font-size:.8rem !important;margin-top:.5rem !important;}
-
-  /* fact finder */
-  .ff{margin-top:1rem;border:1.5px solid var(--accent);border-radius:2px;padding:1.1rem 1.15rem;background:var(--accent-soft);}
-  .passes{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin:1rem 0 .3rem;}
-  .pass{border:1px solid var(--border);border-radius:2px;padding:.75rem .8rem;background:var(--card-bg);}
-  .p-h{font-weight:650;font-size:.92rem;display:flex;align-items:center;gap:.45rem;}
-  .p-n{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;
-       background:var(--accent);color:#0b0d12;font:800 .7rem var(--font-mono);flex:0 0 auto;}
-  .p-basis{font:.64rem var(--font-mono);letter-spacing:.04em;color:var(--accent);margin:.35rem 0 .4rem;text-transform:uppercase;}
-  .pass p{margin:0;color:var(--text-muted);font-size:.83rem;}
-  .catch{margin-top:.55rem;font:600 .67rem var(--font-mono);letter-spacing:.03em;color:var(--text);}
-  .ex{margin-top:.28rem;font-size:.77rem;color:var(--text-muted);font-style:italic;}
-  .modes{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.9rem;}
-  .mode{font-size:.74rem;border:1px solid var(--border);border-radius:2px;padding:.2rem .58rem;color:var(--text-muted);background:var(--card-bg);}
-  .mode b{color:var(--accent);}
-
-  /* worked example */
-  .ex-flow{position:relative;margin-top:1rem;}
-  .page{border:1px solid var(--border);border-radius:2px;background:var(--card-bg);overflow:hidden;margin:0 auto;max-width:640px;}
-  .page-bar{display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;border-bottom:1px solid var(--border-light);
-            background:var(--bg-alt);font:600 .78rem var(--font-sans);}
-  .page-bar .dot{width:9px;height:9px;border-radius:50%;background:var(--border);flex:0 0 auto;}
-  .page-bar .meta{margin-left:auto;font:.68rem var(--font-mono);color:var(--text-muted);}
-  .page-body{padding:.8rem .9rem;font-size:.85rem;color:var(--text);}
-  .page-body .src{color:var(--text-muted);font-size:.78rem;margin-bottom:.4rem;font-family:var(--font-mono);}
-  .page-body p{margin:.3rem 0;}
-  .quoteblock{font-family:var(--font-mono);font-size:.8rem;color:var(--text-muted);border-left:2px solid var(--border);padding-left:.7rem;}
-  mark{background:var(--flag-soft);color:#ffb0ad;padding:.02em .25em;border-radius:2px;}
-  .down{display:flex;justify-content:center;color:var(--text-muted);font-size:1.1rem;margin:.15rem 0;}
-  .down small{font:.66rem var(--font-mono);color:var(--text-muted);align-self:center;margin-left:.4rem;}
-  .ff-report .line{display:flex;gap:.55rem;align-items:flex-start;padding:.32rem 0;border-top:1px solid var(--border-light);font-size:.82rem;}
-  .ff-report .line:first-of-type{border-top:0;}
-  .badge{font:700 .6rem var(--font-mono);letter-spacing:.05em;border-radius:2px;padding:.13rem .4rem;flex:0 0 auto;}
-  .b-ok{background:var(--ok-soft);color:var(--ok);}
-  .b-flag{background:var(--flag-soft);color:var(--flag);}
-  .b-srch{background:var(--accent-soft);color:var(--accent);}
-  .ff-report .line b{color:var(--text);}
-  .ff-report .line .d{color:var(--text-muted);}
-  .verdict{margin-top:.6rem;padding:.5rem .65rem;border:1px solid var(--flag);border-radius:2px;background:var(--flag-soft);font-size:.82rem;}
-  .verdict b{color:#ffb0ad;}
-
-  footer{margin-top:2.6rem;border-top:1px solid var(--border-light);padding-top:1rem;color:var(--text-muted);font-size:.82rem;}
-  footer code{background:var(--accent-soft);color:var(--accent);padding:.05em .4em;border-radius:2px;font-size:.85em;}
-  .pill{display:inline-flex;align-items:center;gap:.35rem;font:600 .72rem var(--font-sans);color:var(--ok);
-        border:1px solid var(--ok);border-radius:2px;padding:.15rem .55rem;background:var(--ok-soft);}
-  /* inside gather: agent loop + rag */
-  .panel{border:1px solid var(--border);border-radius:2px;background:var(--card-bg);padding:.85rem .95rem;margin-bottom:.9rem;}
-  .panel-h{font-weight:650;font-size:.92rem;margin-bottom:.7rem;}
-  .panel-h span{color:var(--text-muted);font-weight:400;font-family:var(--font-mono);font-size:.7rem;}
-  .aspine{display:flex;align-items:stretch;flex-wrap:wrap;gap:.4rem;}
-  .anode{border:1px solid var(--border);border-radius:2px;padding:.45rem .6rem;background:var(--bg-alt);text-align:center;min-width:108px;display:flex;flex-direction:column;justify-content:center;position:relative;flex:1;}
-  .anode b{font-size:.85rem;}
-  .anode small{color:var(--text-muted);font-size:.68rem;line-height:1.25;margin-top:.15rem;}
-  .anode.ctrl{border-color:var(--accent);background:var(--accent-soft);}
-  .anode.adv{border-color:var(--warn);}
-  .anode.done{border-color:var(--ok);}
-  .anode.mem{border-style:dashed;}
-  .loop{position:absolute;top:-9px;right:-7px;font:700 .6rem var(--font-mono);color:#0b0d12;background:var(--accent);border-radius:2px;padding:.05rem .35rem;}
-  .ar{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);font-size:1.05rem;min-width:30px;}
-  .ar em{font-family:var(--font-mono);font-size:.58rem;font-style:normal;color:var(--text-muted);}
-  .atools{margin:.55rem 0 .2rem;}
-  .abrace{text-align:center;font-family:var(--font-mono);font-size:.68rem;color:var(--accent);border-top:1px dashed var(--border);border-bottom:1px dashed var(--border);padding:.3rem 0;}
-  .trow{display:flex;gap:.5rem;margin-top:.5rem;}
-  .tool{flex:1;border:1px solid var(--border);border-radius:2px;padding:.45rem .6rem;background:var(--bg-alt);text-align:center;}
-  .tool b{font-size:.82rem;}
-  .tool small{display:block;color:var(--text-muted);font-size:.69rem;margin-top:.1rem;}
-  .afoot{margin-top:.5rem;font-size:.74rem;color:var(--text-muted);text-align:center;}
-  .dash{border-bottom:1px dashed var(--warn);color:var(--text);}
-  .pipe.sh{margin-top:.7rem;}
-  .ragflow{display:flex;flex-direction:column;gap:.5rem;}
-  .rag-row{display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;}
-  .rag-row i{color:var(--accent);font-style:normal;font-weight:700;}
-  .rag-tag{font:700 .6rem var(--font-mono);letter-spacing:.04em;border-radius:2px;padding:.18rem .45rem;flex:0 0 auto;margin-right:.2rem;}
-  .rag-tag.write{background:var(--accent-soft);color:var(--accent);}
-  .rag-tag.read{background:var(--ok-soft);color:var(--ok);}
-  .rc{font-family:var(--font-mono);font-size:.69rem;border:1px solid var(--border);border-radius:2px;padding:.13rem .42rem;background:var(--bg-alt);}
-  .rc.on{border-color:var(--accent);color:var(--accent);}
-  .muted{color:var(--text-muted);font-style:italic;}
-  /* flowcharts */
-  .fch{font-size:1.02rem;font-weight:650;margin:1.7rem 0 .12rem;display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap;}
-  .fch .em{font-size:.7rem;color:var(--text-muted);font-family:var(--font-mono);font-weight:400;}
-  .fch .n{color:var(--accent);}
-  .fcap{color:var(--text-muted);font-size:.83rem;margin:.1rem 0 .5rem;}
-  .fc{width:100%;height:auto;max-width:560px;display:block;margin:.2rem auto .4rem;}
-  .fc.wide{max-width:640px;}
-  .fc .box{fill:var(--bg-alt);stroke:var(--border);stroke-width:1.5;}
-  .fc .box.acc{stroke:var(--accent);}
-  .fc .box.muted{stroke-dasharray:5 3;}
-  .fc .dec{fill:var(--bg-alt);stroke:var(--text-muted);stroke-width:1.5;stroke-linejoin:round;}
-  .fc .term{fill:var(--card-bg);stroke:var(--text-muted);stroke-width:1.5;}
-  .fc .term.acc{stroke:var(--accent);}
-  .fc .store{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5;}
-  .fc .edge{fill:none;stroke:var(--text-muted);stroke-width:1.5;}
-  .fc .edge.a{stroke:var(--accent);}
-  .fc .edge.loop{stroke:var(--accent);stroke-dasharray:5 4;}
-  .fc text{fill:var(--text);font-family:var(--font-sans);}
-  .fc .t{font-size:12.5px;font-weight:600;}
-  .fc .s{fill:var(--text-muted);font-size:10px;font-family:var(--font-mono);}
-  .fc .lbl{fill:var(--text-muted);font-size:10.5px;font-family:var(--font-mono);}
-  .fc .hd{fill:var(--accent);font-size:11px;font-weight:700;letter-spacing:.06em;}
-  .fc .s.ai{fill:var(--accent);}
-  .fc .s.web{fill:var(--warn);}
-  .fc .s.py{fill:var(--text-muted);}
-  .fc .s.db{fill:var(--ok);}
-  .fc .store{fill:var(--ok-soft);stroke:var(--ok);}
-  .fc .edge.flag{stroke:var(--flag);stroke-dasharray:5 4;}
-  .fc .lbl.flag{fill:var(--flag);}
-  .fckey{display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;font-size:.78rem;color:var(--text-muted);border:1px solid var(--border);border-radius:2px;padding:.55rem .75rem;margin:.2rem 0 .3rem;background:var(--card-bg);}
-  .fckey b{color:var(--text);font-weight:600;}
-  .fckey .k{display:inline-flex;align-items:center;gap:.4rem;}
-  .fckey .sw{width:11px;height:11px;border-radius:2px;display:inline-block;flex:0 0 auto;}
-  .fckey .sw.ai{background:var(--accent);}
-  .fckey .sw.web{background:var(--warn);}
-  .fckey .sw.py{background:var(--text-muted);}
-  .fckey .sw.db{background:var(--ok);}
-  @media(max-width:640px){.passes{grid-template-columns:1fr;}.aspine,.trow,.rag-row{flex-direction:column;align-items:stretch;}.ar{transform:rotate(90deg);}}
-
-  /* ============================================================
-     Site integration, match index.html and the explainer pages:
-     editorial type system, hero / numbered sections, scroll motion.
-     Palette + dark mode come from the :root tokens above. */
-
-  /* Type: serif prose + headings, Inter for labels, mono for code */
-  body{font-family:var(--font-serif);}
-  .hero-name,.section-heading,.fch{font-family:var(--font-serif);font-weight:500;}
-  .nm,.sub-h,.panel-h,.p-h{font-weight:600;}
-  .chip,.mode,.fckey,.fckey b{font-family:var(--font-sans);}
-
-  /* Former dark-only hardcodes → palette tokens */
-  .p-n,.loop{color:var(--on-acc);}
-  mark{background:var(--flag-soft);color:var(--flag);}
-  .verdict b{color:var(--flag);}
-
-  /* Prose measure, keep captions to a comfortable column */
-  .fcap,.fine{max-width:66ch;}
-
-  /* Links, sliding underline + keyboard focus ring, like the other pages */
-  a{color:var(--accent);text-decoration:none;position:relative;}
-  a:not(.back-link)::after{content:'';position:absolute;left:0;bottom:-1px;width:0;height:1px;background:var(--accent-hover);transition:width .25s ease;}
-  a:hover{color:var(--accent-hover);}
-  a:not(.back-link):hover::after{width:100%;}
-  a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px;}
-
-  /* Hero, name / small-caps subtitle / rule / abstract, staggered entrance */
-  .hero{padding:1.5rem 0 2.2rem;}
-  .hero-name{font-size:2.4rem;letter-spacing:-.02em;line-height:1.15;margin:0 0 .5rem;}
-  .hero-subtitle{font-family:var(--font-serif);font-size:.85rem;letter-spacing:.06em;color:var(--text-muted);font-variant:small-caps;margin:0 0 1.4rem;}
-  .hero-rule{border:0;height:1px;background:var(--rule);margin:0 0 1.4rem;}
-  .abstract{max-width:65ch;}
-  .abstract p{font-size:1.12rem;line-height:1.6;color:var(--text-muted);margin:0;}
-  .hero-anim{opacity:0;transform:translateY(18px);animation:heroFadeIn .7s ease-out forwards;}
-  .hero-anim-1{animation-delay:0ms;} .hero-anim-2{animation-delay:120ms;}
-  .hero-anim-3{animation-delay:240ms;} .hero-anim-4{animation-delay:360ms;}
-  @keyframes heroFadeIn{to{opacity:1;transform:translateY(0);}}
-
-  /* Section headings, numbered, underline draws on scroll-in */
-  .section-heading{font-size:1.55rem;margin:2.6rem 0 1.1rem;padding-bottom:.3rem;position:relative;letter-spacing:-.01em;}
-  .section-heading::after{content:'';display:block;position:absolute;bottom:0;left:0;height:1px;background:var(--border-light);width:0;transition:width .8s cubic-bezier(.25,.46,.45,.94) .12s;}
-  .section-heading.visible::after{width:100%;}
-  .section-number{color:var(--accent);font-variant-numeric:oldstyle-nums;margin-right:.4em;font-weight:400;opacity:.38;transition:opacity .55s ease .55s;}
-  .section-heading.visible .section-number{opacity:1;}
-
-  /* Scroll fade-ins — hidden start state applies only when JS is running (.js set in <head>),
-     so a blocked or failed script never leaves the page blank */
-  .js .fade-in{opacity:0;transform:translateY(20px);transition:opacity .6s ease-out,transform .6s ease-out;}
-  .js .fade-in.visible{opacity:1;transform:translateY(0);}
-
-  /* Reading-progress bar */
-  .reading-progress{position:fixed;top:0;left:0;height:2px;width:100%;background:var(--accent);
-                    transform:scaleX(0);transform-origin:left center;opacity:.85;pointer-events:none;z-index:100;}
-  @media (max-width:768px){.reading-progress{display:none;}}
-  @supports (animation-timeline: scroll()){
-    .reading-progress{animation:reading-progress-grow linear both;animation-timeline:scroll(root block);}
-    @keyframes reading-progress-grow{from{transform:scaleX(0);}to{transform:scaleX(1);}}
-  }
-
-  /* Footer, standard site credit row beneath the project provenance */
-  .foot-credit{display:flex;justify-content:space-between;gap:.5rem;margin-top:1.1rem;padding-top:1rem;
-              border-top:1px solid var(--border-light);font-size:.78rem;color:var(--text-muted);}
-  .foot-credit .footer-note{font-style:italic;font-family:var(--font-serif);}
-
-  /* Back-to-portfolio link */
-  .back-link{display:inline-block;font-family:var(--font-sans);font-size:.82rem;color:var(--text-muted);
-             text-decoration:none;margin:1.2rem 0 1.4rem;transition:color .2s;}
-  .back-link:hover{color:var(--accent);}
-  .back-link::after{content:none;}
-
-  /* Step down to 16px on narrow screens, like the explainer pages */
-  @media (max-width:800px){html{font-size:16px;}}
-
-  /* Respect reduced motion */
-  @media (prefers-reduced-motion: reduce){
-    .js .fade-in{opacity:1;transform:none;transition:none;}
-    .hero-anim{opacity:1;transform:none;animation:none;}
-    .section-heading::after{transition:none;width:100%;}
-    .section-number{opacity:1;transition:none;}
-    .reading-progress{animation:none;}
-  }
-
-  @media print{
-    .reading-progress{display:none;}
-    .fade-in{opacity:1!important;transform:none!important;}
-  }
+/* Flowcharts and the worked example, drawn in the site's palette:
+   AI steps in the accent, Google Search in ochre, the database in teal, flags in pink. */
+.fc-plate { padding-top: 18px; }
+.fc { width: 100%; height: auto; max-width: 560px; display: block; margin: 0 auto 4px; padding-inline: 12px; }
+.fc.wide { max-width: 640px; }
+.fc .box, .fc .dec, .fc .term { fill: var(--paper); stroke: var(--rule); stroke-width: 1.5; }
+.fc .dec, .fc .term { stroke: var(--ink-3); stroke-linejoin: round; }
+.fc .box.acc, .fc .term.acc { stroke: var(--accent); }
+.fc .box.muted { stroke-dasharray: 5 3; }
+.fc .store { fill: color-mix(in srgb, var(--e-dr) 12%, var(--paper)); stroke: var(--e-dr); stroke-width: 1.5; }
+.fc .edge { fill: none; stroke: var(--ink-3); stroke-width: 1.5; }
+.fc .edge.a { stroke: var(--accent); }
+.fc .edge.loop { stroke: var(--accent); stroke-dasharray: 5 4; }
+.fc .edge.flag { stroke: var(--e-tf); stroke-dasharray: 5 4; }
+.fc text { fill: var(--ink); font-family: var(--sans); }
+.fc .t { font-size: 12.5px; font-weight: 600; }
+.fc .s, .fc .lbl { fill: var(--ink-3); font-size: 10px; font-family: var(--mono); }
+.fc .lbl { font-size: 10.5px; }
+.fc .hd { fill: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; }
+.fc .s.ai { fill: var(--accent); }
+.fc .s.web { fill: var(--ochre); }
+.fc .s.db { fill: var(--e-dr); }
+.fc .lbl.flag { fill: var(--e-tf); }
+.legend .sw-web { background: var(--ochre); }
+.legend .sw-py { background: var(--ink-3); }
+.legend .sw-db { background: var(--e-dr); }
+.ex-flow { display: grid; gap: 0; margin-top: 1.4rem; }
+.ex-card { border: 1px solid var(--rule-2); border-radius: 4px; background: var(--plate); overflow: hidden; }
+.ex-card.hot { border-color: var(--accent); }
+.ex-bar { display: flex; align-items: baseline; gap: 0.6rem; padding: 0.55rem 18px; border-bottom: 1px solid var(--rule-2); font-family: var(--sans); font-size: 0.8rem; font-weight: 600; color: var(--ink); }
+.ex-card.hot .ex-bar { color: var(--accent); }
+.ex-bar .meta { margin-left: auto; font-family: var(--mono); font-size: 0.68rem; font-weight: 400; color: var(--ink-3); }
+.ex-body { padding: 0.8rem 18px 0.9rem; font-size: 0.98rem; color: var(--ink-2); }
+.ex-body p { margin: 0.35rem 0; max-width: none; }
+.ex-body .src { font-family: var(--mono); font-size: 0.74rem; color: var(--ink-3); line-height: 1.5; }
+.ex-body .note { font-size: 0.92rem; color: var(--ink-3); }
+.quoteblock { font-family: var(--mono); font-size: 0.8rem; line-height: 1.55; color: var(--ink-2); border-left: 2px solid var(--rule); padding-left: 0.75rem; }
+.quoteblock b { color: var(--ink); font-weight: 600; }
+mark { background: color-mix(in srgb, var(--e-tf) 16%, transparent); color: var(--e-tf); padding: 0.02em 0.25em; border-radius: 2px; }
+.fixed { color: var(--e-dr); }
+.down { text-align: center; font-family: var(--mono); font-size: 0.68rem; color: var(--ink-3); padding: 0.45rem 0; }
+.ff-line { display: flex; gap: 0.6rem; align-items: baseline; padding: 0.42rem 0; border-top: 1px solid var(--rule-2); font-size: 0.9rem; }
+.ff-line:first-child { border-top: 0; }
+.badge { flex: 0 0 5.6rem; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em; }
+.b-ok { color: var(--e-dr); }
+.b-flag { color: var(--e-tf); }
+.b-step { color: var(--accent); }
+.ff-line .mono, .verdict .mono { font-family: var(--mono); font-size: 0.78rem; }
+.verdict { margin: 0.5rem 0; padding: 0.55rem 0.7rem; border: 1px solid var(--e-tf); border-radius: 3px; background: color-mix(in srgb, var(--e-tf) 8%, transparent); font-size: 0.9rem; }
+.verdict b { color: var(--e-tf); }
+@media (max-width: 560px) { .ff-line { flex-direction: column; gap: 0.15rem; } .badge { flex: none; } }
 </style>
 </head>
 <body>
-<div class="reading-progress" aria-hidden="true"></div>
-<div class="wrap">
+<nav class="nav stay" id="nav" aria-label="Site">
+  <div class="nav-in">
+    <a class="nav-name" href="index.html">Alexander King</a>
+    <a class="link" href="index.html#projects"><span class="n">1</span>Projects</a>
+    <a class="link" href="index.html#publications"><span class="n">2</span>Publications</a>
+    <a class="link" href="index.html#contact"><span class="n">3</span>Contact</a>
+  </div>
+  <div class="nav-progress" id="nav-progress"></div>
+</nav>
 
-  <a href="index.html" class="back-link">&larr; Back to portfolio</a>
+<div class="page">
+<main class="article">
 
-  <header class="hero">
-    <h1 class="hero-name hero-anim hero-anim-1">Newscaster</h1>
-    <p class="hero-subtitle hero-anim hero-anim-2">Agentic AI Research &amp; Automated Publishing</p>
-    <hr class="hero-rule hero-anim hero-anim-3" aria-hidden="true">
-    <div class="abstract hero-anim hero-anim-4">
-      <p>An agentic research and automated publishing system that searches and validates evidence, demands counter-evidence, fact-checks each script against its sources, and ships an audio and video episode to YouTube &mdash; more than 525 episodes published. An embedding-based RAG memory carries relevant reporting across episodes.</p>
-    </div>
-    <p class="hero-anim hero-anim-4" style="margin-top:1.5rem;">
-      <a href="https://www.youtube.com/@NewsFromAlex" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor;">Watch on YouTube</a>
-      &nbsp;&middot;&nbsp;
-      <a href="https://github.com/AlexanderJulianKing/ai-news-podcast" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor;">View on GitHub</a>
-    </p>
+  <header class="art-head">
+    <p class="proj-kicker"><span class="n">02</span>Agentic systems &middot; how it works</p>
+    <h1>Newscaster</h1>
+    <p class="dek">How an automated daily news show is researched, fact-checked, and published every morning</p>
+    <p class="lede">I built Newscaster to research, write, fact-check, and publish a daily news episode with no one at the keyboard. I run each lead story through a research loop I designed, with an adversary model that looks for counter-evidence, and every script is checked against its sources before it is voiced. What past episodes reported is carried forward by an embedding-based memory. More than 525 episodes have been published to YouTube.</p>
+    <p class="links"><a href="https://www.youtube.com/@NewsFromAlex" target="_blank" rel="noopener">YouTube &rarr;</a><a href="https://github.com/AlexanderJulianKing/ai-news-podcast" target="_blank" rel="noopener">GitHub &rarr;</a></p>
   </header>
 
-  <div class="legend fade-in">
-    <span class="lt">Models</span>
-    <span class="chip">Gemini 3.1 Flash-Lite · <em>low-stakes utility calls</em></span>
-    <span class="chip">GPT-6 Luna · <em>reading front pages, summaries, research answers, faithfulness checks</em></span>
-    <span class="chip">Claude Opus 5.5 · <em>story picks, scripts, research, and the editor</em></span>
-    <span class="chip">GPT-6 Sol · <em>marking repeats and adversarial vetting</em></span>
-  </div>
+  <section class="art-sec" id="pipeline" aria-labelledby="pipe-h">
+    <header class="sec-head"><span class="n">(1)</span><h2 id="pipe-h">The pipeline</h2><span class="dots" aria-hidden="true"></span><span class="r" aria-hidden="true">i</span></header>
+    <p class="intro">Six stages, every morning, with no one at the keyboard.</p>
+    <ol class="steps">
+      <li><div><h3>Gather</h3><p>Read about 150 headlines, pick 2 stories to go deep on and 5 to cover briefly, and research them.</p></div></li>
+      <li><div><h3>Write scripts</h3><p>The two deep dives are written as conversations between an anchor and a reporter, and the other five as a short roundup.</p></div></li>
+      <li><div><h3>Fact-check</h3><p>Check every quote and claim against the sources, and fix what is wrong before anything is voiced.</p></div></li>
+      <li><div><h3>Audio</h3><p>A different voice for each speaker, plus theme music.</p></div></li>
+      <li><div><h3>Video</h3><p>The audio over the cover image.</p></div></li>
+      <li><div><h3>Upload</h3><p>Published to YouTube.</p></div></li>
+    </ol>
+    <figure class="plate">
+      <div class="table-scroll"><table class="data">
+        <thead><tr><th>Model</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td>Gemini 3.1 Flash-Lite</td><td>low-stakes utility calls</td></tr>
+          <tr><td>GPT-6 Luna</td><td>reading front pages, summaries, research answers, faithfulness checks</td></tr>
+          <tr><td>Claude Opus 5.5</td><td>story picks, scripts, research, and the editor</td></tr>
+          <tr><td>GPT-6 Sol</td><td>marking repeats and adversarial vetting</td></tr>
+        </tbody>
+      </table></div>
+      <figcaption><span class="fig">Table 1</span>The models in the pipeline, and what each one does.</figcaption>
+      <div class="plate-bar"></div>
+    </figure>
+  </section>
 
-  <h2 class="section-heading fade-in"><span class="section-number">1.</span> The pipeline</h2>
-  <p class="secnote">Six stages, every morning, with no one at the keyboard.</p>
+  <section class="art-sec" id="inside" aria-labelledby="inside-h">
+    <header class="sec-head"><span class="n">(2)</span><h2 id="inside-h">Inside the pipeline, step by step</h2><span class="dots" aria-hidden="true"></span><span class="r" aria-hidden="true">ii</span></header>
+    <p class="intro">Seven workflows, each drawn as a flowchart. The small label under each step says what does the work.</p>
+    <ul class="legend" style="margin-bottom:0.6rem"><li><i class="sw-acc"></i>AI model (LLM)</li><li><i class="sw-py"></i>plain code (Python)</li><li><i class="sw-web"></i>Google Search</li><li><i class="sw-db"></i>database</li></ul>
 
-  <div class="flow fade-in">
-    <div class="stage">
-      <div class="rail"><span class="num">1</span></div>
-      <div class="card">
-        <div class="ch"><span class="nm">Gather</span><span class="tag">deep-dive below ↓</span></div>
-        <p>Read about 150 headlines, pick <b>2 stories to go deep on</b> and <b>5 to cover briefly</b>, and research them.</p>
-      </div>
-    </div>
-
-    <div class="stage">
-      <div class="rail"><span class="num">2</span></div>
-      <div class="card">
-        <div class="ch"><span class="nm">Write scripts</span></div>
-        <p>The two deep dives become conversations between an anchor and a reporter. The other five become a short roundup.</p>
-      </div>
-    </div>
-
-    <div class="stage">
-      <div class="rail"><span class="num">3</span></div>
-      <div class="card">
-        <div class="ch"><span class="nm">Fact-check</span></div>
-        <p>Check every quote and claim against the sources, and fix what's wrong before anything is voiced.</p>
-      </div>
-    </div>
-
-    <div class="stage">
-      <div class="rail"><span class="num">4</span></div>
-      <div class="card">
-        <div class="ch"><span class="nm">Audio</span></div>
-        <p>A different voice for each speaker, plus theme music.</p>
-      </div>
-    </div>
-
-    <div class="stage">
-      <div class="rail"><span class="num">5</span></div>
-      <div class="card">
-        <div class="ch"><span class="nm">Video</span></div>
-        <p>The audio over the cover image.</p>
-      </div>
-    </div>
-
-    <div class="stage">
-      <div class="rail"><span class="num">6</span></div>
-      <div class="card">
-        <div class="ch"><span class="nm">Upload</span></div>
-        <p>Published to YouTube.</p>
-      </div>
-    </div>
-  </div>
-
-  <hr class="rule">
-  <h2 class="section-heading fade-in"><span class="section-number">2.</span> Inside the pipeline, step by step</h2>
-  <div class="fckey fade-in">
-    <span class="k"><span class="sw ai"></span><b>AI model</b> (LLM)</span>
-    <span class="k"><span class="sw py"></span><b>plain code</b> (Python)</span>
-    <span class="k"><span class="sw web"></span><b>Google Search</b></span>
-    <span class="k"><span class="sw db"></span><b>database</b></span>
-  </div>
-
-  <h3 class="fch fade-in"><span class="n">1.</span> Story selection <span class="em">· headlines → the day's picks</span></h3>
-  <svg class="fc" viewBox="0 0 580 530" role="img" aria-label="Story selection flowchart: read about 150 headlines from 16 sections, mark repeats against the story ledger, Tier 1 scores and keeps the top 10 plus 5 for California, Tier 2 researches the shortlist and picks the stories">
+    <p class="label">Workflow 1 &middot; headlines &rarr; the day&rsquo;s picks</p>
+    <h3 style="margin-top:0">Story selection</h3>
+    <figure class="plate fc-plate">
+      <svg class="fc" viewBox="0 0 580 530" role="img" aria-label="Story selection flowchart: read about 150 headlines from 16 sections, mark repeats against the story ledger, Tier 1 scores and keeps the top 10 plus 5 for California, Tier 2 researches the shortlist and picks the stories">
     <defs><marker id="arP" markerWidth="9" markerHeight="9" refX="6.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="context-stroke"/></marker></defs>
     <path class="edge" marker-end="url(#arP)" d="M190,50 V78"/>
     <path class="edge" marker-end="url(#arP)" d="M190,124 V154"/>
@@ -412,10 +154,15 @@
     <g><rect class="box" x="30" y="470" width="250" height="46" rx="9"/><text class="t" x="155" y="490" text-anchor="middle">2 deep-dive picks</text><text class="s ai" x="155" y="506" text-anchor="middle">AI · Opus → Gather (workflow <tspan font-size="12" font-weight="700">2</tspan>)</text></g>
     <g><rect class="box" x="300" y="470" width="250" height="46" rx="9"/><text class="t" x="425" y="490" text-anchor="middle">5 overview stories</text><text class="s ai" x="425" y="506" text-anchor="middle">AI · Luna → spoken roundup</text></g>
   </svg>
+      <figcaption><span class="fig">Fig. 1</span>Story selection, from the morning&rsquo;s headlines to the day&rsquo;s picks.</figcaption>
+      <div class="plate-bar"></div>
+    </figure>
 
-  <h3 class="fch fade-in"><span class="n">2.</span> Gather <span class="em">· one story → in-depth summary</span></h3>
-  <p class="fcap">This runs for each of the two deep-dive picks, then saves the results and indexes them.</p>
-  <svg class="fc" viewBox="0 0 560 945" role="img" aria-label="Gather flowchart: an escalating search, last 1 day, then last 3 days, then a reworded query. A usable article continues to the grounded overview, research agent and summary; if all three fail, the story is skipped.">
+    <p class="label">Workflow 2 &middot; one story &rarr; in-depth summary</p>
+    <h3 style="margin-top:0">Gather</h3>
+    <p>This workflow runs for each of the two deep-dive picks, and the results are then saved and indexed.</p>
+    <figure class="plate fc-plate">
+      <svg class="fc" viewBox="0 0 560 945" role="img" aria-label="Gather flowchart: an escalating search, last 1 day, then last 3 days, then a reworded query. A usable article continues to the grounded overview, research agent and summary; if all three fail, the story is skipped.">
     <defs><marker id="arG" markerWidth="9" markerHeight="9" refX="6.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="context-stroke"/></marker></defs>
     <path class="edge" marker-end="url(#arG)" d="M150,50 V66"/>
     <path class="edge" marker-end="url(#arG)" d="M150,112 V130"/>
@@ -446,10 +193,15 @@
     <g><rect class="box" x="290" y="818" width="220" height="46" rx="9"/><text class="t" x="400" y="838" text-anchor="middle">Trim off-topic bits</text><text class="s ai" x="400" y="854" text-anchor="middle">AI · Flash-Lite + Luna</text></g>
     <g><rect class="term" x="290" y="894" width="220" height="38" rx="19"/><text class="t" x="400" y="917" text-anchor="middle">Save summary + research notes</text></g>
   </svg>
+      <figcaption><span class="fig">Fig. 2</span>Gather, from one chosen story to an in-depth summary.</figcaption>
+      <div class="plate-bar"></div>
+    </figure>
 
-  <h3 class="fch fade-in"><span class="n">3.</span> Grounded search <span class="em">· answers only from verified sources</span></h3>
-  <p class="fcap">"Grounded" means tied to real fetched sources, never the model's own memory. Both the first pass and the research agent's source-checking tool (the "source hunter") use this: it answers <em>only</em> from verified excerpts, or reports no evidence. It never guesses.</p>
-  <svg class="fc" viewBox="0 0 560 690" role="img" aria-label="Grounded search flowchart: build a checklist, search, fetch, check each page, write findings and gaps">
+    <p class="label">Workflow 3 &middot; answers only from verified sources</p>
+    <h3 style="margin-top:0">Grounded search</h3>
+    <p>&ldquo;Grounded&rdquo; means tied to real fetched sources, never the model&rsquo;s own memory. The first pass and the research agent&rsquo;s source-checking tool (the &ldquo;source hunter&rdquo;) both use this workflow. Its answers come only from verified excerpts, and when there are none, it reports no evidence instead of guessing.</p>
+    <figure class="plate fc-plate">
+      <svg class="fc" viewBox="0 0 560 690" role="img" aria-label="Grounded search flowchart: build a checklist, search, fetch, check each page, write findings and gaps">
     <defs><marker id="arS" markerWidth="9" markerHeight="9" refX="6.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="context-stroke"/></marker></defs>
     <path class="edge" marker-end="url(#arS)" d="M185,50 V78"/>
     <path class="edge" marker-end="url(#arS)" d="M185,124 V154"/>
@@ -475,11 +227,16 @@
     <g><rect class="box" x="345" y="548" width="205" height="44" rx="9"/><text class="t" x="447" y="566" text-anchor="middle">Retry, more reasoning</text><text class="s ai" x="447" y="580" text-anchor="middle">AI · GPT-6 Luna</text></g>
     <g><rect class="term" x="92" y="626" width="186" height="38" rx="19"/><text class="t" x="185" y="649" text-anchor="middle">Answer + the sources used</text></g>
   </svg>
-  <p class="fine">Code checks each page for the right date, people and topic. For news, the checklist ranks the pages rather than rejecting them, because a strict checklist was throwing out real coverage of breaking stories. The whole flow runs once and, if no page passes, runs again with the model reasoning harder. Every run is logged, and those saved excerpts become what the fact-finder later checks against.</p>
+      <figcaption><span class="fig">Fig. 3</span>Grounded search: answers come only from verified sources.</figcaption>
+      <div class="plate-bar"></div>
+    </figure>
+    <p>Each page is checked in code for the right date, people, and topic. For news, the pages are ranked against the checklist instead of rejected by it, because a strict checklist was discarding real coverage of breaking stories. If no page passes on the first run, the whole flow runs again with the model reasoning harder. Every run is logged, and the saved excerpts are what the fact-finder later checks against.</p>
 
-  <h3 class="fch fade-in"><span class="n">4.</span> Research agent <span class="em">· the dig-deeper loop</span></h3>
-  <p class="fcap">It starts from the story's research so far, the article summaries plus the grounded search's first findings, then the orchestrator (Opus) keeps deciding "dig more or stop," calling two tools, until a second model (GPT-6 Sol), acting as an adversary that tries to poke holes in the findings, signs off. Up to ~5 rounds; it stops after 2 rounds that turn up nothing new.</p>
-  <svg class="fc" viewBox="0 0 580 500" role="img" aria-label="Research agent loop: pull a memory note from the cross-day memory, the controller plans, and if more research is needed runs a search tool with a targeted question and loops, the adversary checks for gaps, then it is done">
+    <p class="label">Workflow 4 &middot; the dig-deeper loop</p>
+    <h3 style="margin-top:0">Research agent</h3>
+    <p>The agent starts from the story&rsquo;s research so far: the article summaries plus the grounded search&rsquo;s first findings. The orchestrator (Opus) then keeps deciding whether to dig further or stop, calling one of two tools each round, until a second model (GPT-6 Sol), acting as an adversary that looks for holes in the findings, signs off. It runs up to 8 rounds and stops early after 2 rounds that turn up nothing new.</p>
+    <figure class="plate fc-plate">
+      <svg class="fc" viewBox="0 0 580 500" role="img" aria-label="Research agent loop: pull a memory note from the cross-day memory, the controller plans, and if more research is needed runs a search tool with a targeted question and loops, the adversary checks for gaps, then it is done">
     <defs><marker id="arA" markerWidth="9" markerHeight="9" refX="6.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="context-stroke"/></marker></defs>
     <path class="edge" marker-end="url(#arA)" d="M175,60 V72"/>
     <path class="edge" marker-end="url(#arA)" d="M175,118 V140"/>
@@ -501,11 +258,16 @@
     <polygon class="dec" points="175,358 245,386 175,414 105,386"/><text class="t" x="175" y="390" text-anchor="middle">gaps found?</text>
     <g><rect class="term" x="65" y="444" width="220" height="38" rx="19"/><text class="t" x="175" y="467" text-anchor="middle">Done → Gather (workflow 2)</text></g>
   </svg>
-  <p class="fine">One tool is the source hunter (workflow 3), which answers only from verified sources; the other runs a fresh web search and pulls in another relevant article. The adversary checks once: if it spots a gap, it forces one more dig; otherwise the agent hands its findings back to Gather.</p>
+      <figcaption><span class="fig">Fig. 4</span>The research agent&rsquo;s dig-deeper loop.</figcaption>
+      <div class="plate-bar"></div>
+    </figure>
+    <p>One tool is the source hunter (workflow 3), which answers only from verified sources; the other runs a fresh web search and pulls in another relevant article. The adversary checks once. If it finds a gap, the agent digs one more round; otherwise the agent hands its findings back to Gather.</p>
 
-  <h3 class="fch fade-in"><span class="n">5.</span> Embedding-based RAG memory <span class="em">· what past episodes already covered</span></h3>
-  <p class="fcap">The embedding-based retrieval system remembers what past episodes covered. Each note is turned into a vector (a list of numbers that captures its meaning) and stored; a new story's question becomes a vector too, and the most similar past notes come back. Written each day (left), read per story (right).</p>
-  <svg class="fc wide" viewBox="0 0 640 430" role="img" aria-label="Cross-day memory flowchart: write path indexes notes into the database; read path finds similar past notes and GPT-6 Luna writes a briefing">
+    <p class="label">Workflow 5 &middot; what past episodes already covered</p>
+    <h3 style="margin-top:0">Embedding-based RAG memory</h3>
+    <p>This retrieval system keeps a record of what past episodes covered. Each note is turned into a vector, a list of numbers that represents its meaning, and stored. A new story&rsquo;s question is turned into a vector too, and the most similar past notes are returned.</p>
+    <figure class="plate fc-plate">
+      <svg class="fc wide" viewBox="0 0 640 430" role="img" aria-label="Cross-day memory flowchart: write path indexes notes into the database; read path finds similar past notes and GPT-6 Luna writes a briefing">
     <defs><marker id="arR" markerWidth="9" markerHeight="9" refX="6.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="context-stroke"/></marker></defs>
     <text class="hd" x="105" y="30" text-anchor="middle">WRITE · each day</text>
     <text class="hd" x="540" y="30" text-anchor="middle">READ · per story</text>
@@ -531,13 +293,16 @@
     <g><rect class="box" x="450" y="310" width="180" height="44" rx="9"/><text class="t" x="540" y="330" text-anchor="middle">Summarize past coverage</text><text class="s ai" x="540" y="346" text-anchor="middle">AI · GPT-6 Luna</text></g>
     <g><rect class="term acc" x="450" y="370" width="180" height="40" rx="20"/><text class="t" x="540" y="394" text-anchor="middle">Briefing → research agent</text></g>
   </svg>
-  <p class="fine">The memory gives the system <b>continuity</b> (build on a running story), avoids <b>repeating</b> what it already covered, and nudges toward <b>fresh angles</b>; notes are tagged by storyline. If nothing matches, it simply starts fresh. In leakage-free chronological replay, the right prior coverage ranked first in <b>12/12</b> recurring-story tests, with <b>93%</b> of the top six results relevant.</p>
+      <figcaption><span class="fig">Fig. 5</span>The embedding-based memory: written each day (left), read for each story (right).</figcaption>
+      <div class="plate-bar"></div>
+    </figure>
+    <p>The memory is there for continuity: building on a running story, not repeating what was already covered, and finding fresh angles. Notes are tagged by storyline, and if nothing matches, the story starts fresh. In a leakage-free chronological replay, the right prior coverage ranked first in 12 of 12 recurring-story tests, and 93% of the top six results were relevant.</p>
 
-  <h3 class="fch fade-in"><span class="n">6.</span> The fact-finder <span class="em">· the last check before voicing</span></h3>
-  <p class="secnote">One last fact-check before the episode is voiced and published. Every script is checked against the <b>real source text the pipeline fetched</b> (the saved excerpts), <em>not</em> the LLM summaries, which would carry any invented claim straight through. Three passes, each matched to a different way fabrication slips in: a quote check (are quoted words verbatim?), a faithfulness check (does every claim match its source?), and a stable-fact check (are names and titles right?).</p>
-
-  <p class="fcap">Runs on every script (overview + segments) just before text-to-speech.</p>
-  <svg class="fc" viewBox="0 0 560 500" role="img" aria-label="Fact-finder flowchart: load the source excerpts, then three checks, quote, faithfulness, stable facts, each logging a flag; the grounded quote and faithfulness flags go to the editor in workflow 7 while stable-fact stays advisory; the episode always airs">
+    <p class="label">Workflow 6 &middot; the last check before voicing</p>
+    <h3 style="margin-top:0">The fact-finder</h3>
+    <p>This is the last fact-check before the episode is voiced and published. Every script is checked against the source text the pipeline actually fetched (the saved excerpts), not against the LLM summaries, which would carry an invented claim straight through. There are three passes, each aimed at a different way fabrication gets in: a quote check (are quoted words verbatim?), a faithfulness check (does every claim match its source?), and a stable-fact check (are names and titles right?). It runs on every script, the overview and the segments, just before text-to-speech.</p>
+    <figure class="plate fc-plate">
+      <svg class="fc" viewBox="0 0 560 500" role="img" aria-label="Fact-finder flowchart: load the source excerpts, then three checks, quote, faithfulness, stable facts, each logging a flag; the grounded quote and faithfulness flags go to the editor in workflow 7 while stable-fact stays advisory; the episode always airs">
     <defs><marker id="arF" markerWidth="9" markerHeight="9" refX="6.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="context-stroke"/></marker></defs>
     <path class="edge" marker-end="url(#arF)" d="M185,50 V72"/>
     <path class="edge" marker-end="url(#arF)" d="M185,118 V138"/>
@@ -557,11 +322,16 @@
     <g><rect class="box" x="80" y="368" width="210" height="46" rx="9"/><text class="t" x="185" y="388" text-anchor="middle">3 Stable facts</text><text class="s ai" x="185" y="404" text-anchor="middle">AI · Luna → web · advisory</text></g>
     <g><rect class="term" x="55" y="438" width="260" height="50" rx="22"/><text class="t" x="185" y="456" text-anchor="middle">Grounded flags → editor (workflow <tspan font-size="12" font-weight="700">7</tspan>)</text><text class="s" x="185" y="474" text-anchor="middle">stable-fact stays a logged flag</text></g>
   </svg>
-  <p class="fine">Pass&nbsp;2 runs on <b>GPT-6 Luna</b> at medium reasoning (GLM 5.2 until September 2026) against <em>only that segment's</em> sources: the tight context is what lets it catch a subtle contradiction a long, noisy corpus would drown. In the 2026-06-23 episode it flags the script's “a crushing <b>defeat</b> in the Makerfield by-election” when the sources say Andy Burnham <b>won</b> it with 55%, a victory, not a defeat (a reversal, pass 2). Only the source-grounded flags (from passes 1 and 2) go to the editor (workflow 7). The stable-fact pass stays <b>advisory</b>: its web check is unreliable on facts newer than the model's training. In the same episode it wrongly insisted the Fed chair was still Powell, dismissing the 2026 dates as “simulated”, so it's logged but never auto-edited. Every flag is logged; it never blocks the run.</p>
+      <figcaption><span class="fig">Fig. 6</span>The fact-finder&rsquo;s three checks before voicing.</figcaption>
+      <div class="plate-bar"></div>
+    </figure>
+    <p>Pass&nbsp;2 runs on GPT-6 Luna at medium reasoning (GLM 5.2 until September 2026) against only that segment&rsquo;s sources. The tight context is what lets it catch a subtle contradiction that a long, noisy corpus would bury. In the June 23, 2026 episode, it flagged the script&rsquo;s &ldquo;a crushing defeat in the Makerfield by-election&rdquo; when the sources say Andy Burnham won it with 55%. Only the source-grounded flags, from passes 1 and 2, go to the editor (workflow 7). The stable-fact pass stays advisory, because its web check is unreliable on facts newer than the model&rsquo;s training; in the same episode it insisted the Fed chair was still Powell and dismissed the 2026 dates as &ldquo;simulated.&rdquo; Its flags are logged but never auto-edited, and no flag ever blocks the run.</p>
 
-  <h3 class="fch fade-in"><span class="n">7.</span> The fact-finder editor <span class="em">· fix the confirmed errors before voicing</span></h3>
-  <p class="fcap">Runs only on scripts with a <b>source-grounded</b> flag (quote or faithfulness). Opus proposes verbatim find/replace fixes for the confirmed factual errors; a GPT-6 Sol adversary signs off on each; then plain code applies it, but only where the exact phrase occurs once. Up to 3 rounds.</p>
-  <svg class="fc" viewBox="0 0 580 430" role="img" aria-label="Fact-finder editor flowchart: Opus proposes a minimal find-replace fix, a GPT-6 Sol adversary approves or rejects, plain code swaps the exact words only when the span is unambiguous, looping up to three rounds into a corrected script; rejected or ambiguous cases stay logged flags">
+    <p class="label">Workflow 7 &middot; fix the confirmed errors before voicing</p>
+    <h3 style="margin-top:0">The fact-finder editor</h3>
+    <p>The editor runs only on scripts with a source-grounded flag (quote or faithfulness). Opus proposes verbatim find-and-replace fixes for the confirmed factual errors, a GPT-6 Sol adversary signs off on each one, and plain code applies a fix only where the exact phrase occurs once. It runs up to 3 rounds.</p>
+    <figure class="plate fc-plate">
+      <svg class="fc" viewBox="0 0 580 430" role="img" aria-label="Fact-finder editor flowchart: Opus proposes a minimal find-replace fix, a GPT-6 Sol adversary approves or rejects, plain code swaps the exact words only when the span is unambiguous, looping up to three rounds into a corrected script; rejected or ambiguous cases stay logged flags">
     <defs><marker id="arE" markerWidth="9" markerHeight="9" refX="6.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="context-stroke"/></marker></defs>
     <path class="edge" marker-end="url(#arE)" d="M185,60 V72"/>
     <path class="edge" marker-end="url(#arE)" d="M185,118 V140"/>
@@ -578,98 +348,83 @@
     <g><rect class="box" x="80" y="292" width="210" height="46" rx="9"/><text class="t" x="185" y="312" text-anchor="middle">Swap the exact words</text><text class="s py" x="185" y="328" text-anchor="middle">plain code · unique span only</text></g>
     <g><rect class="term acc" x="58" y="360" width="254" height="40" rx="20"/><text class="t" x="185" y="384" text-anchor="middle">Corrected script → voicing</text></g>
   </svg>
-  <p class="fine">The reference it checks against is that segment's fetched excerpts. The adversary rejects anything uncertain or unsupported, so only checkable, <em>contradicted</em> facts change; ambiguous spans and everything else stay logged flags.</p>
+      <figcaption><span class="fig">Fig. 7</span>The fact-finder editor, which fixes confirmed errors before voicing.</figcaption>
+      <div class="plate-bar"></div>
+    </figure>
+    <p>The reference is that segment&rsquo;s fetched excerpts. The adversary rejects anything uncertain or unsupported, so only checkable, contradicted facts are changed; ambiguous spans and everything else stay as logged flags.</p>
+  </section>
 
-  <hr class="rule">
-  <h2 class="section-heading fade-in"><span class="section-number">3.</span> A story through the machine</h2>
-  <p class="secnote">Following one real story from the June 23, 2026 episode, the U.K. leadership shake-up. The source hunter pulls it cleanly, then the cheap rewrite model <b>inverts the outcome</b>, calling Andy Burnham's by-election <mark>landslide</mark> a <mark>crushing defeat</mark>. The faithfulness pass catches the flip, and the editor restores the win before voicing. The models named in this example are the ones that ran that day (Gemma, GLM 5.2 and GPT-5.5); GPT-6 Luna and GPT-6 Sol do those jobs now.</p>
+  <section class="art-sec" id="example" aria-labelledby="ex-h">
+    <header class="sec-head"><span class="n">(3)</span><h2 id="ex-h">A story through the machine</h2><span class="dots" aria-hidden="true"></span><span class="r" aria-hidden="true">iii</span></header>
+    <p class="intro">This follows one real story from the June 23, 2026 episode: the U.K. leadership shake-up. The source hunter got it right, then the cheaper rewrite model inverted the outcome, calling Andy Burnham&rsquo;s by-election landslide a &ldquo;crushing defeat.&rdquo; The faithfulness pass caught the flip, and the editor restored the win before voicing.</p>
+    <p>The models named here are the ones that ran that day (Gemma, GLM 5.2, and GPT-5.5); GPT-6 Luna and GPT-6 Sol do those jobs now.</p>
 
-  <div class="ex-flow">
-
-    <div class="page fade-in">
-      <div class="page-bar"><span class="dot"></span> Scraped source <span class="meta">stage 1 · scrape</span></div>
-      <div class="page-body">
-        <div class="src">npr.org · bbc.com · al jazeera, U.K. politics coverage · Jun 22 2026</div>
-        <p class="quoteblock">Keir Starmer announced his resignation as Labour leader, following <b>Andy Burnham's decisive victory</b> last week in the Makerfield by-election. Burnham, then mayor of Greater Manchester, <b>won</b> the Makerfield parliamentary by-election on June 19 with 55% of the vote.</p>
-        <p class="src" style="margin-top:.5rem">↳ the source is unambiguous: Burnham <em>won</em> the by-election in a landslide, one of the blows that pushed Starmer out.</p>
+    <div class="ex-flow">
+      <div class="ex-card">
+        <div class="ex-bar">Scraped source <span class="meta">stage 1 &middot; scrape</span></div>
+        <div class="ex-body">
+          <p class="src">npr.org &middot; bbc.com &middot; al jazeera, U.K. politics coverage &middot; Jun 22 2026</p>
+          <p class="quoteblock">Keir Starmer announced his resignation as Labour leader, following <b>Andy Burnham&rsquo;s decisive victory</b> last week in the Makerfield by-election. Burnham, then mayor of Greater Manchester, <b>won</b> the Makerfield parliamentary by-election on June 19 with 55% of the vote.</p>
+          <p class="note">The source is unambiguous: Burnham won the by-election in a landslide, one of the setbacks that led Starmer to resign.</p>
+        </div>
+      </div>
+      <div class="down">&darr; fetched and validated; only the relevant excerpts are kept</div>
+      <div class="ex-card">
+        <div class="ex-bar">Source-hunter findings <span class="meta">stage 1 &middot; grounded research</span></div>
+        <div class="ex-body">
+          <p><b>Findings:</b> Keir Starmer announced his resignation as Labour leader on June 22, 2026. After heavy May losses, <b>Andy Burnham&rsquo;s 55% win</b> in the June 19 Makerfield by-election, and the Mandelson controversy, Starmer stays on as caretaker until a successor is chosen; nominations run July 9&ndash;16. Burnham is the frontrunner; Wes Streeting is backing him rather than running.</p>
+          <p class="src"><b>Gaps:</b> the final field of leadership candidates.</p>
+          <p class="note">Every actor and outcome is correct here, including that Burnham won. The error appears next, when a cheaper model compresses the findings into the anchor&rsquo;s read.</p>
+        </div>
+      </div>
+      <div class="down">&darr; findings &rarr; anchor read</div>
+      <div class="ex-card">
+        <div class="ex-bar">Overview script, the anchor&rsquo;s read <span class="meta">stage 2 &middot; scripting</span></div>
+        <div class="ex-body">
+          <p class="quoteblock"><b>Anchor:</b> &hellip;After devastating losses in May and rival Andy Burnham&rsquo;s <mark>crushing defeat</mark> in the Makerfield by-election on June nineteenth, Starmer decided it was time to step down&hellip;</p>
+          <p class="note">Gemma compressed the verified findings into a brisk anchor read but inverted the outcome, calling Burnham&rsquo;s landslide a defeat. Every name and date is real; only the result is flipped. A check against the whole day&rsquo;s corpus would likely miss a reversal this subtle, and the per-segment faithfulness pass catches it.</p>
+        </div>
+      </div>
+      <div class="down">&darr; the last check before voicing</div>
+      <div class="ex-card hot">
+        <div class="ex-bar">Fact-finder report <span class="meta">stage 3 &middot; fact-finder + editor</span></div>
+        <div class="ex-body">
+          <div class="ff-line"><span class="badge b-ok">PASS 1</span><span><b>Quote check</b> &middot; clean: no marked quotes to verify in this read.</span></div>
+          <div class="ff-line"><span class="badge b-flag">PASS 2</span><span><b>Faithfulness</b> <span class="mono">GLM &middot; vs this segment&rsquo;s sources</span>: <b>&ldquo;a crushing defeat in the Makerfield by-election&rdquo;</b>. The sources say Andy Burnham <b>won</b> it with 55%, a victory, not a defeat.</span></div>
+          <div class="ff-line"><span class="badge b-flag">PASS 3</span><span><b>Stable-fact</b> (advisory): elsewhere in the same read it flags <b>&ldquo;Current Chair Kevin Warsh&rdquo;</b>&hellip;</span></div>
+          <div class="ff-line"><span class="badge b-step">SEARCH</span><span>&hellip;but it insists Jerome Powell is Chair and dismisses the 2026 dates as &ldquo;simulated&rdquo;; Warsh&rsquo;s appointment is newer than the model&rsquo;s training, so the check is unreliable here. <b>Advisory: logged, never edited.</b></span></div>
+          <div class="verdict"><b>FLAG</b> &middot; faithfulness (overview): <span class="mono">&ldquo;a crushing defeat in the Makerfield by-election&rdquo; &rarr; the source says Andy Burnham (Labour) won it with 55%; it was a victory, not a defeat.</span></div>
+          <div class="ff-line"><span class="badge b-step">EDITOR</span><span><b>Opus</b> proposes a verbatim fix for the grounded flag: <span class="mono">&ldquo;a crushing defeat in the Makerfield by-election&rdquo; &rarr; &ldquo;rival Andy Burnham&rsquo;s crushing victory in the Makerfield by-election&rdquo;</span></span></div>
+          <div class="ff-line"><span class="badge b-step">ADVERSARY</span><span><b>GPT-5.5</b> checks the fix against the sources &rarr; <b class="fixed">approved</b> &middot; it never sees the Warsh flag</span></div>
+          <div class="ff-line"><span class="badge b-ok">APPLIED</span><span>The phrase occurs exactly once, so plain code swaps it in. <b class="fixed">Corrected before voicing.</b></span></div>
+        </div>
+      </div>
+      <div class="down">&darr; fix applied &middot; corrected script &rarr; voicing</div>
+      <div class="ex-card">
+        <div class="ex-bar">Episode <span class="meta">stages 4&ndash;6 &middot; audio &rarr; video &rarr; upload</span></div>
+        <div class="ex-body">
+          <p class="quoteblock"><b>Anchor:</b> &hellip;After devastating losses in May and rival Andy Burnham&rsquo;s <b class="fixed">crushing victory</b> in the Makerfield by-election on June nineteenth, Starmer decided it was time to step down&hellip;</p>
+          <p class="note">The corrected read is voiced (an anchor and two reporters), turned into video, and uploaded to YouTube as a public episode, alongside the day&rsquo;s deep dives (&ldquo;Why a judge quashed DOJ subpoenas targeting Minnesota leaders,&rdquo; &ldquo;Why the Supreme Court reinstated Pedro Hernandez&rsquo;s convictions&rdquo;).</p>
+          <p class="note">Each grounded fix is recorded in the edit log with the source behind it. The Warsh flag stays logged but untouched, because the stable-fact pass is advisory.</p>
+        </div>
       </div>
     </div>
-    <div class="down">↓<small>fetched + validated, only relevant excerpts kept</small></div>
+    <p class="fine-print" style="margin-top:2rem;font-size:0.92rem;color:var(--ink-3)">Newscaster is deployed and runs daily on a Raspberry Pi, a credit-card-sized computer; each run starts at 4 AM. Labels, models, and sources reflect the codebase as of September 23, 2026, except the research agent&rsquo;s round limit, which was raised to 8 on September 25. The worked example is the real June 23, 2026 run, shown with the models that ran it.</p>
+  </section>
 
-    <div class="page fade-in">
-      <div class="page-bar"><span class="dot"></span> Source-hunter findings <span class="meta">stage 1 · grounded research</span></div>
-      <div class="page-body">
-        <p><b>FINDINGS</b>: Keir Starmer announced his resignation as Labour leader on June 22, 2026. After heavy May losses, <b>Andy Burnham's 55% win</b> in the June 19 Makerfield by-election, and the Mandelson controversy, Starmer stays on as caretaker until a successor is chosen; nominations run July 9–16. Burnham is the frontrunner; Wes Streeting is backing him rather than running.</p>
-        <p class="src"><b>GAPS</b>: the final field of leadership candidates.</p>
-        <p class="src" style="margin-top:.45rem">↳ every actor and outcome is straight here, including that Burnham <em>won</em>. The error appears next, when a cheaper model compresses the findings into the anchor's read.</p>
-      </div>
-    </div>
-    <div class="down">↓<small>findings → anchor read</small></div>
-
-    <div class="page fade-in">
-      <div class="page-bar"><span class="dot"></span> Overview script · the anchor's read <span class="meta">stage 2 · scripting</span></div>
-      <div class="page-body">
-        <p class="quoteblock"><b>Anchor:</b> …After devastating losses in May and rival Andy Burnham's <mark>crushing defeat</mark> in the Makerfield by-election on June nineteenth, Starmer decided it was time to step down…</p>
-        <p class="src" style="margin-top:.5rem">↳ Gemma compresses the verified findings into a brisk anchor read, but it <em>inverts the outcome</em>, calling Burnham's landslide a defeat. Every name and date is real; only the result is flipped, the kind of subtle reversal a whole-day corpus check would miss but the per-segment faithfulness pass catches.</p>
-      </div>
-    </div>
-    <div class="down">↓<small>last check before voicing</small></div>
-
-    <div class="page fade-in" style="border-color:var(--accent);">
-      <div class="page-bar" style="background:var(--accent-soft);"><span class="dot" style="background:var(--accent);"></span> Fact-finder report <span class="meta">stage 3 · fact-finder + editor</span></div>
-      <div class="page-body ff-report">
-        <div class="line"><span class="badge b-ok">PASS 1</span><span class="d"><b>Quote check</b> · clean: no marked quotes to verify in this read.</span></div>
-        <div class="line"><span class="badge b-flag">PASS 2</span><span class="d"><b>Faithfulness</b> <span class="mono">GLM · vs this segment's sources</span>: <b>"a crushing defeat in the Makerfield by-election"</b>. The sources say Andy Burnham <b>won</b> it with 55%, a victory, not a defeat.</span></div>
-        <div class="line"><span class="badge b-flag">PASS 3</span><span class="d"><b>Stable-fact</b> (advisory), elsewhere in the same read it flags <b>"Current Chair Kevin Warsh"</b></span></div>
-        <div class="line"><span class="badge b-srch">SEARCH</span><span class="d">…but it insists Jerome Powell is Chair and dismisses the 2026 dates as "simulated"; Warsh's appointment is newer than the model's training, so the check is unreliable here. <b style="color:var(--warn)">advisory: logged, never edited</b></span></div>
-        <div class="verdict"><b>FLAG</b> · FAITHFULNESS (overview): <span class="mono">"a crushing defeat in the Makerfield by-election" → the source says Andy Burnham (Labour) won it with 55%; it was a victory, not a defeat.</span></div>
-        <div class="line" style="margin-top:.6rem"><span class="badge b-srch">EDITOR</span><span class="d"><b>Opus</b> proposes a verbatim fix for the <b>grounded</b> flag: <span class="mono">"a crushing defeat in the Makerfield by-election" → "rival Andy Burnham's crushing victory in the Makerfield by-election"</span></span></div>
-        <div class="line"><span class="badge b-srch">ADVERSARY</span><span class="d"><b>GPT-5.5</b> checks the fix against the sources → <b style="color:var(--ok)">approved</b> · it never sees the Warsh flag</span></div>
-        <div class="line"><span class="badge b-ok">APPLIED</span><span class="d">the phrase occurs exactly once, so plain code swaps it in. <b style="color:var(--ok)">Corrected before voicing</b></span></div>
-      </div>
-    </div>
-    <div class="down">↓<small>fix applied · corrected script → voicing</small></div>
-
-    <div class="page fade-in">
-      <div class="page-bar"><span class="dot"></span> Episode <span class="meta">stages 4–6 · audio → video → upload</span></div>
-      <div class="page-body">
-        <p class="quoteblock"><b>Anchor:</b> …After devastating losses in May and rival Andy Burnham's <b style="color:var(--ok)">crushing victory</b> in the Makerfield by-election on June nineteenth, Starmer decided it was time to step down…</p>
-        <p class="src" style="margin-top:.5rem">The corrected read is voiced (anchor + two reporters) → video → uploaded to YouTube, published public, alongside the day's deep-dives ("Why a judge quashed DOJ subpoenas targeting Minnesota leaders," "Why the Supreme Court reinstated Pedro Hernandez's convictions").</p>
-        <p class="src" style="margin-top:.45rem">Each grounded fix, and the source behind it, lands in the edit log. The Warsh flag stays logged but untouched: advisory only.</p>
-      </div>
-    </div>
-
-  </div>
-
-  <footer class="fade-in">
-    <span class="pill">● deployed &amp; live</span>
-    &nbsp; Running on a Raspberry Pi (a credit-card-sized computer): a three-pass fact-finder feeds an <b>Opus editor</b> (GPT-6 Sol-vetted) that fixes the source-grounded factual errors in place before voicing; the stable-fact pass stays advisory. Saved source excerpts ground passes 1–2 and the editor. The scheduler sleeps until 4 AM.
-    <div style="margin-top:.6rem;font-size:.78rem;">Every label, model and source reflects the codebase as of September 23, 2026. The worked example is the real June 23, 2026 run, shown with the models that ran it.</div>
-    <div class="foot-credit">
-      <span>&copy; 2026 Alexander King</span>
-      <span class="footer-note">Newscaster</span>
-    </div>
-    <div style="margin-top:1rem;"><a href="index.html" class="back-link" style="margin:0;">&larr; Back to portfolio</a> &nbsp;&middot;&nbsp; <a href="https://www.youtube.com/@NewsFromAlex" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor;">Watch on YouTube</a> &nbsp;&middot;&nbsp; <a href="https://github.com/AlexanderJulianKing/ai-news-podcast" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor;">View on GitHub</a></div>
-  </footer>
-
+</main>
+<footer class="foot art-foot">
+  <span>&copy; 2026 Alexander King</span>
+  <span>Newscaster &middot; <a href="https://www.youtube.com/@NewsFromAlex" target="_blank" rel="noopener">YouTube</a> &middot; <a href="https://github.com/AlexanderJulianKing/ai-news-podcast" target="_blank" rel="noopener">GitHub</a> &middot; <a href="index.html">Home</a></span>
+</footer>
 </div>
+
 <script>
-(function(){
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  // Scroll-triggered fade-ins (matches index.html and the explainer pages)
-  var obs = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } });
-  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-  document.querySelectorAll('.fade-in').forEach(function(el){ obs.observe(el); });
-  // Reading-progress bar, JS fallback where scroll-driven CSS animation is unsupported
-  if (!(window.CSS && CSS.supports && CSS.supports('animation-timeline', 'scroll()'))) {
-    var bar = document.querySelector('.reading-progress');
-    if (bar) window.addEventListener('scroll', function(){
-      var s = document.documentElement;
-      var pct = s.scrollTop / (s.scrollHeight - s.clientHeight);
-      bar.style.transform = 'scaleX(' + Math.min(Math.max(pct, 0), 1) + ')';
-    }, { passive: true });
-  }
+/* Reading progress along the bottom of the nav. */
+(() => {
+  const bar = document.getElementById('nav-progress');
+  const up = () => { const t = document.documentElement.scrollHeight - innerHeight; bar.style.transform = `scaleX(${t > 0 ? Math.min(1, Math.max(0, scrollY / t)) : 0})`; };
+  addEventListener('scroll', up, { passive: true }); addEventListener('resize', up); up();
 })();
 </script>
 </body>

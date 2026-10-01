@@ -1,667 +1,246 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Project Soothsayer — How It Works</title>
-  <meta name="description" content="How Project Soothsayer predicts Arena (arena.ai) ELO scores from benchmark data alone.">
-  <meta property="og:title" content="Project Soothsayer — How It Works">
-  <meta property="og:description" content="How Project Soothsayer predicts Arena (arena.ai) ELO scores from benchmark data alone.">
-  <meta property="og:type" content="article">
-  <meta property="og:image" content="https://alexanderjulianking.github.io/og-image.jpg">
-  <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='Georgia, serif' fill='%237a2e2e'>A</text></svg>">
-  <script>document.documentElement.classList.add('js');</script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #fafaf8;
-      --bg-alt: #f3f2ef;
-      --text: #1a1a1a;
-      --text-muted: #555;
-      --text-light: #6a6a6a;
-      --accent: #7a2e2e;
-      --accent-hover: #5c1e1e;
-      --border: #d4d0c8;
-      --border-light: #e8e5de;
-      --card-bg: #ffffff;
-      --card-border: #e8e5de;
-      --card-hover-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      --rule: #c4c0b8;
-      --tag-bg: #eee;
-      --tag-text: #555;
-      --font-serif: 'EB Garamond', 'Georgia', serif;
-      --font-sans: 'Inter', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', 'Menlo', monospace;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #141414;
-        --bg-alt: #1c1c1c;
-        --text: #d8d4cf;
-        --text-muted: #a09a90;
-        --text-light: #8a8580;
-        --accent: #c46b6b;
-        --accent-hover: #d98e8e;
-        --border: #2e2e2e;
-        --border-light: #252525;
-        --card-bg: #1a1a1a;
-        --card-border: #2a2a2a;
-        --card-hover-shadow: 0 2px 12px rgba(0,0,0,0.3);
-        --rule: #333;
-        --tag-bg: #262626;
-        --tag-text: #999;
-      }
-    }
-
-    html { font-size: 18px; -webkit-text-size-adjust: 100%; }
-    @media (prefers-reduced-motion: no-preference) {
-      html { scroll-behavior: smooth; }
-    }
-
-    body {
-      font-family: var(--font-serif);
-      color: var(--text);
-      background: var(--bg);
-      line-height: 1.68;
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* Selected text gets the house burgundy, not browser blue */
-    ::selection {
-      background: color-mix(in srgb, var(--accent) 22%, transparent);
-    }
-
-    /* Layout */
-    .page-wrapper { max-width: 900px; margin: 0 auto; padding: 0 1.5rem; }
-
-    .back-link {
-      display: inline-block;
-      font-family: var(--font-sans);
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      text-decoration: none;
-      padding: 1.2rem 0 0;
-      transition: color 0.2s;
-    }
-    .back-link:hover { color: var(--accent); }
-
-    /* Typography */
-    h1, h2, h3 { font-family: var(--font-serif); font-weight: 500; letter-spacing: -0.01em; }
-
-    .section-heading {
-      font-size: 1.55rem;
-      margin-bottom: 1.25rem;
-      padding-bottom: 0.3rem;
-      position: relative;
-    }
-    .section-heading::after {
-      content: ''; display: block; position: absolute;
-      bottom: 0; left: 0; height: 1px; background: var(--border-light);
-      width: 0;
-      transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.12s;
-    }
-    .section-heading.visible::after { width: 100%; }
-    .section-number {
-      color: var(--accent); font-variant-numeric: oldstyle-nums;
-      margin-right: 0.4em; font-weight: 400;
-      opacity: 0.38; transition: opacity 0.55s ease 0.55s;
-    }
-    .section-heading.visible .section-number { opacity: 1; }
-
-    p { margin-bottom: 1rem; }
-    .subtitle { color: var(--text-muted); font-size: 1rem; font-style: italic; margin-bottom: 2rem; }
-
-    section { padding: 2.5rem 0 1.5rem; }
-
-    /* Hero */
-    .hero { padding: 4rem 0 2rem; }
-    .hero-name { font-size: 2.4rem; font-weight: 500; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 0.5rem; }
-    .hero-subtitle {
-      font-family: var(--font-serif); font-size: 0.85rem; letter-spacing: 0.06em;
-      color: var(--text-muted); font-variant: small-caps; margin-bottom: 1.5rem;
-    }
-    .hero-rule { border: none; height: 1px; background: var(--rule); margin-bottom: 1.5rem; }
-    .abstract p { font-size: 1.15rem; line-height: 1.65; color: var(--text-muted); margin-left: 1rem; margin-right: 1rem; }
-
-    /* Problem explainer */
-    .problem-explainer {
-      border-top: 1px solid var(--border-light);
-      padding: 2rem 0 0.5rem;
-    }
-    .problem-explainer h2 {
-      font-size: 1.3rem; font-weight: 500; margin-bottom: 1.25rem;
-      color: var(--text);
-    }
-    .explainer-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-    .explainer-col h3 {
-      font-family: var(--font-sans); font-size: 0.75rem; font-weight: 500;
-      text-transform: uppercase; letter-spacing: 0.08em;
-      color: var(--accent); margin-bottom: 0.6rem;
-    }
-    .explainer-col p { font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0; }
-    @media (max-width: 600px) { .explainer-columns { grid-template-columns: 1fr; gap: 1rem; } }
-
-    /* Cards */
-    .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin-top: 1.5rem; }
-    .card {
-      border: 1px solid var(--card-border); background: var(--card-bg); padding: 1.5rem;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      position: relative; overflow: hidden;
-    }
-    .card::before {
-      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
-      background: var(--accent); transform: scaleY(0);
-      transform-origin: top center; transition: transform 0.22s ease;
-    }
-    .card:hover::before { transform: scaleY(1); }
-    .card:hover { transform: translateY(-2px); box-shadow: var(--card-hover-shadow); }
-    .card.fade-in { transform: translateX(-14px); }
-    .card.fade-in.visible { transform: translateX(0); }
-    .card h3 { font-size: 1.05rem; margin-bottom: 0.4rem; color: var(--accent); }
-    .card .method-tag {
-      display: inline-block; font-family: var(--font-mono); font-size: 0.7rem;
-      background: var(--tag-bg); color: var(--tag-text); padding: 0.15rem 0.5rem;
-      border-radius: 2px; margin-bottom: 0.6rem;
-    }
-    .card p { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0; text-align: left; }
-    .card .impact-tag {
-      display: inline-block; font-family: var(--font-mono); font-size: 0.7rem;
-      color: var(--accent); margin-top: 0.5rem;
-    }
-
-    /* Pipeline canvas */
-    .pipeline-wrap { margin: 1.5rem 0; }
-    .pipeline-wrap canvas { display: block; width: 100%; }
-
-    /* Source bubbles */
-    .source-cloud { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.5rem 0; }
-    .source-bubble {
-      border: 1px solid var(--border); background: var(--bg-alt); padding: 0.3rem 0.8rem;
-      font-size: 0.72rem; font-family: var(--font-sans); color: var(--text-muted);
-      transition: border-color 0.2s, color 0.2s; cursor: default;
-    }
-    .source-bubble:hover { border-color: var(--accent); color: var(--text); }
-    .source-bubble.custom { border-color: var(--accent); color: var(--accent); }
-
-    /* Flow boxes */
-    .flow-row { display: flex; gap: 1rem; margin: 1.5rem 0; flex-wrap: wrap; }
-    .flow-box {
-      flex: 1; min-width: 200px; border: 1px solid var(--card-border);
-      background: var(--card-bg); padding: 1rem 1.2rem;
-    }
-    .flow-box .box-header { font-family: var(--font-serif); font-weight: 500; font-size: 0.9rem; margin-bottom: 0.3rem; }
-    .flow-box .box-detail { color: var(--text-muted); font-size: 0.82rem; }
-
-    /* Stats */
-    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin: 2rem 0; }
-    .stat-card { border: 1px solid var(--card-border); background: var(--card-bg); padding: 1.2rem; text-align: center; }
-    .stat-num { font-size: 2rem; font-weight: 400; font-family: var(--font-mono); color: var(--accent); }
-    .stat-label { font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-sans); margin-top: 0.2rem; }
-
-    /* TrueSkill */
-    .trueskill-box { border: 1px solid var(--card-border); background: var(--card-bg); padding: 2rem; margin: 1.5rem 0; }
-    .trueskill-box h3 { text-align: center; margin-bottom: 0.5rem; }
-    .trueskill-box .ts-desc { text-align: center; color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.2rem; }
-    .battle-arena { display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin: 1rem 0; flex-wrap: wrap; }
-    .fighter {
-      background: var(--bg-alt); border: 1px solid var(--border); padding: 1.2rem 1.5rem;
-      text-align: center; min-width: 130px; transition: border-color 0.3s, opacity 0.3s;
-    }
-    .fighter.winner { border-color: var(--accent); }
-    .fighter.loser { opacity: 0.45; }
-    .fighter .model-name { font-weight: 500; font-size: 0.9rem; margin-bottom: 0.2rem; }
-    .fighter .elo { font-family: var(--font-mono); color: var(--accent); font-size: 1.3rem; }
-    .fighter .sigma { font-size: 0.72rem; color: var(--text-light); font-family: var(--font-mono); }
-    .vs { font-size: 1.2rem; font-weight: 600; color: var(--accent); }
-    .battle-log { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 0.8rem; min-height: 1.2em; }
-
-    /* Imputer deep dive */
-    .imputer-wrap { border: 1px solid var(--card-border); background: var(--card-bg); padding: 2rem; margin: 1.5rem 0; }
-    .phase-bar { display: flex; gap: 0.4rem; margin-bottom: 1.5rem; flex-wrap: wrap; justify-content: center; }
-    .phase-pip {
-      padding: 0.35rem 0.8rem; font-size: 0.7rem; font-family: var(--font-sans); font-weight: 500;
-      background: var(--bg-alt); color: var(--text-muted); border: 1px solid var(--border);
-      cursor: pointer; transition: all 0.25s; user-select: none;
-    }
-    .phase-pip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .phase-pip.done { color: var(--accent); border-color: var(--accent); background: var(--bg-alt); }
-    .phase-narration { text-align: center; margin-bottom: 1.5rem; min-height: 3em; }
-    .phase-narration h4 { font-family: var(--font-serif); font-size: 1.05rem; font-weight: 500; margin-bottom: 0.3rem; }
-    .phase-narration p { font-size: 0.85rem; color: var(--text-muted); max-width: 650px; margin: 0 auto; }
-    .matrix-viewport { position: relative; width: 100%; overflow: hidden; border: 1px solid var(--border-light); background: var(--bg); }
-    .matrix-viewport canvas { display: block; width: 100%; }
-    .imputer-controls { display: flex; justify-content: center; gap: 0.8rem; margin-top: 1.2rem; align-items: center; }
-    .imp-btn {
-      padding: 0.55rem 1.4rem; border: 1px solid var(--border); background: var(--bg-alt);
-      color: var(--text); font-family: var(--font-sans); font-size: 0.78rem; font-weight: 500;
-      cursor: pointer; transition: border-color 0.2s, color 0.2s;
-    }
-    .imp-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .imp-btn:disabled { opacity: 0.3; cursor: default; }
-    .imp-btn:focus-visible, .phase-pip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
-    .imp-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .imp-btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: #fff; }
-
-    /* ML steps */
-    .ml-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
-    @media (max-width: 640px) { .ml-steps { grid-template-columns: 1fr; } }
-    .ml-step {
-      display: flex; align-items: flex-start; gap: 1.1rem;
-      border: 1px solid var(--card-border); background: var(--card-bg); padding: 1.4rem;
-      position: relative; overflow: hidden;
-      transition: box-shadow 0.2s ease;
-    }
-    .ml-step::before {
-      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
-      background: var(--accent); transform: scaleY(0); transform-origin: top;
-      transition: transform 0.22s ease;
-    }
-    .ml-step:hover::before { transform: scaleY(1); }
-    .ml-step:hover { box-shadow: var(--card-hover-shadow); }
-    .step-icon {
-      font-family: var(--font-serif); font-size: 2rem; color: var(--accent);
-      flex-shrink: 0; opacity: 0.5; line-height: 1; padding-top: 0.05em;
-    }
-    .step-content h4 { font-family: var(--font-serif); font-weight: 500; font-size: 1rem; margin-bottom: 0.25rem; }
-    .step-content p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0; }
-    .code-tag {
-      font-family: var(--font-mono); font-size: 0.7rem;
-      background: var(--tag-bg); border: 1px solid var(--border-light);
-      padding: 0.1rem 0.4rem; color: var(--accent);
-    }
-
-    /* Comparison table */
-    .comparison-table {
-      width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 1rem 0;
-    }
-    .comparison-table th, .comparison-table td {
-      text-align: left; padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border-light);
-    }
-    .comparison-table thead th {
-      border-bottom: 2px solid var(--border); font-family: var(--font-serif);
-      font-weight: 500; font-size: 0.88rem; color: var(--text-muted);
-    }
-    .comparison-table td:nth-child(2), .comparison-table td:nth-child(3), .comparison-table td:nth-child(4),
-    .comparison-table th:nth-child(2), .comparison-table th:nth-child(3), .comparison-table th:nth-child(4) {
-      text-align: right; font-family: var(--font-mono); font-size: 0.85rem;
-    }
-    .comparison-table tbody tr:last-child th, .comparison-table tbody tr:last-child td {
-      border-bottom: 2px solid var(--border);
-    }
-    .comparison-table tr.highlight td {
-      font-weight: 500; color: var(--accent);
-    }
-
-    /* Footer */
-    footer {
-      padding: 2.5rem 0 2rem; border-top: 1px solid var(--border-light); margin-top: 2rem;
-      font-size: 0.78rem; color: var(--text-light); display: flex; justify-content: space-between;
-    }
-    .footer-note { font-style: italic; font-family: var(--font-serif); }
-
-    /* Screen reader only */
-    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-
-    /* Animations — hidden start states apply only when JS is running (.js set in <head>),
-       so a blocked or failed script never leaves the page blank */
-    .js .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
-    .js .fade-in.visible { opacity: 1; transform: translateY(0); }
-    .stagger-1 { transition-delay: 0ms; }
-    .stagger-2 { transition-delay: 60ms; }
-    .stagger-3 { transition-delay: 120ms; }
-    .stagger-4 { transition-delay: 180ms; }
-    .hero-anim { opacity: 0; transform: translateY(18px); animation: heroFadeIn 0.7s ease-out forwards; }
-    .hero-anim-1 { animation-delay: 0ms; }
-    .hero-anim-2 { animation-delay: 120ms; }
-    .hero-anim-3 { animation-delay: 240ms; }
-    .hero-anim-4 { animation-delay: 360ms; }
-    @keyframes heroFadeIn { to { opacity: 1; transform: translateY(0); } }
-
-    /* Responsive */
-    @media (max-width: 800px) {
-      html { font-size: 16px; }
-      .hero-name { font-size: 1.8rem; }
-      .battle-arena { flex-direction: column; }
-      .card-grid { grid-template-columns: 1fr; }
-      .flow-row { flex-direction: column; }
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
-      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .js .fade-in { opacity: 1; transform: none; transition: none; }
-      .hero-anim { opacity: 1; transform: none; animation: none; }
-      .card { transition: none; }
-      .js .card.fade-in { transform: none; }
-      .section-heading::after { transition: none; width: 100% !important; }
-      .section-number { opacity: 1 !important; transition: none; }
-      .reading-progress { animation: none; }
-      .elo.flash-gain, .elo.flash-loss { animation: none; }
-    }
-
-    /* TrueSkill leaderboard */
-    .ts-lb-wrap {
-      border-top: 1px solid var(--border-light);
-      padding-top: 1rem; margin-top: 1.2rem;
-    }
-    .ts-lb-header {
-      font-family: var(--font-sans); font-size: 0.7rem;
-      text-transform: uppercase; letter-spacing: 0.08em;
-      color: var(--text-muted); margin-bottom: 0.5rem;
-    }
-    .ts-lb-wrap canvas { display: block; width: 100%; }
-    @media (max-width: 600px) {
-      .trueskill-box { padding: 1rem 1.2rem; }
-    }
-
-    /* Reading progress bar */
-    .reading-progress {
-      position: fixed; top: 0; left: 0; height: 2px; width: 100%;
-      background: var(--accent); transform: scaleX(0);
-      transform-origin: left center; opacity: 0.85;
-      pointer-events: none; z-index: 100;
-    }
-    @media (max-width: 768px) { .reading-progress { display: none; } }
-    @supports (animation-timeline: scroll()) {
-      .reading-progress {
-        animation: reading-progress-grow linear both;
-        animation-timeline: scroll(root block);
-      }
-      @keyframes reading-progress-grow {
-        from { transform: scaleX(0); }
-        to   { transform: scaleX(1); }
-      }
-    }
-
-    /* Sigma certainty bar */
-    .sigma-bar-wrap {
-      width: 80%; margin: 0.45rem auto 0; height: 3px;
-      background: var(--border-light); overflow: hidden;
-    }
-    .sigma-bar-fill {
-      height: 100%; background: var(--accent); opacity: 0.5;
-      transition: width 0.5s ease;
-    }
-
-    /* ELO sparkline */
-    .sparkline-canvas {
-      display: block; width: 80px; height: 28px; margin: 0.45rem auto 0;
-      opacity: 0.75;
-    }
-
-    /* ELO gain / loss flash */
-    .elo.flash-gain { animation: eloFlashGain 0.65s ease-out; }
-    .elo.flash-loss  { animation: eloFlashLoss  0.65s ease-out; }
-    @keyframes eloFlashGain {
-      0%   { color: var(--accent); }
-      30%  { color: #27ae60; }
-      100% { color: var(--accent); }
-    }
-    @keyframes eloFlashLoss {
-      0%   { color: var(--accent); }
-      30%  { color: #e67e22; }
-      100% { color: var(--accent); }
-    }
-
-    /* Comparison table row reveal — gated on .js like .fade-in */
-    .js .comparison-table tbody tr {
-      opacity: 0;
-      transform: translateX(-10px);
-      transition: opacity 0.48s ease-out, transform 0.48s ease-out;
-    }
-    .comparison-table tbody tr.row-visible {
-      opacity: 1;
-      transform: translateX(0);
-    }
-    .comparison-table tbody tr.highlight.row-visible {
-      animation: rowLand 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) both;
-    }
-    @keyframes rowLand {
-      from { transform: translateX(-10px); opacity: 0; }
-      60%  { transform: translateX(3px); }
-      to   { transform: translateX(0); opacity: 1; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .js .comparison-table tbody tr { opacity: 1; transform: none; transition: none; }
-      .comparison-table tbody tr.highlight.row-visible { animation: none; }
-    }
-
-    @media print {
-      .imputer-wrap, .trueskill-box { page-break-inside: avoid; }
-      .fade-in { opacity: 1 !important; transform: none !important; }
-      .comparison-table tbody tr { opacity: 1 !important; transform: none !important; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Project Soothsayer · How it works</title>
+<meta name="description" content="How Project Soothsayer predicts Arena (arena.ai) scores from benchmark data alone.">
+<meta property="og:title" content="Project Soothsayer · How it works">
+<meta property="og:description" content="How Project Soothsayer predicts Arena (arena.ai) scores from benchmark data alone.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://alexanderjulianking.github.io/soothsayer_explainer.html">
+<meta property="og:image" content="https://alexanderjulianking.github.io/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://alexanderjulianking.github.io/og-image.jpg">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='Georgia, serif' fill='%237a2e2e'>A</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script>(() => { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap'; document.head.appendChild(l); })();</script>
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
+<link rel="stylesheet" href="site.css">
+<style>
+/* The tournament and the imputer walk-through, restyled to the site's plates and controls. */
+.plate > canvas { display: block; width: 100%; }
+.battle-arena { display: flex; align-items: stretch; justify-content: center; gap: 0.9rem; padding: 18px 18px 6px; flex-wrap: wrap; }
+.fighter { flex: 1 1 11rem; max-width: 15rem; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); padding: 0.8rem 1rem; text-align: center; transition: border-color 0.25s, opacity 0.25s; }
+.fighter.winner { border-color: var(--accent); }
+.fighter.loser { opacity: 0.5; }
+.fighter .model-name { font-family: var(--sans); font-weight: 500; font-size: 0.86rem; color: var(--ink); margin-bottom: 0.2rem; }
+.fighter .elo { font-family: var(--mono); font-size: 1.25rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+.fighter .sigma { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-3); }
+.vs { align-self: center; font-style: italic; font-size: 1.1rem; color: var(--ink-3); }
+.elo.flash-gain { animation: eloGain 0.65s ease-out; }
+.elo.flash-loss { animation: eloLoss 0.65s ease-out; }
+@keyframes eloGain { from { color: var(--e-dr); } to { color: var(--accent); } }
+@keyframes eloLoss { from { color: var(--ink-3); } to { color: var(--accent); } }
+.ts-lb-wrap { padding: 12px 18px 4px; }
+.ts-lb-header { font-family: var(--sans); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 0.4rem; }
+.ts-lb-wrap canvas { display: block; width: 100%; }
+.phase-bar { display: flex; flex-wrap: wrap; gap: 0.3rem; padding: 16px 18px 0; }
+.phase-pip { font-family: var(--sans); font-size: 0.72rem; font-weight: 500; color: var(--ink-2); border: 1px solid var(--rule); border-radius: 3px; padding: 0.3rem 0.62rem; cursor: pointer; user-select: none; }
+.phase-pip:hover { border-color: var(--ink-3); color: var(--ink); }
+.phase-pip.done { color: var(--accent); border-color: var(--accent); }
+.phase-pip.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.phase-pip:focus-visible, .imp-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.phase-narration { padding: 14px 18px 14px; min-height: 7.4em; }
+.phase-narration h4 { font-family: var(--serif); font-weight: 500; font-size: 1.14rem; margin: 0 0 0.3rem; }
+.phase-narration p { font-size: 0.95rem; line-height: 1.5; color: var(--ink-2); margin: 0; max-width: 72ch; }
+.matrix-viewport { position: relative; overflow: hidden; border-block: 1px solid var(--rule-2); background: var(--paper); }
+.matrix-viewport canvas { display: block; width: 100%; }
+.imputer-controls { display: flex; flex-wrap: wrap; gap: 0.3rem; padding: 0.7rem 18px 0; }
+.imp-btn { font-family: var(--sans); font-size: 0.72rem; font-weight: 500; color: var(--ink-2); background: transparent; border: 1px solid var(--rule); border-radius: 3px; padding: 0.3rem 0.62rem; cursor: pointer; }
+.imp-btn:hover { border-color: var(--ink-3); color: var(--ink); }
+.imp-btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.imp-btn:disabled { opacity: 0.35; cursor: default; }
+</style>
 </head>
 <body>
-  <div class="reading-progress" aria-hidden="true"></div>
-  <div class="page-wrapper">
-    <a href="index.html" class="back-link">&larr; Back to portfolio</a>
+<nav class="nav stay" id="nav" aria-label="Site">
+  <div class="nav-in">
+    <a class="nav-name" href="index.html">Alexander King</a>
+    <a class="link" href="index.html#projects"><span class="n">1</span>Projects</a>
+    <a class="link" href="index.html#publications"><span class="n">2</span>Publications</a>
+    <a class="link" href="index.html#contact"><span class="n">3</span>Contact</a>
+  </div>
+  <div class="nav-progress" id="nav-progress"></div>
+</nav>
 
-    <header class="hero">
-      <h1 class="hero-name hero-anim hero-anim-1">Project Soothsayer</h1>
-      <p class="hero-subtitle hero-anim hero-anim-2">LLM Evaluation &amp; Arena.ai ELO Prediction</p>
-      <hr class="hero-rule hero-anim hero-anim-3" aria-hidden="true">
-      <div class="abstract hero-anim hero-anim-4">
-        <p>A multi-benchmark evaluation suite that predicts human preference before anyone votes. Four custom benchmarks join 11 public leaderboards, feed through a per-cell imputation engine, and emerge as ELO predictions within ~0.8% of actual scores. And because the prediction works, the model doubles as a map of which measurable capabilities actually move human preference &mdash; a question benchmarks alone can&rsquo;t answer.</p>
+<div class="page">
+<main class="article">
+
+  <header class="art-head">
+    <p class="proj-kicker"><span class="n">01</span>LLM evaluation &middot; how it works</p>
+    <h1>Project Soothsayer</h1>
+    <p class="dek">Predicting how people will rate a language model on Arena, from benchmark data alone</p>
+    <p class="lede">I built Soothsayer to predict a model&rsquo;s Arena score before anyone votes on it. It combines four benchmarks I designed with 11 public leaderboards, fills the gaps in that data with a per-cell imputer, and predicts each model&rsquo;s Arena score to within about 0.8%. Because the predictions hold up, I can also use the model to see which measurable capabilities move human preference, a question that benchmarks alone cannot answer.</p>
+    <p class="links"><a href="https://github.com/AlexanderJulianKing/project-soothsayer" target="_blank" rel="noopener">GitHub &rarr;</a></p>
+  </header>
+
+  <section class="art-sec" id="why" aria-labelledby="why-h">
+    <header class="sec-head"><span class="n">(1)</span><h2 id="why-h">Why this exists</h2><span class="dots" aria-hidden="true"></span><span class="r" aria-hidden="true">i</span></header>
+    <div class="cols">
+      <div>
+        <h3>The problem</h3>
+        <p>Arena ranks models by millions of blind head-to-head votes, so its scores are a measure of what people prefer. That is a different quantity from intelligence or objective quality, and it is hard to pin down. Traditional benchmarks do not measure it, and it is not clear that they can.</p>
       </div>
-    </header>
-
-    <div class="problem-explainer fade-in">
-      <h2>Why does this exist?</h2>
-      <div class="explainer-columns">
-        <div class="explainer-col">
-          <h3>The Problem</h3>
-          <p>Arena.ai captures something no benchmark can&mdash;real human preference, derived from millions of blind head-to-head votes. But what it measures is difficult to pin down. It isn&rsquo;t model intelligence in any strict sense, and it isn&rsquo;t objective quality. It reflects what people <em>prefer</em>, which is a fundamentally different signal. Traditional benchmarks don&rsquo;t measure it, and it&rsquo;s not clear they can.</p>
-        </div>
-        <div class="explainer-col">
-          <h3>Why It&rsquo;s Hard</h3>
-          <p>Benchmarks evaluate well-defined capabilities: coding, mathematics, logical reasoning. Human preference is nearly a black box. Intelligence is multidimensional and context-dependent&mdash;the gap between &ldquo;this model performs well&rdquo; and &ldquo;people prefer this model&rdquo; is real and nontrivial. And it&rsquo;s a statistically hostile regime: only 138 labeled models against 122 features, roughly 40% of the benchmark matrix missing, and a noisy human-derived target&mdash;high-dimensional and low-sample at the same time.</p>
-        </div>
+      <div>
+        <h3>Why it is hard</h3>
+        <p>Benchmarks are tests of well-defined capabilities such as coding, mathematics, and logical reasoning. Human preference is closer to a black box, and the model that scores well is not always the model people prefer. The data are also hard to model: 138 models with Arena scores, 122 features, about 40% of the benchmark matrix missing, and a noisy target from human votes. The problem is high-dimensional and low-sample at the same time.</p>
       </div>
     </div>
+  </section>
 
-    <main>
+  <section class="art-sec" id="overview" aria-labelledby="overview-h">
+    <header class="sec-head"><span class="n">(2)</span><h2 id="overview-h">The big picture</h2><span class="dots" aria-hidden="true"></span><span class="r" aria-hidden="true">ii</span></header>
+    <p class="intro">I combine my benchmarks and the public ones into one dataset, fill its gaps by imputation, and predict Arena scores with an adaptive nearest-neighbor model.</p>
+    <figure class="plate">
+      <canvas id="pipelineCanvas" aria-hidden="true"></canvas>
+      <p class="sr-only">Pipeline diagram: 4 custom benchmarks and 11 public benchmarks are combined into 176 models by 122 features, then passed through the ModelBankImputer and adaptive KNN prediction to predict Arena scores.</p>
+      <figcaption><span class="fig">Fig. 1</span>The pipeline, from benchmarks to a predicted Arena score.</figcaption>
+      <div class="plate-bar"></div>
+    </figure>
+  </section>
 
-      <!-- 1. The Big Picture -->
-      <section>
-        <h2 class="section-heading fade-in"><span class="section-number">1.</span> The Big Picture</h2>
-        <p class="subtitle fade-in stagger-1">Custom and public benchmarks converge into one dataset, then imputation and adaptive KNN produce Arena.ai ELO estimates.</p>
+  <section class="art-sec" id="data" aria-labelledby="data-h">
+    <header class="sec-head"><span class="n">(3)</span><h2 id="data-h">Data sources</h2><span class="dots" aria-hidden="true"></span><span class="r" aria-hidden="true">iii</span></header>
+    <p class="intro">I run four benchmarks of my own and scrape 11 public leaderboards, then combine them into one dataset.</p>
+    <div class="sources">
+      <div class="mine"><h3>My benchmarks</h3><ul><li>Soothsayer EQ</li><li>Soothsayer Writing</li><li>Soothsayer Logic</li><li>Soothsayer Style</li></ul></div>
+      <div><h3>Public leaderboards</h3><ul><li>Arena</li><li>LiveBench</li><li>ARC-AGI</li><li>Aider</li><li>EQ-Bench</li><li>UGI</li><li>Artificial Analysis</li><li>Lechmazur</li><li>Long-context Arena</li><li>WeirdML</li><li>Yupp</li></ul></div>
+    </div>
+    <ol class="pipe">
+      <li><span class="file">scrape.bash</span><p>The latest leaderboard CSVs are pulled in parallel by 11 Python scrapers, and model names are canonicalized with the Gemini API.</p></li>
+      <li><span class="file">combine.py</span><p>An outer join on unified model names, with aliases, renames, and duplicates resolved and low-variance columns dropped.</p></li>
+      <li><span class="file">clean_combined.csv</span><p>176 models by 122 features. About 40% of the cells are missing, because not every model has been tested on every benchmark.</p></li>
+    </ol>
+  </section>
 
-        <div class="pipeline-wrap fade-in stagger-2">
-          <canvas id="pipelineCanvas" aria-hidden="true"></canvas>
-          <p class="sr-only">Pipeline diagram: 4 custom benchmarks and 11 public benchmarks feed into a combine step producing 176 models by 122 features, then through ModelBankImputer and adaptive KNN prediction to predict Arena ELO scores.</p>
-        </div>
+  <section class="art-sec" id="benchmarks" aria-labelledby="bench-h">
+    <header class="sec-head"><span class="n">(4)</span><h2 id="bench-h">Four benchmarks of my own</h2><span class="dots" aria-hidden="true"></span><span class="r" aria-hidden="true">iv</span></header>
+    <p class="intro">I designed each one to cover something the public benchmarks miss.</p>
+    <div class="defs">
+      <div><p class="label">TrueSkill arena</p><h3>Soothsayer EQ</h3><p>Emotional intelligence: empathy, social nuance, and conflict resolution. Models compete head to head, and an LLM referee judges each match.</p></div>
+      <div><p class="label">TrueSkill arena</p><h3>Soothsayer Writing</h3><p>A pairwise creative-writing tournament. Stories are judged on character authenticity, originality, coherence, and atmosphere, with penalties for clich&eacute;s, flowery verbosity, and gratuitous metaphor.</p></div>
+      <div><p class="label">LLM grading</p><h3>Soothsayer Logic</h3><p>Twelve physics and lateral-thinking puzzles on commonsense reasoning, graded by an LLM judge.</p></div>
+      <div><p class="label">Style analysis</p><h3>Soothsayer Style</h3><p>A profile of each model&rsquo;s writing: vocabulary richness, sentence patterns, and tone, plus a 32-dimensional semantic embedding of its raw responses (bge-small, then PCA). These are stylistic qualities that people respond to and that benchmark scores do not include.</p></div>
+    </div>
+    <figure class="plate trueskill-box">
+      <div class="battle-arena">
+        <div class="fighter" id="fighterA"><div class="model-name" id="nameA">&hellip;</div><div class="elo" id="eloA">&hellip;</div><div class="sigma" id="sigmaA">&sigma; = &hellip;</div></div>
+        <span class="vs">vs</span>
+        <div class="fighter" id="fighterB"><div class="model-name" id="nameB">&hellip;</div><div class="elo" id="eloB">&hellip;</div><div class="sigma" id="sigmaB">&sigma; = &hellip;</div></div>
+      </div>
+      <div class="ts-lb-wrap"><p class="ts-lb-header">Tournament standings</p><canvas id="tsLeaderboard" aria-hidden="true"></canvas></div>
+      <figcaption><span class="fig">Fig. 2</span>A TrueSkill tournament, simulated for illustration. Each match updates both models&rsquo; ratings and their uncertainty (&sigma;), and in the real benchmarks the models with the most uncertainty are matched first.</figcaption>
+      <div class="plate-bar"><p class="readout" id="battleLog" aria-live="polite">Loading the tournament&hellip;</p></div>
+    </figure>
+  </section>
 
-        <div class="stats-row fade-in stagger-3">
-          <div class="stat-card"><div class="stat-num" data-target="172">172</div><div class="stat-label">Models evaluated</div></div>
-          <div class="stat-card"><div class="stat-num" data-target="133">133</div><div class="stat-label">Benchmark features</div></div>
-          <div class="stat-card"><div class="stat-num" data-target="138">138</div><div class="stat-label">Training samples</div></div>
-          <div class="stat-card"><div class="stat-num decimal" data-target="0.942">0.942</div><div class="stat-label">R&sup2;</div></div>
-        </div>
-      </section>
+  <section class="art-sec" id="imputerSection" aria-labelledby="imp-h">
+    <header class="sec-head"><span class="n">(5)</span><h2 id="imp-h">The ModelBankImputer</h2><span class="dots" aria-hidden="true"></span><span class="r" aria-hidden="true">v</span></header>
+    <p class="intro">About 40% of the public benchmark cells are missing, spread across 65+ highly collinear features. I impute each cell separately, using that correlation structure to pick the most informative predictors for each gap instead of applying one global strategy.</p>
+    <figure class="plate">
+      <div class="phase-bar" id="phaseBar">
+        <div class="phase-pip active" data-phase="0">The problem</div>
+        <div class="phase-pip" data-phase="1">Rank &amp; select</div>
+        <div class="phase-pip" data-phase="2">Pass 1: per cell</div>
+        <div class="phase-pip" data-phase="3">Pass 2: expansion</div>
+        <div class="phase-pip" data-phase="4">Coherence</div>
+        <div class="phase-pip" data-phase="5">Complete</div>
+      </div>
+      <div class="phase-narration">
+        <h4 id="phaseTitle">The Problem: A Sparse Matrix</h4>
+        <p id="phaseDesc">176 models, 122 benchmarks. Not every model has been tested everywhere. The matrix is ~40% empty.</p>
+      </div>
+      <div class="matrix-viewport">
+        <canvas id="imputerCanvas" aria-hidden="true"></canvas>
+        <p class="sr-only">Matrix visualization of the ModelBankImputer filling missing benchmark scores in five phases: identifying sparse cells, ranking predictors and forward-selecting by leave-one-out MSE, per-cell imputation, an expansion pass, and SVD coherence projection.</p>
+      </div>
+      <div class="imputer-controls">
+        <button type="button" class="imp-btn" id="btnPrev" disabled>&larr; Prev</button>
+        <button type="button" class="imp-btn primary" id="btnNext">Next &rarr;</button>
+        <button type="button" class="imp-btn" id="btnAutoPlay">Auto-play</button>
+      </div>
+      <figcaption><span class="fig">Fig. 3</span>The imputer, one phase at a time, on a sample of the matrix. Step through with Next, or press Auto-play.</figcaption>
+      <div class="plate-bar"></div>
+    </figure>
+  </section>
 
-      <!-- 2. Data Sources -->
-      <section>
-        <h2 class="section-heading fade-in"><span class="section-number">2.</span> Data Sources</h2>
-        <p class="subtitle fade-in stagger-1">Four custom benchmarks run alongside 11 scraped public benchmark sources. All converge into a single combined dataset.</p>
-        <div class="source-cloud fade-in stagger-2">
-          <span class="source-bubble custom">Soothsayer EQ</span>
-          <span class="source-bubble custom">Soothsayer Writing</span>
-          <span class="source-bubble custom">Soothsayer Logic</span>
-          <span class="source-bubble custom">Soothsayer Style</span>
-          <span class="source-bubble">Arena.ai</span>
-          <span class="source-bubble">LiveBench</span>
-          <span class="source-bubble">ARC-AGI</span>
-          <span class="source-bubble">Aider</span>
-          <span class="source-bubble">EQ-Bench</span>
-          <span class="source-bubble">UGI</span>
-          <span class="source-bubble">Artificial Analysis</span>
-          <span class="source-bubble">Lechmazur</span>
-          <span class="source-bubble">Long-context Arena</span>
-          <span class="source-bubble">WeirdML</span>
-          <span class="source-bubble">Yupp</span>
-        </div>
-        <div class="flow-row fade-in stagger-3">
-          <div class="flow-box"><div class="box-header">scrape.bash</div><div class="box-detail">11 Python scrapers pull latest leaderboard CSVs in parallel. Gemini API handles model name canonicalization.</div></div>
-          <div class="flow-box"><div class="box-header">combine.py</div><div class="box-detail">Outer-join on unified model names. Handles aliases, renames, deduplication. Drops low-variance columns.</div></div>
-          <div class="flow-box"><div class="box-header">clean_combined.csv</div><div class="box-detail">176 models &times; 122 features. ~40% of cells missing&mdash;not every model tested on every benchmark.</div></div>
-        </div>
-      </section>
+  <section class="art-sec" id="prediction" aria-labelledby="pred-h">
+    <header class="sec-head"><span class="n">(6)</span><h2 id="pred-h">From features to predictions</h2><span class="dots" aria-hidden="true"></span><span class="r" aria-hidden="true">vi</span></header>
+    <p class="intro">An adaptive nearest-neighbor model, because what people prefer changes with how capable a model already is.</p>
+    <h3>The key finding</h3>
+    <p>The same benchmark can correlate with Arena scores in opposite directions depending on how capable the models are. List formatting, for example, correlates positively with human preference among mid-tier models (&rho;&nbsp;=&nbsp;+0.16) and negatively among top-tier models (&rho;&nbsp;=&nbsp;&minus;0.74). If I fit one global model, these two effects nearly cancel, so I fit a model that adapts to the local regime instead.</p>
+    <ol class="steps">
+      <li><div><h3>Fold-internal PLS-3 hybrid</h3><p>In a plain Euclidean distance over ~119 benchmark columns, every column counts equally, so two models can look like neighbors just because they agree on features that do not move the Arena score. Before the nearest-neighbor step, I fit three supervised summary axes inside the current cross-validation fold and append them to the feature matrix. Each axis is a weighted combination of raw columns chosen to track the Arena score globally, so three dimensions of the distance are aligned with the target. The raw columns remain in step 3&rsquo;s local ridge regression, so the tier-specific sign flips described above are still handled neighborhood by neighborhood. Fitting PLS inside each fold, on training data only, keeps the target from leaking into held-out rows.</p></div></li>
+      <li><div><h3>Adaptive KNN with a sublinear power cutoff</h3><p>For each model, I find its nearest neighbors in the augmented feature space: ~119 raw columns plus the 3 PLS axes, after dropping the style and tone columns, since accuracy was lower with them once the supervised axes were in. The neighborhood radius is a sublinear power law, <code>max_dist&nbsp;=&nbsp;d<sub>nearest</sub><sup>0.7</sup>&nbsp;&times;&nbsp;3</code>. Neighborhoods are tighter in dense regions (top models, k&nbsp;&asymp;&nbsp;25) and still wide enough in sparse regions, so each local regression stays within one consistent feature-preference regime.</p></div></li>
+      <li><div><h3>Kernel-weighted ridge regression</h3><p>Within each neighborhood, I fit a weighted ridge regression in which closer neighbors carry more weight (a Gaussian kernel). The regularization strength is set by the spread of scores in the neighborhood.</p></div></li>
+      <li><div><h3>Jackknife bias correction</h3><p>In ridge regression, predictions are shrunk toward the neighborhood mean. To measure how much, I leave each neighbor out in turn, refit, and compare. The resulting compression slope, typically 1.1 to 1.5, is used to stretch the prediction back out and correct that centering bias.</p></div></li>
+    </ol>
+    <h3>Adaptive neighborhoods</h3>
+    <p>The cutoff radius is d<sub>nearest</sub><sup>0.7</sup>&thinsp;&times;&thinsp;3, sublinear in the nearest-neighbor distance. Distinctive models, with few close peers in feature space, get a small d<sub>0</sub> and a tight neighborhood. Models that cluster together share a small d<sub>0</sub> too, but many peers fall within that tight radius, so k is large. Each neighborhood becomes its own training set for a kernel-weighted ridge regression, with different dominant features depending on the regime.</p>
+    <figure class="plate">
+      <canvas id="knnCanvas"></canvas>
+      <figcaption><span class="fig">Fig. 4</span>Two neighborhoods, one in a dense region of feature space and one in a sparse region, and the ridge fit inside each. The button switches between the two views.</figcaption>
+      <div class="plate-bar"><div class="controls"><button type="button" id="knnToggle">Show the ridge fit</button></div></div>
+    </figure>
+    <h3>Predicted against actual Arena score</h3>
+    <figure class="plate">
+      <canvas id="scatterCanvas" aria-hidden="true"></canvas>
+      <p class="sr-only">Scatter plot of predicted against actual Arena scores for 138 models. Points cluster tightly around the diagonal, with R-squared of 0.942, Spearman rho of 0.966, and RMSE of 13.90.</p>
+      <figcaption><span class="fig">Fig. 5</span>Out-of-fold predictions for 138 models with 5-fold cross-validation, so no model was in the training data for its own prediction. Hover a point for its details.</figcaption>
+      <div class="plate-bar"></div>
+    </figure>
+  </section>
 
-      <!-- 3. Custom Benchmarks -->
-      <section>
-        <h2 class="section-heading fade-in"><span class="section-number">3.</span> Four Custom Benchmarks</h2>
-        <p class="subtitle fade-in stagger-1">Each tests a dimension of intelligence that public benchmarks miss.</p>
-        <div class="card-grid">
-          <div class="card fade-in stagger-1"><h3>Soothsayer EQ</h3><span class="method-tag">TrueSkill Arena</span><p>Tests emotional intelligence: empathy, social nuance, conflict resolution. Models compete head-to-head, judged by an LLM referee.</p></div>
-          <div class="card fade-in stagger-2"><h3>Soothsayer Writing</h3><span class="method-tag">TrueSkill Arena</span><p>Pairwise creative-writing tournament judged on character authenticity, originality, coherence, atmosphere&mdash;and penalizing clich&eacute;s, flowery verbosity, and gratuitous metaphor.</p></div>
-          <div class="card fade-in stagger-3"><h3>Soothsayer Logic</h3><span class="method-tag">LLM Grading</span><p>12 physics and lateral-thinking puzzles that test commonsense reasoning. Graded by an LLM judge.</p></div>
-          <div class="card fade-in stagger-4"><h3>Soothsayer Style</h3><span class="method-tag">Style Analysis</span><p>Profiles each model&rsquo;s writing fingerprint&mdash;vocabulary richness, sentence patterns, tone, plus a 32-dimensional semantic embedding of its raw responses (bge-small &rarr; PCA). Captures stylistic qualities humans instinctively prefer but benchmark scores don&rsquo;t see.</p></div>
-        </div>
-      </section>
+  <section class="art-sec" id="validation" aria-labelledby="val-h">
+    <header class="sec-head"><span class="n">(7)</span><h2 id="val-h">How well it works</h2><span class="dots" aria-hidden="true"></span><span class="r" aria-hidden="true">vii</span></header>
+    <h3>Why not just fill the gaps with the median?</h3>
+    <figure class="plate">
+      <div class="table-scroll"><table class="data comparison-table">
+        <thead><tr><th>Method</th><th>RMSE</th><th>R&sup2;</th><th>Spearman &rho;</th></tr></thead>
+        <tbody>
+          <tr><td>Predict the mean</td><td>58.1</td><td>&minus;0.016</td><td>&ndash;</td></tr>
+          <tr><td>Public benchmarks, median-imputed</td><td>26.5</td><td>0.79</td><td>0.88</td></tr>
+          <tr><td>My benchmarks, median-imputed</td><td>23.2</td><td>0.84</td><td>0.92</td></tr>
+          <tr><td>All benchmarks, median-imputed</td><td>19.6</td><td>0.88</td><td>0.93</td></tr>
+          <tr class="highlight"><td>Full Soothsayer pipeline</td><td>13.90</td><td>0.942</td><td>0.966</td></tr>
+        </tbody>
+      </table></div>
+      <figcaption><span class="fig">Table 1</span>The same 5-fold cross-validation for every row. Only the imputation and prediction steps change.</figcaption>
+      <div class="plate-bar"></div>
+    </figure>
+    <h3>Chronological holdout</h3>
+    <p>A stricter test: I train on the oldest 80% of models and predict the newest 20% (n&nbsp;=&nbsp;22) one model at a time, refitting imputation, PCA, and PLS at every step, so no information from later models is used. The simple baselines get much worse when they have to extrapolate past their training data. The public-only baseline goes from 26.5 to 33.5 RMSE and from R&sup2;&nbsp;0.79 to 0.53. The full pipeline stays at 12.2 RMSE on these newest models.</p>
+    <figure class="plate">
+      <div class="table-scroll"><table class="data comparison-table">
+        <thead><tr><th>Method</th><th>RMSE</th><th>R&sup2;</th><th>Spearman &rho;</th></tr></thead>
+        <tbody>
+          <tr><td>Predict the mean</td><td>64.2</td><td>&minus;0.73</td><td>&ndash;</td></tr>
+          <tr><td>Public benchmarks, median-imputed</td><td>33.5</td><td>0.53</td><td>0.80</td></tr>
+          <tr><td>My benchmarks, median-imputed</td><td>27.2</td><td>0.69</td><td>0.84</td></tr>
+          <tr><td>All benchmarks, median-imputed</td><td>25.2</td><td>0.73</td><td>0.86</td></tr>
+          <tr class="highlight"><td>Full Soothsayer pipeline</td><td>12.22</td><td>0.937</td><td>0.958</td></tr>
+        </tbody>
+      </table></div>
+      <figcaption><span class="fig">Table 2</span>Chronological holdout: trained on the oldest 80% of models, tested on the newest 20% (n&nbsp;=&nbsp;22).</figcaption>
+      <div class="plate-bar"></div>
+    </figure>
+    <h3>Calibrated uncertainty</h3>
+    <p>Every prediction comes with a conformal 95% interval. Out of fold, 92.8% of those intervals contain the true score, close to the nominal 95%.</p>
+    <h3>Reproducible and tested</h3>
+    <p>Every number on this page can be regenerated from a clean clone with one command, <code>git clone &amp;&amp; ./predict.sh</code>, which prints RMSE 13.90, because the data snapshot is committed with the code. The imputation, scoring, and arena logic are covered by a 130-test suite.</p>
+  </section>
 
-      <!-- 4. TrueSkill -->
-      <section>
-        <div class="trueskill-box fade-in">
-          <h3>TrueSkill Arena in Action</h3>
-          <p class="ts-desc">Models battle pairwise. Each match updates ELO and uncertainty (&sigma;). High-uncertainty models get priority matchups.</p>
-          <div class="battle-arena">
-            <div class="fighter" id="fighterA">
-              <div class="model-name" id="nameA">—</div>
-              <div class="elo" id="eloA">—</div>
-              <div class="sigma" id="sigmaA">&sigma; = —</div>
-            </div>
-            <span class="vs">vs</span>
-            <div class="fighter" id="fighterB">
-              <div class="model-name" id="nameB">—</div>
-              <div class="elo" id="eloB">—</div>
-              <div class="sigma" id="sigmaB">&sigma; = —</div>
-            </div>
-          </div>
-          <div class="battle-log" id="battleLog">Loading tournament&hellip;</div>
-          <div class="ts-lb-wrap">
-            <p class="ts-lb-header">Tournament standings</p>
-            <canvas id="tsLeaderboard" aria-hidden="true"></canvas>
-          </div>
-        </div>
-      </section>
+</main>
+<footer class="foot art-foot">
+  <span>&copy; 2026 Alexander King</span>
+  <span>Project Soothsayer &middot; <a href="https://github.com/AlexanderJulianKing/project-soothsayer" target="_blank" rel="noopener">GitHub</a> &middot; <a href="index.html">Home</a></span>
+</footer>
+</div>
 
-      <!-- 5. ModelBankImputer -->
-      <section id="imputerSection">
-        <h2 class="section-heading fade-in"><span class="section-number">4.</span> The ModelBankImputer</h2>
-        <p class="subtitle fade-in stagger-1">40% of public benchmark cells are missing across 65+ highly collinear features. Per-cell imputation exploits that correlation structure, selecting the most informative predictors for each gap rather than applying one global strategy.</p>
-
-        <div class="imputer-wrap fade-in stagger-2">
-          <div class="phase-bar" id="phaseBar">
-            <div class="phase-pip active" data-phase="0">The Problem</div>
-            <div class="phase-pip" data-phase="1">Rank &amp; Select</div>
-            <div class="phase-pip" data-phase="2">Pass 1: Per-Cell</div>
-            <div class="phase-pip" data-phase="3">Pass 2: Expansion Pass</div>
-            <div class="phase-pip" data-phase="4">Coherence</div>
-            <div class="phase-pip" data-phase="5">Complete</div>
-          </div>
-          <div class="phase-narration">
-            <h4 id="phaseTitle">The Problem: A Sparse Matrix</h4>
-            <p id="phaseDesc">176 models, 122 benchmarks. Not every model has been tested everywhere. The matrix is ~40% empty.</p>
-          </div>
-          <div class="matrix-viewport">
-            <canvas id="imputerCanvas" aria-hidden="true"></canvas>
-            <p class="sr-only">Interactive matrix visualization showing how the ModelBankImputer fills missing benchmark scores through 5 phases: identifying sparse cells, ranking predictors and forward-selecting by leave-one-out MSE, per-cell imputation, expansion pass, and SVD coherence projection.</p>
-          </div>
-          <div class="imputer-controls">
-            <button class="imp-btn" id="btnPrev" disabled>&larr; Prev</button>
-            <button class="imp-btn primary" id="btnNext">Next &rarr;</button>
-            <button class="imp-btn" id="btnAutoPlay">Auto-play</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- 5. Prediction -->
-      <section>
-        <h2 class="section-heading fade-in"><span class="section-number">5.</span> From Features to Predictions</h2>
-        <p class="subtitle fade-in stagger-1">An adaptive nearest-neighbor approach that accounts for how human preference works differently at different competency levels.</p>
-
-        <div class="fade-in stagger-2" style="margin-bottom:1.5rem;">
-          <h3 style="font-size:1.05rem;margin-bottom:0.75rem;">The Key Finding</h3>
-          <p style="font-size:0.92rem;">The same benchmark can predict Arena scores in opposite directions depending on LLM quality. For example, <strong>list formatting</strong> positively predicts human preference for mid-tier LLMs (&rho;=+0.16) but <em>negatively</em> predicts it for top-tier LLMs (&rho;=&minus;0.74). A global score prediction model averages these effects to near zero. Instead, we need an approach that adapts to the local regime.</p>
-        </div>
-
-        <div class="ml-steps fade-in stagger-2">
-          <div class="ml-step"><span class="step-icon">1.</span><div class="step-content"><h4>Fold-Internal PLS-3 Hybrid</h4><p>Euclidean distance across ~119 benchmark columns treats every column as equally load-bearing, so models can look like neighbors just by agreeing on features that don&rsquo;t move ELO. Before KNN runs, three supervised summary axes are fit inside the current CV fold and appended to the feature matrix. Each axis is a weighted combination of raw columns chosen to track ELO globally. KNN&rsquo;s distance now has three dimensions that encode &ldquo;things that broadly track the target.&rdquo; The local Ridge in Step 3 still sees the raw columns, so the tier-specific sign flips from the Key Finding above still get handled neighborhood by neighborhood. Fitting PLS inside each fold (on training data only) keeps the target from leaking into held-out rows.</p></div></div>
-          <div class="ml-step"><span class="step-icon">2.</span><div class="step-content"><h4>Adaptive KNN with Sublinear Power Cutoff</h4><p>For each model, find its nearest neighbors in the augmented feature space (~119 raw columns plus the 3 PLS axes, after dropping style/tone columns that hurt once the supervised axes are on). The neighborhood radius follows a sublinear power law: <code>max_dist&nbsp;=&nbsp;d<sub>nearest</sub><sup>0.7</sup>&nbsp;&times;&nbsp;3</code>. This naturally gives tighter neighborhoods in dense regions (top models, k&asymp;25) while keeping adequate coverage in sparse regions, ensuring the local regression stays within a consistent feature-preference regime.</p></div></div>
-          <div class="ml-step"><span class="step-icon">3.</span><div class="step-content"><h4>Kernel-Weighted Ridge Regression</h4><p>Within each neighborhood, fit a weighted Ridge regression where closer neighbors have more influence (Gaussian kernel). The regularization strength adapts to the neighborhood&rsquo;s score spread.</p></div></div>
-          <div class="ml-step"><span class="step-icon">4.</span><div class="step-content"><h4>Jackknife Bias Correction</h4><p>Ridge shrinks predictions toward the neighborhood mean. The jackknife leaves each neighbor out, refits, and measures how much Ridge compresses. This compression slope (typically 1.1&ndash;1.5&times;) is used to inflate the prediction back outward, correcting the centering bias.</p></div></div>
-        </div>
-
-        <h3 class="fade-in" style="margin-top:2rem;margin-bottom:0.5rem;font-size:1.1rem;">Adaptive Neighborhoods</h3>
-        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">The cutoff radius is d<sub>nearest</sub><sup>0.7</sup>&thinsp;&times;&thinsp;3&mdash;sublinear in nearest-neighbor distance. Distinctive LLMs (few close peers in feature space) get a small d<sub>0</sub> and a tight neighborhood; models that cluster together share a small d<sub>0</sub> too, but many peers fall within that tight radius, so k is large. Each neighborhood becomes its own private training set for a kernel-weighted ridge regression&mdash;with completely different dominant features depending on the regime.</p>
-        <div class="fade-in stagger-2" style="border:1px solid var(--card-border);background:var(--card-bg);padding:1rem;">
-          <canvas id="knnCanvas" style="width:100%;display:block;"></canvas>
-          <div style="text-align:center;margin-top:0.75rem;">
-            <button id="knnToggle" style="font-family:'Inter',sans-serif;font-size:0.82rem;font-weight:500;padding:0.4rem 1.2rem;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text-muted);border-radius:4px;cursor:pointer;transition:all 0.2s;">Show Ridge Regression →</button>
-          </div>
-        </div>
-
-        <h3 class="fade-in" style="margin-top:2.5rem;margin-bottom:1rem;font-size:1.1rem;">Predicted vs. Actual Arena ELO</h3>
-        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">Out-of-fold predictions on 138 models (5-fold CV). Every point is a prediction the model never trained on.</p>
-        <div class="fade-in stagger-2" style="border:1px solid var(--card-border);background:var(--card-bg);padding:1rem;">
-          <canvas id="scatterCanvas" style="width:100%;display:block;" aria-hidden="true"></canvas>
-          <p class="sr-only">Scatter plot of predicted versus actual Arena ELO scores for 138 models. Points cluster tightly around the diagonal line, with R-squared of 0.942, Spearman rho of 0.966, and RMSE of 13.90.</p>
-        </div>
-
-        <h3 class="fade-in" style="margin-top:2.5rem;margin-bottom:1rem;font-size:1.1rem;">Why Not Just Median-Impute?</h3>
-        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">Same 5-fold cross-validation. Only the imputation and prediction pipeline differ.</p>
-        <table class="comparison-table fade-in stagger-2">
-          <thead><tr><th>Method</th><th>RMSE</th><th>R&sup2;</th><th>Spearman &rho;</th></tr></thead>
-          <tbody>
-            <tr><td>Predict mean (dummy)</td><td>58.1</td><td>&minus;0.016</td><td>&mdash;</td></tr>
-            <tr><td>Public benchmarks + median impute</td><td>26.5</td><td>0.79</td><td>0.88</td></tr>
-            <tr><td>Private benchmarks + median impute</td><td>23.2</td><td>0.84</td><td>0.92</td></tr>
-            <tr><td>All benchmarks + median impute</td><td>19.6</td><td>0.88</td><td>0.93</td></tr>
-            <tr class="highlight"><td>Full Soothsayer pipeline</td><td>13.90</td><td>0.942</td><td>0.966</td></tr>
-          </tbody>
-        </table>
-
-        <h3 class="fade-in" style="margin-top:2.5rem;margin-bottom:1rem;font-size:1.1rem;">Chronological Holdout</h3>
-        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">The stricter test: train on the oldest 80% of models, then predict the newest 20% (n=22) one model at a time, re-fitting imputation, PCA, and PLS at every step. No information from the future ever leaks backward. The naive baselines degrade sharply when forced to extrapolate past their training distribution &mdash; public-only nearly doubles its error (26.5 &rarr; 33.5 RMSE, R&sup2; 0.79 &rarr; 0.53). The full pipeline holds at 12.2 RMSE: it doesn&rsquo;t just survive the newest frontier models, it predicts them about as accurately as anything.</p>
-        <table class="comparison-table fade-in stagger-2">
-          <thead><tr><th>Method</th><th>RMSE</th><th>R&sup2;</th><th>Spearman &rho;</th></tr></thead>
-          <tbody>
-            <tr><td>Predict mean (dummy)</td><td>64.2</td><td>&minus;0.73</td><td>&mdash;</td></tr>
-            <tr><td>Public benchmarks + median impute</td><td>33.5</td><td>0.53</td><td>0.80</td></tr>
-            <tr><td>Private benchmarks + median impute</td><td>27.2</td><td>0.69</td><td>0.84</td></tr>
-            <tr><td>All benchmarks + median impute</td><td>25.2</td><td>0.73</td><td>0.86</td></tr>
-            <tr class="highlight"><td>Full Soothsayer pipeline</td><td>12.22</td><td>0.937</td><td>0.958</td></tr>
-          </tbody>
-        </table>
-
-        <h3 class="fade-in" style="margin-top:2.5rem;margin-bottom:1rem;font-size:1.1rem;">Calibrated Uncertainty</h3>
-        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">A point estimate isn&rsquo;t enough, so every prediction ships with a conformal 95% interval. Out-of-fold, those intervals capture the true score <strong>92.8%</strong> of the time &mdash; close to the nominal 95%. The model knows what it doesn&rsquo;t know, which matters more than a single number when the prediction is meant to inform a real decision.</p>
-
-        <h3 class="fade-in" style="margin-top:2.5rem;margin-bottom:1rem;font-size:1.1rem;">Reproducible &amp; Tested</h3>
-        <p class="fade-in stagger-1" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">Every number on this page regenerates from a clean clone in one command &mdash; <code style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;">git clone &amp;&amp; ./predict.sh</code> &rarr; RMSE 13.90 &mdash; with the data snapshot committed alongside the code, so the result isn&rsquo;t just claimed, it&rsquo;s runnable. A 130-test suite guards the imputation, scoring, and arena logic against regressions.</p>
-      </section>
-
-    </main>
-
-    <footer>
-      <span>&copy; 2026 Alexander King</span>
-      <span class="footer-note">Project Soothsayer</span>
-      <a href="https://github.com/AlexanderJulianKing/project-soothsayer" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor;">View on GitHub</a>
-    </footer>
-  </div>
-
-<!-- ═══════════════════════════════════════════════
-     SCRIPTS
-     ═══════════════════════════════════════════════ -->
 <script>
 (function() {
   'use strict';
@@ -875,8 +454,7 @@
       drawLeaderboard(a.n, b.n); // update rankings after result
       bCount++;
       document.getElementById('battleLog').textContent =
-        'Battle #' + bCount + ': ' + w.n + ' wins! ELO ' +
-        (aW ? '\u2191' : '\u2193') + Math.abs(K * (1 - ex)).toFixed(1);
+        'Match ' + bCount + ' \u00b7 ' + w.n + ' wins \u00b7 rating moves ' + Math.abs(K * (1 - ex)).toFixed(1);
     }, 600);
   }
 
@@ -1328,9 +906,9 @@
     { title:'The Problem: A Sparse Matrix', desc:'176 models, 122 benchmarks. Not every model has been tested everywhere. The matrix is ~40% empty.' },
     { title:'Step 1: Rank Predictors, Then Forward-Select by LOO', desc:'For each target column, rank every other column by |correlation| \u00d7 \u221an to build a candidate pool (arcs shown). Then greedy forward selection walks down that pool, adding the candidate whose BayesianRidge leave-one-out MSE drops the column\u2019s error the most. Stops when no candidate improves LOO MSE by more than 0.1%, or when 8 predictors are locked in. Three target columns shown.' },
     { title:'Step 2: Per-Cell Prediction (Pass 1)', desc:'The core of the ModelBankImputer. For each missing cell, select the best predictors that model actually has observed values for, then pick from a bank of fitted regressors. Each regressor estimates its own leave-one-out error; a fill is \u201cconfident\u201d when that error is under 40% of the column\u2019s natural spread.' },
-    { title:'Step 3: Pass 2 — Expansion Pass', desc:'Pass 1 filled every cell, but some fits are uncertain. Pass 2 retries them worst-first, now allowing confident pass-1 fills (dashed connector) as additional predictors. The new estimate only replaces the old one if \u03c3\u00b2 improves by at least 5%. Any cells that couldn\u2019t be filled at all fall back to column median.' },
+    { title:'Step 3: Pass 2, the Expansion Pass', desc:'Pass 1 filled every cell, but some fits are uncertain. Pass 2 retries them worst-first, now allowing confident pass-1 fills (dashed connector) as additional predictors. The new estimate only replaces the old one if \u03c3\u00b2 improves by at least 5%. Any cells that couldn\u2019t be filled at all fall back to column median.' },
     { title:'Step 4: SVD Coherence Projection', desc:'A low-rank SVD decomposes the filled matrix. Each imputed value blends toward its coherent estimate, weighted by uncertainty.' },
-    { title:'Complete: Ready for Prediction', desc:'Every cell filled. The matrix is dense, coherent, and ready for adaptive KNN prediction. 176 models \u00d7 122 features \u2192 Arena ELO predictions.' },
+    { title:'Complete: Ready for Prediction', desc:'Every cell filled. The matrix is dense, coherent, and ready for adaptive KNN prediction. 176 models \u00d7 122 features \u2192 Arena score predictions.' },
   ];
 
   let currentPhase = 0;
@@ -1748,11 +1326,11 @@
     ctx.font = _titleFont;
     ctx.fillStyle = pal.text;
     ctx.textAlign = 'center';
-    ctx.fillText('Actual Arena ELO', PAD_L + plotW / 2, H - 4);
+    ctx.fillText('Actual Arena score', PAD_L + plotW / 2, H - 4);
     ctx.save();
     ctx.translate(_scatMobile ? 16 : 13, PAD_T + plotH / 2);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillText('Predicted ELO', 0, 0);
+    ctx.fillText('Predicted Arena score', 0, 0);
     ctx.restore();
 
     // Dots — spring from diagonal (where predicted=actual) to final scatter position
@@ -2212,7 +1790,7 @@
       ctx.save();
       ctx.translate(sx_l - 28, (SY_T + SY_B) / 2);
       ctx.rotate(-Math.PI / 2);
-      ctx.fillText('Arena ELO', 0, 0);
+      ctx.fillText('Arena score', 0, 0);
       ctx.restore();
       ctx.restore();
     }
@@ -2367,7 +1945,7 @@
 
   toggleBtn.addEventListener('click', () => {
     viewTarget = viewTarget < 0.5 ? 1 : 0;
-    toggleBtn.textContent = viewTarget > 0.5 ? '\u2190 Show Neighborhoods' : 'Show Ridge Regression \u2192';
+    toggleBtn.textContent = viewTarget > 0.5 ? 'Show the neighborhoods' : 'Show the ridge fit';
   });
 
   const knnObs = new IntersectionObserver(entries => {
@@ -2415,7 +1993,7 @@
     { id:'public', label:'11 Public Benchmarks', sub:'LiveBench \u00b7 Aider \u00b7 ARC-AGI \u00b7 \u2026' },
     { id:'combine', label:'Combine', sub:'176 models \u00d7 122 features' },
     { id:'impute', label:'Impute & Predict', sub:'ModelBankImputer \u2192 Adaptive KNN' },
-    { id:'elo', label:'Arena ELO', sub:'Spearman \u03c1 = 0.966 \u00b7 RMSE 13.90' },
+    { id:'elo', label:'Arena score', sub:'Spearman \u03c1 = 0.966 \u00b7 RMSE 13.90' },
   ];
 
   function fitText(text, maxW, baseSize, font) {
@@ -2624,6 +2202,14 @@
     });
   }, { threshold: 0.1 });
   document.fonts.ready.then(() => { pipeObs.observe(canvas); });
+})();
+</script>
+<script>
+/* Reading progress along the bottom of the nav. */
+(() => {
+  const bar = document.getElementById('nav-progress');
+  const up = () => { const t = document.documentElement.scrollHeight - innerHeight; bar.style.transform = `scaleX(${t > 0 ? Math.min(1, Math.max(0, scrollY / t)) : 0})`; };
+  addEventListener('scroll', up, { passive: true }); addEventListener('resize', up); up();
 })();
 </script>
 </body>
